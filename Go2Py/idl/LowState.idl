@@ -1,0 +1,12 @@
+module msgs{
+    struct LowState {
+        float q[12];
+        float dq[12];
+        float ddq[12];
+        float tau_est[12];
+        float tmp[12];
+        float contact[4];
+        float voltage;
+        float current;
+    };
+};
