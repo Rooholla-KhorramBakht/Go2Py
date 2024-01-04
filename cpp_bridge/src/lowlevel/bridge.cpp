@@ -78,12 +78,8 @@ private:
     void LowCmdWrite();
     std::thread go2py_thread;
     bool running = true;
-    void go2py_callback(const msgs::LowCmd& msg);
-    DDSPublisher<msgs::LowState> lowstate_publisher;
-    DDSSubscriber<msgs::LowCmd> lowcmd_subscriber;
-
-
-private:
+ 
+ private:
     float dt = 0.002; // 0.001~0.01
     unitree_go::msg::dds_::LowCmd_ low_cmd{};      // default init
     unitree_go::msg::dds_::LowState_ low_state{};  // default init
@@ -93,21 +89,26 @@ private:
     ChannelSubscriberPtr<unitree_go::msg::dds_::LowState_> lowstate_subscriber;
     /*LowCmd write thread*/
     ThreadPtr lowCmdWriteThreadPtr;
+    // Callback function for the Go2Py command subscriber
+    void go2py_callback(const msgs::LowCmd& msg);
+    // State publisher to Go2Py
+    DDSPublisher<msgs::LowState> lowstate_publisher;
+    // Command subscriber from Go2Py
+    DDSSubscriber<msgs::LowCmd> lowcmd_subscriber;
 };
 
 void Go2LowLevelBridge::Init()
 {
     InitLowCmd();
-    /*create publisher*/
+    /*create robot lowstate publisher*/
     lowcmd_publisher.reset(new ChannelPublisher<unitree_go::msg::dds_::LowCmd_>(TOPIC_LOWCMD));
     lowcmd_publisher->InitChannel();
-    /*create subscriber*/
+    /*create robot lowcmd subscriber*/
     lowstate_subscriber.reset(new ChannelSubscriber<unitree_go::msg::dds_::LowState_>(TOPIC_LOWSTATE));
     lowstate_subscriber->InitChannel(std::bind(&Go2LowLevelBridge::LowStateMessageHandler, this, std::placeholders::_1), 1);
-    /*loop publishing thread*/
-    // lowCmdWriteThreadPtr = CreateRecurrentThreadEx("writebasiccmd", UT_CPU_ID_NONE, 2000, &Go2LowLevelBridge::LowCmdWrite, this);  
-}
+    }
 
+// Upon the reception of the commands form the Go2Py, forward them to the robot
 void Go2LowLevelBridge::go2py_callback(const msgs::LowCmd& msg)
 {
     for(int i=0; i<12; i++)
@@ -140,6 +141,7 @@ void Go2LowLevelBridge::InitLowCmd()
     }
 }
 
+// Upon the reception of each state from the robot, forward it to the Go2Py
 void Go2LowLevelBridge::LowStateMessageHandler(const void* message)
 {
     low_state = *(unitree_go::msg::dds_::LowState_*)message;
@@ -153,37 +155,35 @@ void Go2LowLevelBridge::LowStateMessageHandler(const void* message)
         lowstate.tau_est()[i] = low_state.motor_state()[i].tau_est();
         lowstate.tmp()[i] = (float)low_state.motor_state()[i].temperature();
     }
-
+    for(int i=0; i<4; i++)
+    {
+        lowstate.contact()[i] = (float)low_state.foot_force()[i];
+        lowstate.quat()[i] = low_state.imu_state().quaternion()[i];
+    }
+    for(int i=0; i<3; i++)
+    {
+        lowstate.accel()[i] = low_state.imu_state().accelerometer()[i];
+        lowstate.gyro()[i] = low_state.imu_state().gyroscope()[i];
+        lowstate.rpy()[i] = low_state.imu_state().rpy()[i];
+    }
     lowstate.voltage() = (float)low_state.power_v();
     lowstate.current() = (float)low_state.power_a();
-    
-    for(int i=0; i<4; i++)
-        lowstate.contact()[i] = (float)low_state.foot_force()[i];
-
+    lowstate.imu_tmp() = (float)low_state.imu_state().temperature();
     lowstate_publisher.publish(lowstate);
-}
-
-void Go2LowLevelBridge::LowCmdWrite()
-{
-    low_cmd.motor_cmd()[2].q() = 0;
-    low_cmd.motor_cmd()[2].dq() = 0;
-    low_cmd.motor_cmd()[2].kp() = 0;
-    low_cmd.motor_cmd()[2].kd() = 0;
-    low_cmd.motor_cmd()[2].tau() = 0;
-    low_cmd.crc() = crc32_core((uint32_t *)&low_cmd, (sizeof(unitree_go::msg::dds_::LowCmd_)>>2)-1);
-    lowcmd_publisher->Write(low_cmd);
 }
 
 int main(int argc, const char** argv)
 {
     if (argc < 2)
     {
-        std::cout << "Usage: " << argv[0] << " networkInterface" << std::endl;
+        std::cout << "Usage: " << argv[0] << "domain_id" << std::endl;
         exit(-1); 
     }
+    int domain_id = std::stoi(argv[1]);
 
     // ChannelFactory::Instance()->Init(0, argv[1]);
-    Go2LowLevelBridge bridge("go2py/lowcmd", "go2py/lowstate");
+    Go2LowLevelBridge bridge("go2_robot"+std::to_string(domain_id)+"/lowcmd",
+                             "go2_robot"+std::to_string(domain_id)+"/lowstate");
     bridge.Init();
     while (1)
     {

@@ -6,6 +6,11 @@ module msgs{
         float tau_est[12];
         float tmp[12];
         float contact[4];
+        float quat[4];
+        float gyro[3];
+        float accel[3];
+        float rpy[3];
+        octet imu_tmp;
         float voltage;
         float current;
     };

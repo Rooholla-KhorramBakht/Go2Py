@@ -28,6 +28,11 @@ class LowState(idl.IdlStruct, typename="msgs.LowState"):
     tau_est: types.array[types.float32, 12]
     tmp: types.array[types.float32, 12]
     contact: types.array[types.float32, 4]
+    quat: types.array[types.float32, 4]
+    gyro: types.array[types.float32, 3]
+    accel: types.array[types.float32, 3]
+    rpy: types.array[types.float32, 3]
+    imu_tmp: types.uint8
     voltage: types.float32
     current: types.float32
 

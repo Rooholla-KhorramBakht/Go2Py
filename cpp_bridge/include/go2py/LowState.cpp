@@ -43,8 +43,13 @@ propvec &get_type_props<::msgs::LowState>() {
   props.push_back(entity_properties_t(1, 3, false, get_bit_bound<float>(), extensibility::ext_final, false));  //::tau_est
   props.push_back(entity_properties_t(1, 4, false, get_bit_bound<float>(), extensibility::ext_final, false));  //::tmp
   props.push_back(entity_properties_t(1, 5, false, get_bit_bound<float>(), extensibility::ext_final, false));  //::contact
-  props.push_back(entity_properties_t(1, 6, false, get_bit_bound<float>(), extensibility::ext_final, false));  //::voltage
-  props.push_back(entity_properties_t(1, 7, false, get_bit_bound<float>(), extensibility::ext_final, false));  //::current
+  props.push_back(entity_properties_t(1, 6, false, get_bit_bound<float>(), extensibility::ext_final, false));  //::quat
+  props.push_back(entity_properties_t(1, 7, false, get_bit_bound<float>(), extensibility::ext_final, false));  //::gyro
+  props.push_back(entity_properties_t(1, 8, false, get_bit_bound<float>(), extensibility::ext_final, false));  //::accel
+  props.push_back(entity_properties_t(1, 9, false, get_bit_bound<float>(), extensibility::ext_final, false));  //::rpy
+  props.push_back(entity_properties_t(1, 10, false, get_bit_bound<uint8_t>(), extensibility::ext_final, false));  //::imu_tmp
+  props.push_back(entity_properties_t(1, 11, false, get_bit_bound<float>(), extensibility::ext_final, false));  //::voltage
+  props.push_back(entity_properties_t(1, 12, false, get_bit_bound<float>(), extensibility::ext_final, false));  //::current
 
   entity_properties_t::finish(props, keylist);
   props_end = props.data() + props.size();
