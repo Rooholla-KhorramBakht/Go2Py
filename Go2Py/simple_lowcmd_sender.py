@@ -24,4 +24,4 @@ cmd = LowCmd(
 )
 while True:
     dw.write(cmd)
-    time.sleep(0.1)
+    time.sleep(0.01)

@@ -13,6 +13,7 @@ template<typename T>
 class DDSSubscriber {
     public:
         // Define a callback type for user-provided callbacks
+        
         using UserCallback = std::function<void(const T&)>;
 
     private:
