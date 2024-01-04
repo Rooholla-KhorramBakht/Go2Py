@@ -10,10 +10,7 @@
 #include <unitree/common/thread/thread.hpp>
 #include <go2py/LowCmd.hpp>
 #include <go2py/LowState.hpp>
-#include "dds/dds.hpp"
-#include "dds/dds.h"
 #include <thread>
-
 
 using namespace unitree::common;
 using namespace unitree::robot;
@@ -184,59 +181,8 @@ void Bridge::LowCmdWrite()
     lowcmd_publisher->Write(low_cmd);
 }
 
-class Go2PyListener: public dds::sub::NoOpDataReaderListener<msgs::LowCmd>
-{
-  public:
-    using callback_func = std::function<bool(dds::sub::DataReader<msgs::LowCmd>&,
-                                             dds::pub::DataWriter<msgs::LowState>&)>;
-    Go2PyListener() = delete;
-    Go2PyListener( const callback_func &f):
-        dds::sub::DataReaderListener<msgs::LowCmd>(), _f(f) { ; }
-
-    void on_data_available(dds::sub::DataReader<msgs::LowCmd>& rd,
-                           dds::pub::DataWriter<msgs::LowState>& rw) {
-        (void)_f(rd, rw);
-    }
-  private:
-    callback_func _f; // Private member variable to store the callback function
-};
-
-static bool data_available(dds::sub::DataReader<msgs::LowCmd>& rd,
-                           dds::pub::DataWriter<msgs::LowState>& rw)
-{
-    return true;
-}
 int main(int argc, const char** argv)
 {
-    dds::domain::DomainParticipant participant(domain::default_id());
-
-    dds::topic::qos::TopicQos tqos;
-    tqos << dds::core::policy::Reliability::Reliable(dds::core::Duration::from_secs(10));
-    dds::topic::Topic<msgs::LowCmd> cmd_topic(participant, "go2py/lowcmd", tqos);
-    dds::topic::Topic<msgs::LowState> state_topic(participant, "go2py/lowstate", tqos);
-
-    dds::pub::qos::PublisherQos pqos;
-    pqos << dds::core::policy::Partition("pong");
-    dds::pub::Publisher publisher(participant, pqos);
-
-    dds::sub::qos::SubscriberQos sqos;
-    sqos << dds::core::policy::Partition("ping");
-    dds::sub::Subscriber subscriber(participant, sqos);
-
-    dds::pub::qos::DataWriterQos wqos;
-    wqos << dds::core::policy::WriterDataLifecycle::ManuallyDisposeUnregisteredInstances();
-    dds::pub::DataWriter<msgs::LowState> writer(publisher, state_topic, wqos);
-
-    Go2PyListener listener(&data_available);
-
-    dds::sub::DataReader<msgs::LowCmd>
-      reader(
-        subscriber,
-        cmd_topic,
-        dds::sub::qos::DataReaderQos(),
-        &listener,
-        dds::core::status::StatusMask::data_available());
-
     if (argc < 2)
     {
         std::cout << "Usage: " << argv[0] << " networkInterface" << std::endl;
@@ -244,7 +190,6 @@ int main(int argc, const char** argv)
     }
 
     ChannelFactory::Instance()->Init(0, argv[1]);
-
     Bridge bridge;
     bridge.Init();
     while (1)

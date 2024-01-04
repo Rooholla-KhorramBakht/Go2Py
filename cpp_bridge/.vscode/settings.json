@@ -1,9 +1,0 @@
-{
-    "cmake.configureOnOpen": true,
-    "files.associations": {
-        "thread": "cpp",
-        "chrono": "cpp",
-        "ostream": "cpp",
-        "list": "cpp"
-    }
-}
