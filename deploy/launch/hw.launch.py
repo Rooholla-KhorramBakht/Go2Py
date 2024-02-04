@@ -13,7 +13,7 @@ def generate_launch_description():
             remappings=[('cloud_in', '/go2/lidar_points'),
                         ('scan', '/go2/lidar_scans')],
             parameters=[{
-                'target_frame': 'go2/go2/hesai_lidar',
+                'target_frame': 'go2/hesai_lidar',
                 'transform_tolerance': 0.01,
                 'min_height': 0.0,
                 'max_height': 1.0,
