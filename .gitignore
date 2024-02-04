@@ -159,3 +159,10 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 .vscode
+
+deploy/ros2_ws/log
+deploy/ros2_ws/install
+deploy/ros2_ws/build
+
+_isaac_sim
+.vscode
