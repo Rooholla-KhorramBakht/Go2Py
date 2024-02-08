@@ -1,0 +1,30 @@
+// generated from rosidl_generator_dds_idl/resource/idl.idl.em
+// with input from unitree_api:msg/RequestPolicy.idl
+// generated code does not contain a copyright notice
+
+#ifndef __unitree_api__msg__request_policy__idl__
+#define __unitree_api__msg__request_policy__idl__
+
+
+module unitree_api {
+
+module msg {
+
+module dds_ {
+
+
+struct RequestPolicy_ {
+long priority_;
+boolean noreply_;
+
+};
+
+
+};  // module dds_
+
+};  // module msg
+
+};  // module unitree_api
+
+
+#endif  // __unitree_api__msg__request_policy__idl__

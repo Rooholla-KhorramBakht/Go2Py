@@ -1,0 +1,14 @@
+source;share/unitree_api/hook/cmake_prefix_path.ps1
+source;share/unitree_api/hook/cmake_prefix_path.dsv
+source;share/unitree_api/hook/cmake_prefix_path.sh
+source;share/unitree_api/hook/ld_library_path_lib.ps1
+source;share/unitree_api/hook/ld_library_path_lib.dsv
+source;share/unitree_api/hook/ld_library_path_lib.sh
+source;share/unitree_api/hook/pythonpath.ps1
+source;share/unitree_api/hook/pythonpath.dsv
+source;share/unitree_api/hook/pythonpath.sh
+source;share/unitree_api/local_setup.bash
+source;share/unitree_api/local_setup.dsv
+source;share/unitree_api/local_setup.ps1
+source;share/unitree_api/local_setup.sh
+source;share/unitree_api/local_setup.zsh

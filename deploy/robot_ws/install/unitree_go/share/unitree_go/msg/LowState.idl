@@ -1,0 +1,64 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from unitree_go/msg/LowState.msg
+// generated code does not contain a copyright notice
+
+#include "unitree_go/msg/BmsState.idl"
+#include "unitree_go/msg/IMUState.idl"
+#include "unitree_go/msg/MotorState.idl"
+
+module unitree_go {
+  module msg {
+    typedef uint8 uint8__2[2];
+    typedef uint32 uint32__2[2];
+    typedef unitree_go::msg::MotorState unitree_go__msg__MotorState;
+    typedef unitree_go__msg__MotorState unitree_go__msg__MotorState__20[20];
+    typedef int16 int16__4[4];
+    typedef uint8 uint8__40[40];
+    typedef uint16 uint16__4[4];
+    struct LowState {
+      uint8__2 head;
+
+      uint8 level_flag;
+
+      uint8 frame_reserve;
+
+      uint32__2 sn;
+
+      uint32__2 version;
+
+      uint16 bandwidth;
+
+      unitree_go::msg::IMUState imu_state;
+
+      unitree_go__msg__MotorState__20 motor_state;
+
+      unitree_go::msg::BmsState bms_state;
+
+      int16__4 foot_force;
+
+      int16__4 foot_force_est;
+
+      uint32 tick;
+
+      uint8__40 wireless_remote;
+
+      uint8 bit_flag;
+
+      float adc_reel;
+
+      int8 temperature_ntc1;
+
+      int8 temperature_ntc2;
+
+      float power_v;
+
+      float power_a;
+
+      uint16__4 fan_frequency;
+
+      uint32 reserve;
+
+      uint32 crc;
+    };
+  };
+};

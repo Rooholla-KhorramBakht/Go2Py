@@ -1,0 +1,47 @@
+// generated from rosidl_generator_dds_idl/resource/idl.idl.em
+// with input from unitree_go:msg/UwbState.idl
+// generated code does not contain a copyright notice
+
+#ifndef __unitree_go__msg__uwb_state__idl__
+#define __unitree_go__msg__uwb_state__idl__
+
+
+module unitree_go {
+
+module msg {
+
+module dds_ {
+
+
+struct UwbState_ {
+octet version_[2];
+
+octet channel_;
+octet joy_mode_;
+float orientation_est_;
+float pitch_est_;
+float distance_est_;
+float yaw_est_;
+float tag_roll_;
+float tag_pitch_;
+float tag_yaw_;
+float base_roll_;
+float base_pitch_;
+float base_yaw_;
+float joystick_[2];
+
+octet error_state_;
+octet buttons_;
+octet enabled_from_app_;
+
+};
+
+
+};  // module dds_
+
+};  // module msg
+
+};  // module unitree_go
+
+
+#endif  // __unitree_go__msg__uwb_state__idl__

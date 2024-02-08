@@ -1,0 +1,46 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from unitree_go/msg/UwbState.msg
+// generated code does not contain a copyright notice
+
+
+module unitree_go {
+  module msg {
+    typedef uint8 uint8__2[2];
+    typedef float float__2[2];
+    struct UwbState {
+      uint8__2 version;
+
+      uint8 channel;
+
+      uint8 joy_mode;
+
+      float orientation_est;
+
+      float pitch_est;
+
+      float distance_est;
+
+      float yaw_est;
+
+      float tag_roll;
+
+      float tag_pitch;
+
+      float tag_yaw;
+
+      float base_roll;
+
+      float base_pitch;
+
+      float base_yaw;
+
+      float__2 joystick;
+
+      uint8 error_state;
+
+      uint8 buttons;
+
+      uint8 enabled_from_app;
+    };
+  };
+};

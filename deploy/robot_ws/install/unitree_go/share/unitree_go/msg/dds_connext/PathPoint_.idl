@@ -1,0 +1,35 @@
+// generated from rosidl_generator_dds_idl/resource/idl.idl.em
+// with input from unitree_go:msg/PathPoint.idl
+// generated code does not contain a copyright notice
+
+#ifndef __unitree_go__msg__path_point__idl__
+#define __unitree_go__msg__path_point__idl__
+
+
+module unitree_go {
+
+module msg {
+
+module dds_ {
+
+
+struct PathPoint_ {
+float t_from_start_;
+float x_;
+float y_;
+float yaw_;
+float vx_;
+float vy_;
+float vyaw_;
+
+};
+
+
+};  // module dds_
+
+};  // module msg
+
+};  // module unitree_go
+
+
+#endif  // __unitree_go__msg__path_point__idl__

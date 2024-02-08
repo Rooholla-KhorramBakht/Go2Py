@@ -1,0 +1,12 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from unitree_api/msg/ResponseStatus.msg
+// generated code does not contain a copyright notice
+
+
+module unitree_api {
+  module msg {
+    struct ResponseStatus {
+      int32 code;
+    };
+  };
+};

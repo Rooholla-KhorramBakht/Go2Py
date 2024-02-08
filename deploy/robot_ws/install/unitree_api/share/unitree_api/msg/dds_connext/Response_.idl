@@ -1,0 +1,33 @@
+// generated from rosidl_generator_dds_idl/resource/idl.idl.em
+// with input from unitree_api:msg/Response.idl
+// generated code does not contain a copyright notice
+#include "unitree_api/msg/dds_connext/ResponseHeader_.idl"
+
+#ifndef __unitree_api__msg__response__idl__
+#define __unitree_api__msg__response__idl__
+
+
+module unitree_api {
+
+module msg {
+
+module dds_ {
+
+
+struct Response_ {
+unitree_api::msg::dds_::ResponseHeader_ header_;
+string data_;
+sequence<octet> binary_;
+
+
+};
+
+
+};  // module dds_
+
+};  // module msg
+
+};  // module unitree_api
+
+
+#endif  // __unitree_api__msg__response__idl__

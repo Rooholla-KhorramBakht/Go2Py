@@ -1,0 +1,38 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from unitree_go/msg/SportModeCmd.msg
+// generated code does not contain a copyright notice
+
+#include "unitree_go/msg/BmsCmd.idl"
+#include "unitree_go/msg/PathPoint.idl"
+
+module unitree_go {
+  module msg {
+    typedef float float__2[2];
+    typedef float float__3[3];
+    typedef unitree_go::msg::PathPoint unitree_go__msg__PathPoint;
+    typedef unitree_go__msg__PathPoint unitree_go__msg__PathPoint__30[30];
+    struct SportModeCmd {
+      uint8 mode;
+
+      uint8 gait_type;
+
+      uint8 speed_level;
+
+      float foot_raise_height;
+
+      float body_height;
+
+      float__2 position;
+
+      float__3 euler;
+
+      float__2 velocity;
+
+      float yaw_speed;
+
+      unitree_go::msg::BmsCmd bms_cmd;
+
+      unitree_go__msg__PathPoint__30 path_point;
+    };
+  };
+};

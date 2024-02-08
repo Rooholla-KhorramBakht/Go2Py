@@ -1,0 +1,22 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from unitree_go/msg/IMUState.msg
+// generated code does not contain a copyright notice
+
+
+module unitree_go {
+  module msg {
+    typedef float float__4[4];
+    typedef float float__3[3];
+    struct IMUState {
+      float__4 quaternion;
+
+      float__3 gyroscope;
+
+      float__3 accelerometer;
+
+      float__3 rpy;
+
+      int8 temperature;
+    };
+  };
+};

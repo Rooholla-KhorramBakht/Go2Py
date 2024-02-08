@@ -1,0 +1,30 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from unitree_go/msg/BmsState.msg
+// generated code does not contain a copyright notice
+
+
+module unitree_go {
+  module msg {
+    typedef int8 int8__2[2];
+    typedef uint16 uint16__15[15];
+    struct BmsState {
+      uint8 version_high;
+
+      uint8 version_low;
+
+      uint8 status;
+
+      uint8 soc;
+
+      int32 current;
+
+      uint16 cycle;
+
+      int8__2 bq_ntc;
+
+      int8__2 mcu_ntc;
+
+      uint16__15 cell_vol;
+    };
+  };
+};

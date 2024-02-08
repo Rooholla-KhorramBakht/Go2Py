@@ -1,0 +1,19 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from unitree_api/msg/RequestHeader.msg
+// generated code does not contain a copyright notice
+
+#include "unitree_api/msg/RequestIdentity.idl"
+#include "unitree_api/msg/RequestLease.idl"
+#include "unitree_api/msg/RequestPolicy.idl"
+
+module unitree_api {
+  module msg {
+    struct RequestHeader {
+      unitree_api::msg::RequestIdentity identity;
+
+      unitree_api::msg::RequestLease lease;
+
+      unitree_api::msg::RequestPolicy policy;
+    };
+  };
+};

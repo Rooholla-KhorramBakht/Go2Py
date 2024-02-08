@@ -1,0 +1,30 @@
+// generated from rosidl_generator_dds_idl/resource/idl.idl.em
+// with input from unitree_api:msg/RequestIdentity.idl
+// generated code does not contain a copyright notice
+
+#ifndef __unitree_api__msg__request_identity__idl__
+#define __unitree_api__msg__request_identity__idl__
+
+
+module unitree_api {
+
+module msg {
+
+module dds_ {
+
+
+struct RequestIdentity_ {
+long long id_;
+long long api_id_;
+
+};
+
+
+};  // module dds_
+
+};  // module msg
+
+};  // module unitree_api
+
+
+#endif  // __unitree_api__msg__request_identity__idl__

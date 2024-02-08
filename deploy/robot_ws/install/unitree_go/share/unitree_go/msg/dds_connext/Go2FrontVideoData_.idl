@@ -1,0 +1,35 @@
+// generated from rosidl_generator_dds_idl/resource/idl.idl.em
+// with input from unitree_go:msg/Go2FrontVideoData.idl
+// generated code does not contain a copyright notice
+
+#ifndef __unitree_go__msg__go2_front_video_data__idl__
+#define __unitree_go__msg__go2_front_video_data__idl__
+
+
+module unitree_go {
+
+module msg {
+
+module dds_ {
+
+
+struct Go2FrontVideoData_ {
+unsigned long long time_frame_;
+sequence<octet> video720p_;
+
+sequence<octet> video360p_;
+
+sequence<octet> video180p_;
+
+
+};
+
+
+};  // module dds_
+
+};  // module msg
+
+};  // module unitree_go
+
+
+#endif  // __unitree_go__msg__go2_front_video_data__idl__

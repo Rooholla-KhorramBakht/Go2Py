@@ -1,0 +1,46 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from unitree_go/msg/LowCmd.msg
+// generated code does not contain a copyright notice
+
+#include "unitree_go/msg/BmsCmd.idl"
+#include "unitree_go/msg/MotorCmd.idl"
+
+module unitree_go {
+  module msg {
+    typedef uint8 uint8__2[2];
+    typedef uint32 uint32__2[2];
+    typedef unitree_go::msg::MotorCmd unitree_go__msg__MotorCmd;
+    typedef unitree_go__msg__MotorCmd unitree_go__msg__MotorCmd__20[20];
+    typedef uint8 uint8__40[40];
+    typedef uint8 uint8__12[12];
+    struct LowCmd {
+      uint8__2 head;
+
+      uint8 level_flag;
+
+      uint8 frame_reserve;
+
+      uint32__2 sn;
+
+      uint32__2 version;
+
+      uint16 bandwidth;
+
+      unitree_go__msg__MotorCmd__20 motor_cmd;
+
+      unitree_go::msg::BmsCmd bms_cmd;
+
+      uint8__40 wireless_remote;
+
+      uint8__12 led;
+
+      uint8__2 fan;
+
+      uint8 gpio;
+
+      uint32 reserve;
+
+      uint32 crc;
+    };
+  };
+};

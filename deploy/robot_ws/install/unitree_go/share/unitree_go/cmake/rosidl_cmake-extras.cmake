@@ -1,0 +1,4 @@
+# generated from rosidl_cmake/cmake/rosidl_cmake-extras.cmake.in
+
+set(unitree_go_IDL_FILES "msg/AudioData.idl;msg/BmsCmd.idl;msg/BmsState.idl;msg/Error.idl;msg/Go2FrontVideoData.idl;msg/HeightMap.idl;msg/IMUState.idl;msg/InterfaceConfig.idl;msg/LidarState.idl;msg/LowCmd.idl;msg/LowState.idl;msg/MotorCmd.idl;msg/MotorState.idl;msg/PathPoint.idl;msg/Req.idl;msg/Res.idl;msg/SportModeCmd.idl;msg/SportModeState.idl;msg/TimeSpec.idl;msg/UwbState.idl;msg/UwbSwitch.idl;msg/WirelessController.idl")
+set(unitree_go_INTERFACE_FILES "msg/AudioData.msg;msg/BmsCmd.msg;msg/BmsState.msg;msg/Error.msg;msg/Go2FrontVideoData.msg;msg/HeightMap.msg;msg/IMUState.msg;msg/InterfaceConfig.msg;msg/LidarState.msg;msg/LowCmd.msg;msg/LowState.msg;msg/MotorCmd.msg;msg/MotorState.msg;msg/PathPoint.msg;msg/Req.msg;msg/Res.msg;msg/SportModeCmd.msg;msg/SportModeState.msg;msg/TimeSpec.msg;msg/UwbState.msg;msg/UwbSwitch.msg;msg/WirelessController.msg")

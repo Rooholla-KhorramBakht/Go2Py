@@ -1,0 +1,25 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from unitree_go/msg/MotorCmd.msg
+// generated code does not contain a copyright notice
+
+
+module unitree_go {
+  module msg {
+    typedef uint32 uint32__3[3];
+    struct MotorCmd {
+      uint8 mode;
+
+      float q;
+
+      float dq;
+
+      float tau;
+
+      float kp;
+
+      float kd;
+
+      uint32__3 reserve;
+    };
+  };
+};

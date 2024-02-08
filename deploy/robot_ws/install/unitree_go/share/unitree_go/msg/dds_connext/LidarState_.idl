@@ -1,0 +1,46 @@
+// generated from rosidl_generator_dds_idl/resource/idl.idl.em
+// with input from unitree_go:msg/LidarState.idl
+// generated code does not contain a copyright notice
+
+#ifndef __unitree_go__msg__lidar_state__idl__
+#define __unitree_go__msg__lidar_state__idl__
+
+
+module unitree_go {
+
+module msg {
+
+module dds_ {
+
+
+struct LidarState_ {
+double stamp_;
+string firmware_version_;
+string software_version_;
+string sdk_version_;
+float sys_rotation_speed_;
+float com_rotation_speed_;
+octet error_state_;
+float cloud_frequency_;
+float cloud_packet_loss_rate_;
+unsigned long cloud_size_;
+unsigned long cloud_scan_num_;
+float imu_frequency_;
+float imu_packet_loss_rate_;
+float imu_rpy_[3];
+
+double serial_recv_stamp_;
+unsigned long serial_buffer_size_;
+unsigned long serial_buffer_read_;
+
+};
+
+
+};  // module dds_
+
+};  // module msg
+
+};  // module unitree_go
+
+
+#endif  // __unitree_go__msg__lidar_state__idl__

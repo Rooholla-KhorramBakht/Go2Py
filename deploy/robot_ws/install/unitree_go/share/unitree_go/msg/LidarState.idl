@@ -1,0 +1,45 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from unitree_go/msg/LidarState.msg
+// generated code does not contain a copyright notice
+
+
+module unitree_go {
+  module msg {
+    typedef float float__3[3];
+    struct LidarState {
+      double stamp;
+
+      string firmware_version;
+
+      string software_version;
+
+      string sdk_version;
+
+      float sys_rotation_speed;
+
+      float com_rotation_speed;
+
+      uint8 error_state;
+
+      float cloud_frequency;
+
+      float cloud_packet_loss_rate;
+
+      uint32 cloud_size;
+
+      uint32 cloud_scan_num;
+
+      float imu_frequency;
+
+      float imu_packet_loss_rate;
+
+      float__3 imu_rpy;
+
+      double serial_recv_stamp;
+
+      uint32 serial_buffer_size;
+
+      uint32 serial_buffer_read;
+    };
+  };
+};

@@ -1,0 +1,14 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from unitree_api/msg/RequestIdentity.msg
+// generated code does not contain a copyright notice
+
+
+module unitree_api {
+  module msg {
+    struct RequestIdentity {
+      int64 id;
+
+      int64 api_id;
+    };
+  };
+};

@@ -1,0 +1,46 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from unitree_go/msg/SportModeState.msg
+// generated code does not contain a copyright notice
+
+#include "unitree_go/msg/IMUState.idl"
+#include "unitree_go/msg/TimeSpec.idl"
+
+module unitree_go {
+  module msg {
+    typedef float float__3[3];
+    typedef float float__4[4];
+    typedef int16 int16__4[4];
+    typedef float float__12[12];
+    struct SportModeState {
+      unitree_go::msg::TimeSpec stamp;
+
+      uint32 error_code;
+
+      unitree_go::msg::IMUState imu_state;
+
+      uint8 mode;
+
+      float progress;
+
+      uint8 gait_type;
+
+      float foot_raise_height;
+
+      float__3 position;
+
+      float body_height;
+
+      float__3 velocity;
+
+      float yaw_speed;
+
+      float__4 range_obstacle;
+
+      int16__4 foot_force;
+
+      float__12 foot_position_body;
+
+      float__12 foot_speed_body;
+    };
+  };
+};

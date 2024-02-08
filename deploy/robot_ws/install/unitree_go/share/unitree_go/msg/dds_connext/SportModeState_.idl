@@ -1,0 +1,51 @@
+// generated from rosidl_generator_dds_idl/resource/idl.idl.em
+// with input from unitree_go:msg/SportModeState.idl
+// generated code does not contain a copyright notice
+#include "unitree_go/msg/dds_connext/IMUState_.idl"
+#include "unitree_go/msg/dds_connext/TimeSpec_.idl"
+
+#ifndef __unitree_go__msg__sport_mode_state__idl__
+#define __unitree_go__msg__sport_mode_state__idl__
+
+
+module unitree_go {
+
+module msg {
+
+module dds_ {
+
+
+struct SportModeState_ {
+unitree_go::msg::dds_::TimeSpec_ stamp_;
+unsigned long error_code_;
+unitree_go::msg::dds_::IMUState_ imu_state_;
+octet mode_;
+float progress_;
+octet gait_type_;
+float foot_raise_height_;
+float position_[3];
+
+float body_height_;
+float velocity_[3];
+
+float yaw_speed_;
+float range_obstacle_[4];
+
+short foot_force_[4];
+
+float foot_position_body_[12];
+
+float foot_speed_body_[12];
+
+
+};
+
+
+};  // module dds_
+
+};  // module msg
+
+};  // module unitree_go
+
+
+#endif  // __unitree_go__msg__sport_mode_state__idl__

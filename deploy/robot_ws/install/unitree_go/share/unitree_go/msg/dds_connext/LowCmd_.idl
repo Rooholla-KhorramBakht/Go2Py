@@ -1,0 +1,51 @@
+// generated from rosidl_generator_dds_idl/resource/idl.idl.em
+// with input from unitree_go:msg/LowCmd.idl
+// generated code does not contain a copyright notice
+#include "unitree_go/msg/dds_connext/BmsCmd_.idl"
+#include "unitree_go/msg/dds_connext/MotorCmd_.idl"
+
+#ifndef __unitree_go__msg__low_cmd__idl__
+#define __unitree_go__msg__low_cmd__idl__
+
+
+module unitree_go {
+
+module msg {
+
+module dds_ {
+
+
+struct LowCmd_ {
+octet head_[2];
+
+octet level_flag_;
+octet frame_reserve_;
+unsigned long sn_[2];
+
+unsigned long version_[2];
+
+unsigned short bandwidth_;
+unitree_go::msg::dds_::MotorCmd_ motor_cmd_[20];
+
+unitree_go::msg::dds_::BmsCmd_ bms_cmd_;
+octet wireless_remote_[40];
+
+octet led_[12];
+
+octet fan_[2];
+
+octet gpio_;
+unsigned long reserve_;
+unsigned long crc_;
+
+};
+
+
+};  // module dds_
+
+};  // module msg
+
+};  // module unitree_go
+
+
+#endif  // __unitree_go__msg__low_cmd__idl__

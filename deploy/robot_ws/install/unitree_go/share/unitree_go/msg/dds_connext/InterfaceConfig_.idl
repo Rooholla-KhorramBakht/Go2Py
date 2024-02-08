@@ -1,0 +1,32 @@
+// generated from rosidl_generator_dds_idl/resource/idl.idl.em
+// with input from unitree_go:msg/InterfaceConfig.idl
+// generated code does not contain a copyright notice
+
+#ifndef __unitree_go__msg__interface_config__idl__
+#define __unitree_go__msg__interface_config__idl__
+
+
+module unitree_go {
+
+module msg {
+
+module dds_ {
+
+
+struct InterfaceConfig_ {
+octet mode_;
+octet value_;
+octet reserve_[2];
+
+
+};
+
+
+};  // module dds_
+
+};  // module msg
+
+};  // module unitree_go
+
+
+#endif  // __unitree_go__msg__interface_config__idl__

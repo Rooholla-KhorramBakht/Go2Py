@@ -1,0 +1,17 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from unitree_go/msg/InterfaceConfig.msg
+// generated code does not contain a copyright notice
+
+
+module unitree_go {
+  module msg {
+    typedef uint8 uint8__2[2];
+    struct InterfaceConfig {
+      uint8 mode;
+
+      uint8 value;
+
+      uint8__2 reserve;
+    };
+  };
+};

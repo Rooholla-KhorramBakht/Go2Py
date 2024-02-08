@@ -1,0 +1,30 @@
+// generated from rosidl_generator_dds_idl/resource/idl.idl.em
+// with input from unitree_go:msg/Req.idl
+// generated code does not contain a copyright notice
+
+#ifndef __unitree_go__msg__req__idl__
+#define __unitree_go__msg__req__idl__
+
+
+module unitree_go {
+
+module msg {
+
+module dds_ {
+
+
+struct Req_ {
+string uuid_;
+string body_;
+
+};
+
+
+};  // module dds_
+
+};  // module msg
+
+};  // module unitree_go
+
+
+#endif  // __unitree_go__msg__req__idl__

@@ -1,0 +1,19 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from unitree_go/msg/TimeSpec.msg
+// generated code does not contain a copyright notice
+
+
+module unitree_go {
+  module msg {
+    @verbatim (language="comment", text=
+      " Time indicates a specific point in time, relative to a clock's 0 point." "\n"
+      " The seconds component, valid over all int32 values.")
+    struct TimeSpec {
+      int32 sec;
+
+      @verbatim (language="comment", text=
+        " The nanoseconds component, valid in the range [0, 10e9).")
+      uint32 nanosec;
+    };
+  };
+};

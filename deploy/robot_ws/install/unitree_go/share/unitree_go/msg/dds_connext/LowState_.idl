@@ -1,0 +1,61 @@
+// generated from rosidl_generator_dds_idl/resource/idl.idl.em
+// with input from unitree_go:msg/LowState.idl
+// generated code does not contain a copyright notice
+#include "unitree_go/msg/dds_connext/BmsState_.idl"
+#include "unitree_go/msg/dds_connext/IMUState_.idl"
+#include "unitree_go/msg/dds_connext/MotorState_.idl"
+
+#ifndef __unitree_go__msg__low_state__idl__
+#define __unitree_go__msg__low_state__idl__
+
+
+module unitree_go {
+
+module msg {
+
+module dds_ {
+
+
+struct LowState_ {
+octet head_[2];
+
+octet level_flag_;
+octet frame_reserve_;
+unsigned long sn_[2];
+
+unsigned long version_[2];
+
+unsigned short bandwidth_;
+unitree_go::msg::dds_::IMUState_ imu_state_;
+unitree_go::msg::dds_::MotorState_ motor_state_[20];
+
+unitree_go::msg::dds_::BmsState_ bms_state_;
+short foot_force_[4];
+
+short foot_force_est_[4];
+
+unsigned long tick_;
+octet wireless_remote_[40];
+
+octet bit_flag_;
+float adc_reel_;
+octet temperature_ntc1_;
+octet temperature_ntc2_;
+float power_v_;
+float power_a_;
+unsigned short fan_frequency_[4];
+
+unsigned long reserve_;
+unsigned long crc_;
+
+};
+
+
+};  // module dds_
+
+};  // module msg
+
+};  // module unitree_go
+
+
+#endif  // __unitree_go__msg__low_state__idl__

@@ -1,0 +1,17 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from unitree_api/msg/Response.msg
+// generated code does not contain a copyright notice
+
+#include "unitree_api/msg/ResponseHeader.idl"
+
+module unitree_api {
+  module msg {
+    struct Response {
+      unitree_api::msg::ResponseHeader header;
+
+      string data;
+
+      sequence<int8> binary;
+    };
+  };
+};

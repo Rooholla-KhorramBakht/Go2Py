@@ -1,0 +1,49 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from unitree_go/msg/HeightMap.msg
+// generated code does not contain a copyright notice
+
+
+module unitree_go {
+  module msg {
+    typedef float float__2[2];
+    @verbatim (language="comment", text=
+      " Header")
+    struct HeightMap {
+      @verbatim (language="comment", text=
+        " timestamp")
+      double stamp;
+
+      @verbatim (language="comment", text=
+        " world frame id")
+      string frame_id;
+
+      @verbatim (language="comment", text=
+        " Map info" "\n"
+        " The map resolution")
+      @unit (value="m/cell")
+      float resolution;
+
+      @verbatim (language="comment", text=
+        " Map width along x-axis")
+      @unit (value="cells")
+      uint32 width;
+
+      @verbatim (language="comment", text=
+        " Map height alonge y-axis")
+      @unit (value="cells")
+      uint32 height;
+
+      @verbatim (language="comment", text=
+        " Map frame origin xy-position, the xyz-axis direction of map frame is aligned with the world frame")
+      @unit (value="m")
+      float__2 origin;
+
+      @verbatim (language="comment", text=
+        " Map data, in x-major order, starting with [0,0], ending with [width, height]" "\n"
+        " For a cell whose 2d-array-index is [ix, iy]，" "\n"
+        "    its position in world frame is: [ix * resolution + origin[0], iy * resolution + origin[1]]" "\n"
+        "    its cell value is: data[width * iy + ix]")
+      sequence<float> data;
+    };
+  };
+};

@@ -1,0 +1,45 @@
+// generated from rosidl_generator_dds_idl/resource/idl.idl.em
+// with input from unitree_go:msg/SportModeCmd.idl
+// generated code does not contain a copyright notice
+#include "unitree_go/msg/dds_connext/BmsCmd_.idl"
+#include "unitree_go/msg/dds_connext/PathPoint_.idl"
+
+#ifndef __unitree_go__msg__sport_mode_cmd__idl__
+#define __unitree_go__msg__sport_mode_cmd__idl__
+
+
+module unitree_go {
+
+module msg {
+
+module dds_ {
+
+
+struct SportModeCmd_ {
+octet mode_;
+octet gait_type_;
+octet speed_level_;
+float foot_raise_height_;
+float body_height_;
+float position_[2];
+
+float euler_[3];
+
+float velocity_[2];
+
+float yaw_speed_;
+unitree_go::msg::dds_::BmsCmd_ bms_cmd_;
+unitree_go::msg::dds_::PathPoint_ path_point_[30];
+
+
+};
+
+
+};  // module dds_
+
+};  // module msg
+
+};  // module unitree_go
+
+
+#endif  // __unitree_go__msg__sport_mode_cmd__idl__

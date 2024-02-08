@@ -1,0 +1,40 @@
+// generated from rosidl_generator_dds_idl/resource/idl.idl.em
+// with input from unitree_go:msg/BmsState.idl
+// generated code does not contain a copyright notice
+
+#ifndef __unitree_go__msg__bms_state__idl__
+#define __unitree_go__msg__bms_state__idl__
+
+
+module unitree_go {
+
+module msg {
+
+module dds_ {
+
+
+struct BmsState_ {
+octet version_high_;
+octet version_low_;
+octet status_;
+octet soc_;
+long current_;
+unsigned short cycle_;
+octet bq_ntc_[2];
+
+octet mcu_ntc_[2];
+
+unsigned short cell_vol_[15];
+
+
+};
+
+
+};  // module dds_
+
+};  // module msg
+
+};  // module unitree_go
+
+
+#endif  // __unitree_go__msg__bms_state__idl__

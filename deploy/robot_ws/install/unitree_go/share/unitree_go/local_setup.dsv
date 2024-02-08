@@ -1,0 +1,4 @@
+source;share/unitree_go/environment/ament_prefix_path.sh
+source;share/unitree_go/environment/library_path.sh
+source;share/unitree_go/environment/path.sh
+source;share/unitree_go/environment/pythonpath.sh

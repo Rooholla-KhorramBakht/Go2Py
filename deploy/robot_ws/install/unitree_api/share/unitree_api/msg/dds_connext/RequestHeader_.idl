@@ -1,0 +1,34 @@
+// generated from rosidl_generator_dds_idl/resource/idl.idl.em
+// with input from unitree_api:msg/RequestHeader.idl
+// generated code does not contain a copyright notice
+#include "unitree_api/msg/dds_connext/RequestIdentity_.idl"
+#include "unitree_api/msg/dds_connext/RequestLease_.idl"
+#include "unitree_api/msg/dds_connext/RequestPolicy_.idl"
+
+#ifndef __unitree_api__msg__request_header__idl__
+#define __unitree_api__msg__request_header__idl__
+
+
+module unitree_api {
+
+module msg {
+
+module dds_ {
+
+
+struct RequestHeader_ {
+unitree_api::msg::dds_::RequestIdentity_ identity_;
+unitree_api::msg::dds_::RequestLease_ lease_;
+unitree_api::msg::dds_::RequestPolicy_ policy_;
+
+};
+
+
+};  // module dds_
+
+};  // module msg
+
+};  // module unitree_api
+
+
+#endif  // __unitree_api__msg__request_header__idl__

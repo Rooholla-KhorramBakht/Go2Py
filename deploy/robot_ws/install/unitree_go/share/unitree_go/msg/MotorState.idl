@@ -1,0 +1,33 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from unitree_go/msg/MotorState.msg
+// generated code does not contain a copyright notice
+
+
+module unitree_go {
+  module msg {
+    typedef uint32 uint32__2[2];
+    struct MotorState {
+      uint8 mode;
+
+      float q;
+
+      float dq;
+
+      float ddq;
+
+      float tau_est;
+
+      float q_raw;
+
+      float dq_raw;
+
+      float ddq_raw;
+
+      int8 temperature;
+
+      uint32 lost;
+
+      uint32__2 reserve;
+    };
+  };
+};
