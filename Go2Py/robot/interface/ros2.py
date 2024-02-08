@@ -13,6 +13,8 @@ from geometry_msgs.msg import TransformStamped
 from Go2Py.joy import xKeySwitch, xRockerBtn
 from geometry_msgs.msg import TwistStamped
 from unitree_go.msg import LowState
+from nav_msgs.msg import Odometry   
+
 
 
 def ros2_init(args=None):
@@ -56,25 +58,31 @@ class ROS2ExecutorManager:
             self.executor_thread.join()
 
 
-class GO2Robot(Node):
+class GO2Real(Node):
     def __init__(
         self,
-        test=False,
+        mode = 'highlevel', # 'highlevel' or 'lowlevel'
         vx_max=0.5,
         vy_max=0.4,
         ωz_max=0.5,
-        node_name="go2py_highlevel_subscriber",
     ):
-        self.node_name = node_name
+        assert mode in ['highlevel', 'lowlevel'], "mode should be either 'highlevel' or 'lowlevel'"
+        self.mode = mode
+        self.node_name = "go2py_highlevel_subscriber"
         self.highcmd_topic = "/go2/twist_cmd"
         self.joint_state_topic = "/go2/joint_states"
         self.lowstate_topic = "/lowstate"
         super().__init__(self.node_name)
         
-        self.subscription = self.create_subscription(
+        self.lowstate_subscriber = self.create_subscription(
             LowState, self.lowstate_topic, self.lowstate_callback, 1
         )
-        self.cmd_publisher = self.create_publisher(TwistStamped, self.highcmd_topic, 1)
+
+        self.odometry_subscriber = self.create_subscription(
+            Odometry, "/utlidar/robot_odom", self.odom_callback, 1
+        )
+
+        self.highcmd_publisher = self.create_publisher(TwistStamped, self.highcmd_topic, 1)
         self.highcmd = TwistStamped()
         # create pinocchio robot
         # self.pin_robot = PinRobot()
@@ -93,16 +101,31 @@ class GO2Robot(Node):
         """
         self.state = msg
 
+    def odom_callback(self, msg):
+        """
+        Retrieve the odometry of the robot
+        """
+        self.odom = msg
+
+    def getOdometry(self):
+        """Returns the odometry of the robot"""
+        stamp = self.odom.header.stamp
+        position = np.array([self.odom.pose.pose.position.x, self.odom.pose.pose.position.y, self.odom.pose.pose.position.z])
+        orientation = np.array([self.odom.pose.pose.orientation.x, self.odom.pose.pose.orientation.y, self.odom.pose.pose.orientation.z, self.odom.pose.pose.orientation.w])
+        stamp_nanosec = stamp.sec + stamp.nanosec * 1e-9
+        return {'stamp_nanosec':stamp_nanosec, 'position':position, 'orientation':orientation}
+
     def getIMU(self):
-        accel = self.state.imu.accelerometer
-        gyro = self.state.imu.gyroscope
-        quat = self.state.imu.quaternion
-        rpy = self.state.imu.rpy
-        return accel, gyro, quat, rpy
+        accel = self.state.imu_state.accelerometer
+        gyro = self.state.imu_state.gyroscope
+        quat = self.state.imu_state.quaternion
+        rpy = self.state.imu_state.rpy
+        temp = self.state.imu_state.temperature
+        return {'accel':accel, 'gyro':gyro, 'quat':quat, "rpy":rpy, 'temp':temp}
 
     def getFootContacts(self):
-        """Returns the foot contact states"""
-        footContacts = self.state.foot_force_est
+        """Returns the raw foot contact forces"""
+        footContacts = self.state.foot_force
         return np.array(footContacts)
 
     def getJointStates(self):
@@ -113,10 +136,19 @@ class GO2Robot(Node):
         )
         q, dq = np.array(_q), np.array(_dq)
 
-        return q, dq
+        return {'q':q, 'dq':dq}
 
     def getRemoteState(self):
-        """Returns the state of the remote control"""
+        """A method to get the state of the wireless remote control. 
+        Returns a xRockerBtn object: 
+        - head: [head1, head2]
+        - keySwitch: xKeySwitch object
+        - lx: float
+        - rx: float
+        - ry: float
+        - L2: float
+        - ly: float
+        """
         wirelessRemote = self.state.wireless_remote[:24]
 
         binary_data = bytes(wirelessRemote)
@@ -151,7 +183,7 @@ class GO2Robot(Node):
         v_x = ly * self.vx_max
         v_y = lx * self.vy_max
         ω = rx * self.ωz_max
-
+        
         return v_x, v_y, ω
 
     def getBatteryState(self):
@@ -160,16 +192,17 @@ class GO2Robot(Node):
         return batteryState.SOC
 
     def setCommands(self, v_x, v_y, ω_z, bodyHeight=0.0, footRaiseHeight=0.0, mode=2):
-        assert mode in [0, 2]  # Only mode 2: walking and mode 0: idea is allowed
-        self.cmd_watchdog_timer = time.time()
-        self.cmd.mode = mode
-        self.cmd.body_height = np.clip(bodyHeight, -0.15, 0.1)
-        self.cmd.foot_raise_height = np.clip(footRaiseHeight, -0.1, 0.1)
-        _v_x, _v_y, _ω_z = self.clip_velocity(v_x, v_y, ω_z)
-        self.cmd.velocity = [_v_x, _v_y]
-        self.cmd.yaw_speed = _ω_z
-        # Publish the command as a ROS2 message
-        self.cmd_publisher.publish(self.cmd)
+        if self.mode == 'highlevel':
+            self.cmd_watchdog_timer = time.time()
+            _v_x, _v_y, _ω_z = self.clip_velocity(v_x, v_y, ω_z)
+            self.highcmd.header.stamp = self.get_clock().now().to_msg()
+            self.highcmd.header.frame_id = "base_link"
+            self.highcmd.twist.linear.x = _v_x
+            self.highcmd.twist.linear.y = _v_y
+            self.highcmd.twist.angular.z = _ω_z
+            self.highcmd_publisher.publish(self.highcmd)
+        else:
+            raise NotImplementedError("Low level control command is not implemented yet")
 
     def close(self):
         self.running = False
