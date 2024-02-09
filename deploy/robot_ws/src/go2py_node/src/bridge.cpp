@@ -22,6 +22,7 @@
 #include "unitree_go/msg/sport_mode_state.hpp"
 #include "unitree_api/msg/request.hpp"
 #include "common/ros2_sport_client.h"
+#include "joystick.h"
 
 class Custom: public rclcpp::Node
 {
@@ -79,6 +80,7 @@ class Custom: public rclcpp::Node
         rclcpp::Publisher<unitree_go::msg::LowCmd>::SharedPtr lowcmd_puber;
         unitree_go::msg::LowCmd lowcmd_msg;
         uint64_t last_lowcmd_stamp = 0;
+        xRockerBtnDataStruct _keyData;
 
         void init_lowcmd()
         {
