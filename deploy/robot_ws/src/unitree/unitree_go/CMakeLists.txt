@@ -48,6 +48,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
         "msg/UwbState.msg"
         "msg/UwbSwitch.msg"
         "msg/WirelessController.msg"
+        "msg/Go2pyLowCmd.msg"
   DEPENDENCIES geometry_msgs
 )
 

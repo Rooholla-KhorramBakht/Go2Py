@@ -12,7 +12,7 @@ from rclpy.executors import MultiThreadedExecutor
 from geometry_msgs.msg import TransformStamped
 from Go2Py.joy import xKeySwitch, xRockerBtn
 from geometry_msgs.msg import TwistStamped
-from unitree_go.msg import LowState, LowCmd
+from unitree_go.msg import LowState, Go2pyLowCmd
 from nav_msgs.msg import Odometry   
 
 
@@ -77,7 +77,7 @@ class GO2Real(Node):
         self.lowstate_subscriber = self.create_subscription(
             LowState, self.lowstate_topic, self.lowstate_callback, 1
         )
-        self.lowcmd_publisher = self.create_publisher(LowCmd, self.lowcmd_topic, 1)
+        self.lowcmd_publisher = self.create_publisher(Go2pyLowCmd, self.lowcmd_topic, 1)
 
         self.odometry_subscriber = self.create_subscription(
             Odometry, "/utlidar/robot_odom", self.odom_callback, 1
@@ -95,8 +95,8 @@ class GO2Real(Node):
         self.ωz_max = ωz_max
         self.ωz_min = -ωz_max
         self.running = True
-        self.setCommands = {'lowstate':self.setCommandsLow,
-                            'highstate':self.setCommandsHigh}[self.mode]
+        self.setCommands = {'lowlevel':self.setCommandsLow,
+                            'highlevel':self.setCommandsHigh}[self.mode]
 
     def lowstate_callback(self, msg):
         """
@@ -203,14 +203,14 @@ class GO2Real(Node):
         self.highcmd.twist.angular.z = _ω_z
         self.highcmd_publisher.publish(self.highcmd)
 
-    def setCommandsLow(q, dq, kp, kd, tau_ff):
-        assert q.size == qd.size == kp.size == kd.size == tau_ff.size == 12, "q, dq, kp, kd, tau_ff should have size 12"
-        lowcmd = LowCmd()
-        lowcmd.motor_cmd.q = q.tolist()
-        lowcmd.motor_cmd.dq = dq.tolist()
-        lowcmd.motor_cmd.kp = kp.tolist()
-        lowcmd.motor_cmd.kd = kd.tolist()
-        lowcmd.motor_cmd.tau_ff = tau_ff.tolist()
+    def setCommandsLow(self, q, dq, kp, kd, tau_ff):
+        assert q.size == dq.size == kp.size == kd.size == tau_ff.size == 12, "q, dq, kp, kd, tau_ff should have size 12"
+        lowcmd = Go2pyLowCmd()
+        lowcmd.q = q.tolist()
+        lowcmd.dq = dq.tolist()
+        lowcmd.kp = kp.tolist()
+        lowcmd.kd = kd.tolist()
+        lowcmd.tau = tau_ff.tolist()
         self.lowcmd_publisher.publish(lowcmd)
 
     def close(self):

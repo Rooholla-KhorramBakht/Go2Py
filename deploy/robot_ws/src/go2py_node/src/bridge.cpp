@@ -1,6 +1,7 @@
 #include "unitree_go/msg/low_state.hpp"
 #include "unitree_go/msg/imu_state.hpp"
 #include "unitree_go/msg/motor_state.hpp"
+#include "unitree_go/msg/go2py_low_cmd.hpp"
 
 #include "unitree_go/msg/low_cmd.hpp"
 #include "unitree_go/msg/motor_cmd.hpp"
@@ -44,7 +45,7 @@ class Custom: public rclcpp::Node
             lowstate_suber = this->create_subscription<unitree_go::msg::LowState>(
             "lowstate", 1, std::bind(&Custom::lowstate_callback, this, std::placeholders::_1));
             
-            lowcmd_suber = this->create_subscription<unitree_go::msg::LowCmd>(
+            lowcmd_suber = this->create_subscription<unitree_go::msg::Go2pyLowCmd>(
             "/go2/lowcmd", 1, std::bind(&Custom::lowcmd_callback, this, std::placeholders::_1));
 
             lowcmd_puber = this->create_publisher<unitree_go::msg::LowCmd>("/lowcmd", 10);
@@ -71,9 +72,9 @@ class Custom: public rclcpp::Node
         
         // Lowlevel interface
         void lowstate_callback(unitree_go::msg::LowState::SharedPtr data);
-        void lowcmd_callback(unitree_go::msg::LowCmd::SharedPtr data);
+        void lowcmd_callback(unitree_go::msg::Go2pyLowCmd::SharedPtr data);
         rclcpp::Subscription<unitree_go::msg::LowState>::SharedPtr lowstate_suber;
-        rclcpp::Subscription<unitree_go::msg::LowCmd>::SharedPtr lowcmd_suber;
+        rclcpp::Subscription<unitree_go::msg::Go2pyLowCmd>::SharedPtr lowcmd_suber;
         // A struct to store the highlevel states for later use
         rclcpp::Publisher<unitree_go::msg::LowCmd>::SharedPtr lowcmd_puber;
         unitree_go::msg::LowCmd lowcmd_msg;
@@ -231,15 +232,15 @@ void Custom::twistCmdCallback(const geometry_msgs::msg::TwistStamped::SharedPtr 
     highreq_puber->publish(highreq);
 }
 
-void Custom::lowcmd_callback(unitree_go::msg::LowCmd::SharedPtr data)
+void Custom::lowcmd_callback(unitree_go::msg::Go2pyLowCmd::SharedPtr data)
 {
     for(int i=0; i<12; i++)
     {
-        lowcmd_msg.motor_cmd[i].q =   data->motor_cmd[i].q;   // Taregt angular(rad)
-        lowcmd_msg.motor_cmd[i].kp =  data->motor_cmd[i].kp;  // Poinstion(rad) control kp gain
-        lowcmd_msg.motor_cmd[i].dq =  data->motor_cmd[i].dq;  // Taregt angular velocity(rad/ss)
-        lowcmd_msg.motor_cmd[i].kd =  data->motor_cmd[i].kd;  // Poinstion(rad) control kd gain
-        lowcmd_msg.motor_cmd[i].tau = data->motor_cmd[i].tau; // Feedforward toque 1N.m
+        lowcmd_msg.motor_cmd[i].q =   data->q[i];   // Taregt angular(rad)
+        lowcmd_msg.motor_cmd[i].kp =  data->kp[i];  // Poinstion(rad) control kp gain
+        lowcmd_msg.motor_cmd[i].dq =  data->dq[i];  // Taregt angular velocity(rad/ss)
+        lowcmd_msg.motor_cmd[i].kd =  data->kd[i];  // Poinstion(rad) control kd gain
+        lowcmd_msg.motor_cmd[i].tau = data->tau[i]; // Feedforward toque 1N.m
         get_crc(lowcmd_msg); //Compute the CRC and load it into the message
         lowcmd_puber->publish(lowcmd_msg); //Publish lowcmd message
     }
