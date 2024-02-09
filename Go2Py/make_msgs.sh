@@ -20,6 +20,6 @@ do
     idlc -l ../../idl/libcycloneddsidlcxx.so.0.10.2 $file
 done
 cd ../..
-rm -r ../cpp_bridge/include/go2py
-mv msgs/cpp ../cpp_bridge/include/go2py
+# rm -r ../cpp_bridge/include/go2py
+# mv msgs/cpp ../cpp_bridge/include/go2py
 echo -e "${GREEN} Done with DDS type generation${NC}"

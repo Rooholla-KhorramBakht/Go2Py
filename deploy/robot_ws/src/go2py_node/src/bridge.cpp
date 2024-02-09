@@ -42,7 +42,11 @@ class Custom: public rclcpp::Node
             //Go2 lowlevel interface
             init_lowcmd();
             lowstate_suber = this->create_subscription<unitree_go::msg::LowState>(
-            "lowstate", 10, std::bind(&Custom::lowstate_callback, this, std::placeholders::_1));
+            "lowstate", 1, std::bind(&Custom::lowstate_callback, this, std::placeholders::_1));
+            
+            lowcmd_suber = this->create_subscription<unitree_go::msg::LowCmd>(
+            "/go2/lowcmd", 1, std::bind(&Custom::lowcmd_callback, this, std::placeholders::_1));
+
             lowcmd_puber = this->create_publisher<unitree_go::msg::LowCmd>("/lowcmd", 10);
 
         }
@@ -67,7 +71,9 @@ class Custom: public rclcpp::Node
         
         // Lowlevel interface
         void lowstate_callback(unitree_go::msg::LowState::SharedPtr data);
+        void lowcmd_callback(unitree_go::msg::LowCmd::SharedPtr data);
         rclcpp::Subscription<unitree_go::msg::LowState>::SharedPtr lowstate_suber;
+        rclcpp::Subscription<unitree_go::msg::LowCmd>::SharedPtr lowcmd_suber;
         // A struct to store the highlevel states for later use
         rclcpp::Publisher<unitree_go::msg::LowCmd>::SharedPtr lowcmd_puber;
         unitree_go::msg::LowCmd lowcmd_msg;
@@ -220,33 +226,23 @@ void Custom::twistCmdCallback(const geometry_msgs::msg::TwistStamped::SharedPtr 
 {
     auto stamp_now = std::chrono::high_resolution_clock::now();
     last_highcmd_stamp = std::chrono::duration_cast<std::chrono::microseconds>(stamp_now.time_since_epoch()).count();
-    // reset = 0; 
     sport_req.Move(highreq, msg->twist.linear.x, msg->twist.linear.y, msg->twist.angular.z);
     // Publish request messages with desired body velocity
     highreq_puber->publish(highreq);
 }
 
-void lowcmd_callback(const unitree_go::msg::LowCmd::SharedPtr msg)
+void Custom::lowcmd_callback(unitree_go::msg::LowCmd::SharedPtr data)
 {
-    // lowcmd_msg = *msg;
-    // lowcmd_puber->publish(lowcmd_msg);
-        // Toque controle, set RL_2 toque
-        // cmd_msg.motor_cmd[RL_2].q = PosStopF; // Set to stop position(rad)
-        // cmd_msg.motor_cmd[RL_2].kp = 0;
-        // cmd_msg.motor_cmd[RL_2].dq = VelStopF; // Set to stop angular velocity(rad/s)
-        // cmd_msg.motor_cmd[RL_2].kd = 0;
-        // cmd_msg.motor_cmd[RL_2].tau = 1; // target toque is set to 1N.m
-
-        // // Poinstion(rad) control, set RL_0 rad
-        // cmd_msg.motor_cmd[RL_0].q = 0;   // Taregt angular(rad)
-        // cmd_msg.motor_cmd[RL_0].kp = 10; // Poinstion(rad) control kp gain
-        // cmd_msg.motor_cmd[RL_0].dq = 0;  // Taregt angular velocity(rad/ss)
-        // cmd_msg.motor_cmd[RL_0].kd = 1;  // Poinstion(rad) control kd gain
-        // cmd_msg.motor_cmd[RL_0].tau = 0; // Feedforward toque 1N.m
-
-        // get_crc(cmd_msg); //Check motor cmd crc
-
-        // cmd_puber->publish(cmd_msg); //Publish lowcmd message
+    for(int i=0; i<12; i++)
+    {
+        lowcmd_msg.motor_cmd[i].q =   data->motor_cmd[i].q;   // Taregt angular(rad)
+        lowcmd_msg.motor_cmd[i].kp =  data->motor_cmd[i].kp;  // Poinstion(rad) control kp gain
+        lowcmd_msg.motor_cmd[i].dq =  data->motor_cmd[i].dq;  // Taregt angular velocity(rad/ss)
+        lowcmd_msg.motor_cmd[i].kd =  data->motor_cmd[i].kd;  // Poinstion(rad) control kd gain
+        lowcmd_msg.motor_cmd[i].tau = data->motor_cmd[i].tau; // Feedforward toque 1N.m
+        get_crc(lowcmd_msg); //Compute the CRC and load it into the message
+        lowcmd_puber->publish(lowcmd_msg); //Publish lowcmd message
+    }
 }
 
 int main(int argc, char **argv)

@@ -12,7 +12,7 @@ from rclpy.executors import MultiThreadedExecutor
 from geometry_msgs.msg import TransformStamped
 from Go2Py.joy import xKeySwitch, xRockerBtn
 from geometry_msgs.msg import TwistStamped
-from unitree_go.msg import LowState
+from unitree_go.msg import LowState, LowCmd
 from nav_msgs.msg import Odometry   
 
 
@@ -57,7 +57,6 @@ class ROS2ExecutorManager:
         if self.executor_thread:
             self.executor_thread.join()
 
-
 class GO2Real(Node):
     def __init__(
         self,
@@ -70,6 +69,7 @@ class GO2Real(Node):
         self.mode = mode
         self.node_name = "go2py_highlevel_subscriber"
         self.highcmd_topic = "/go2/twist_cmd"
+        self.lowcmd_topic = "/go2/lowcmd"
         self.joint_state_topic = "/go2/joint_states"
         self.lowstate_topic = "/lowstate"
         super().__init__(self.node_name)
@@ -77,6 +77,7 @@ class GO2Real(Node):
         self.lowstate_subscriber = self.create_subscription(
             LowState, self.lowstate_topic, self.lowstate_callback, 1
         )
+        self.lowcmd_publisher = self.create_publisher(LowCmd, self.lowcmd_topic, 1)
 
         self.odometry_subscriber = self.create_subscription(
             Odometry, "/utlidar/robot_odom", self.odom_callback, 1
@@ -94,6 +95,8 @@ class GO2Real(Node):
         self.ωz_max = ωz_max
         self.ωz_min = -ωz_max
         self.running = True
+        self.setCommands = {'lowstate':self.setCommandsLow,
+                            'highstate':self.setCommandsHigh}[self.mode]
 
     def lowstate_callback(self, msg):
         """
@@ -169,7 +172,6 @@ class GO2Real(Node):
 
         keySwitch = xKeySwitch(*btn)
         rockerBtn = xRockerBtn(head, keySwitch, lx, rx, ry, L2, ly)
-
         return rockerBtn
 
     def getCommandFromRemote(self):
@@ -191,18 +193,25 @@ class GO2Real(Node):
         batteryState = self.state.bms
         return batteryState.SOC
 
-    def setCommands(self, v_x, v_y, ω_z, bodyHeight=0.0, footRaiseHeight=0.0, mode=2):
-        if self.mode == 'highlevel':
-            self.cmd_watchdog_timer = time.time()
-            _v_x, _v_y, _ω_z = self.clip_velocity(v_x, v_y, ω_z)
-            self.highcmd.header.stamp = self.get_clock().now().to_msg()
-            self.highcmd.header.frame_id = "base_link"
-            self.highcmd.twist.linear.x = _v_x
-            self.highcmd.twist.linear.y = _v_y
-            self.highcmd.twist.angular.z = _ω_z
-            self.highcmd_publisher.publish(self.highcmd)
-        else:
-            raise NotImplementedError("Low level control command is not implemented yet")
+    def setCommandsHigh(self, v_x, v_y, ω_z, bodyHeight=0.0, footRaiseHeight=0.0, mode=2):
+        self.cmd_watchdog_timer = time.time()
+        _v_x, _v_y, _ω_z = self.clip_velocity(v_x, v_y, ω_z)
+        self.highcmd.header.stamp = self.get_clock().now().to_msg()
+        self.highcmd.header.frame_id = "base_link"
+        self.highcmd.twist.linear.x = _v_x
+        self.highcmd.twist.linear.y = _v_y
+        self.highcmd.twist.angular.z = _ω_z
+        self.highcmd_publisher.publish(self.highcmd)
+
+    def setCommandsLow(q, dq, kp, kd, tau_ff):
+        assert q.size == qd.size == kp.size == kd.size == tau_ff.size == 12, "q, dq, kp, kd, tau_ff should have size 12"
+        lowcmd = LowCmd()
+        lowcmd.motor_cmd.q = q.tolist()
+        lowcmd.motor_cmd.dq = dq.tolist()
+        lowcmd.motor_cmd.kp = kp.tolist()
+        lowcmd.motor_cmd.kd = kd.tolist()
+        lowcmd.motor_cmd.tau_ff = tau_ff.tolist()
+        self.lowcmd_publisher.publish(lowcmd)
 
     def close(self):
         self.running = False

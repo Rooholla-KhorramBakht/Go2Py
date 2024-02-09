@@ -160,9 +160,13 @@ cython_debug/
 #.idea/
 .vscode
 
-deploy/ros2_ws/log
-deploy/ros2_ws/install
-deploy/ros2_ws/build
+deploy/robot_ws/log
+deploy/robot_ws/install
+deploy/robot_ws/build
+
+deploy/dock_ws/log
+deploy/dock_ws/install
+deploy/dock_ws/build
 
 _isaac_sim
 .vscode
