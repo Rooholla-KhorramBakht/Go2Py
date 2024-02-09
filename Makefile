@@ -1,5 +1,5 @@
 docker:
-	@docker build --no-cache --tag go2py:latest .
+	@docker build --no-cache --tag go2py:latest -f Dockerfile.dock .
 
 docker_install:
 	@cp deploy/scripts/go2py-hw-nodes.service /etc/systemd/system/
