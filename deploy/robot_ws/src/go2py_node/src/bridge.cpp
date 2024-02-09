@@ -177,12 +177,14 @@ void Custom::lowstate_callback(unitree_go::msg::LowState::SharedPtr data)
     }
     pub_joint->publish(joint_state);
     pub_imu->publish(imu);
+    // Check for emergency stop
     memcpy(&_keyData, &data->wireless_remote[0], 40);
     if (_keyData.btn.components.R2 == 1 && _keyData.btn.components.L2 == 1)
     {
         Estop = 1;
     }
-    if (_keyData.btn.components.R1 == 1 && _keyData.btn.components.L1 == 1)
+    if ((_keyData.btn.components.R1 == 1 && _keyData.btn.components.L1 == 1)||
+        (_keyData.btn.components.L2 == 1 && _keyData.btn.components.A == 1))
     {
         Estop = 0;
     }
