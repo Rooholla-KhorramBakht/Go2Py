@@ -29,6 +29,7 @@ class Custom: public rclcpp::Node
     public:
         Custom() : Node("go2py_bridge_node")
         {
+            watchdog_timer = this->create_wall_timer(std::chrono::milliseconds(10), std::bind(&Custom::watchdog, this));
             pub_odom = this->create_publisher<nav_msgs::msg::Odometry>("/go2/odom", 1);
             pub_imu  = this->create_publisher<sensor_msgs::msg::Imu>("/go2/imu", 1);
             pub_joint  = this->create_publisher<sensor_msgs::msg::JointState>("/go2/joint_states", 1);
@@ -53,6 +54,8 @@ class Custom: public rclcpp::Node
 
         }
     private:
+        rclcpp::TimerBase::SharedPtr watchdog_timer;
+        void watchdog();
         // Highlevel twist command through standard ROS2 message type
         void twistCmdCallback(const geometry_msgs::msg::TwistStamped::SharedPtr msg);
         geometry_msgs::msg::TwistStamped twist_cmd;
@@ -114,6 +117,7 @@ class Custom: public rclcpp::Node
             float vy;
             float foot_force[4];
         }highstate;     
+        int Estop = 0;
 };
 
 void Custom::lowstate_callback(unitree_go::msg::LowState::SharedPtr data)
@@ -175,6 +179,18 @@ void Custom::lowstate_callback(unitree_go::msg::LowState::SharedPtr data)
     */
     pub_joint->publish(joint_state);
     pub_imu->publish(imu);
+    // Check for emergency stop
+    memcpy(&_keyData, &data->wireless_remote[0], 40);
+    if (_keyData.btn.components.R2 == 1 && _keyData.btn.components.L2 == 1)
+    {
+        Estop = 1;
+    }
+    if ((_keyData.btn.components.R1 == 1 && _keyData.btn.components.L1 == 1)||
+        (_keyData.btn.components.L2 == 1 && _keyData.btn.components.A == 1))
+    {
+        Estop = 0;
+    }
+    // std::cout << "Estop: " << Estop << std::endl;
 }
 
 void Custom::highstate_callback(unitree_go::msg::SportModeState::SharedPtr data)
@@ -231,22 +247,61 @@ void Custom::twistCmdCallback(const geometry_msgs::msg::TwistStamped::SharedPtr 
 {
     auto stamp_now = std::chrono::high_resolution_clock::now();
     last_highcmd_stamp = std::chrono::duration_cast<std::chrono::microseconds>(stamp_now.time_since_epoch()).count();
-    sport_req.Move(highreq, msg->twist.linear.x, msg->twist.linear.y, msg->twist.angular.z);
+    if(Estop == 0)
+        sport_req.Move(highreq, msg->twist.linear.x, msg->twist.linear.y, msg->twist.angular.z);
+    else
+        sport_req.Damp(highreq);
+    
     // Publish request messages with desired body velocity
     highreq_puber->publish(highreq);
 }
 
 void Custom::lowcmd_callback(unitree_go::msg::Go2pyLowCmd::SharedPtr data)
-{
-    for(int i=0; i<12; i++)
+{   
+    if(Estop == 0)
     {
-        lowcmd_msg.motor_cmd[i].q =   data->q[i];   // Taregt angular(rad)
-        lowcmd_msg.motor_cmd[i].kp =  data->kp[i];  // Poinstion(rad) control kp gain
-        lowcmd_msg.motor_cmd[i].dq =  data->dq[i];  // Taregt angular velocity(rad/ss)
-        lowcmd_msg.motor_cmd[i].kd =  data->kd[i];  // Poinstion(rad) control kd gain
-        lowcmd_msg.motor_cmd[i].tau = data->tau[i]; // Feedforward toque 1N.m
-        get_crc(lowcmd_msg); //Compute the CRC and load it into the message
-        lowcmd_puber->publish(lowcmd_msg); //Publish lowcmd message
+        for(int i=0; i<12; i++)
+        {
+            lowcmd_msg.motor_cmd[i].q =   data->q[i];   // Taregt angular(rad)
+            lowcmd_msg.motor_cmd[i].kp =  data->kp[i];  // Poinstion(rad) control kp gain
+            lowcmd_msg.motor_cmd[i].dq =  data->dq[i];  // Taregt angular velocity(rad/ss)
+            lowcmd_msg.motor_cmd[i].kd =  data->kd[i];  // Poinstion(rad) control kd gain
+            lowcmd_msg.motor_cmd[i].tau = data->tau[i]; // Feedforward toque 1N.m
+            get_crc(lowcmd_msg); //Compute the CRC and load it into the message
+            lowcmd_puber->publish(lowcmd_msg); //Publish lowcmd message
+        }
+    }else
+    {
+        for(int i=0; i<12; i++)
+        {
+            lowcmd_msg.motor_cmd[i].q =   0.;   // Taregt angular(rad)
+            lowcmd_msg.motor_cmd[i].kp =  0.;  // Poinstion(rad) control kp gain
+            lowcmd_msg.motor_cmd[i].dq =  0.;  // Taregt angular velocity(rad/ss)
+            lowcmd_msg.motor_cmd[i].kd =  0;  // Poinstion(rad) control kd gain
+            lowcmd_msg.motor_cmd[i].tau = 0.; // Feedforward toque 1N.m
+            get_crc(lowcmd_msg); //Compute the CRC and load it into the message
+            lowcmd_puber->publish(lowcmd_msg); //Publish lowcmd message
+        }
+    }
+}
+
+void Custom::watchdog()
+{
+    if(Estop == 1)
+    {
+        sport_req.Damp(highreq);    
+        highreq_puber->publish(highreq);
+        for(int i=0; i<12; i++)
+        {
+            lowcmd_msg.motor_cmd[i].q =   0.;   // Taregt angular(rad)
+            lowcmd_msg.motor_cmd[i].kp =  0.;  // Poinstion(rad) control kp gain
+            lowcmd_msg.motor_cmd[i].dq =  0.;  // Taregt angular velocity(rad/ss)
+            lowcmd_msg.motor_cmd[i].kd =  3;  // Poinstion(rad) control kd gain
+            lowcmd_msg.motor_cmd[i].tau = 0.; // Feedforward toque 1N.m
+            get_crc(lowcmd_msg); //Compute the CRC and load it into the message
+            lowcmd_puber->publish(lowcmd_msg); //Publish lowcmd message
+        }
+        lowcmd_puber->publish(lowcmd_msg);
     }
 }
 
