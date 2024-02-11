@@ -146,7 +146,8 @@ add_subdirectory(src/driver/HesaiLidar_SDK_2.0)
 
 
 find_package(CUDA)
-if(CUDA_FOUND)
+if(OFF)
+# if(CUDA_FOUND)
   
   message(=============================================================)
   message("-- CUDA Found. CUDA Support is turned On.")

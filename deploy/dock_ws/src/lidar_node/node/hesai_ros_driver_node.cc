@@ -100,8 +100,34 @@ int main(int argc, char** argv)
   ros::MultiThreadedSpinner spinner(2); 
   spinner.spin();
 #elif ROS2_FOUND
+std::cout << "Start of here...";
+  using namespace std::chrono;
   std::unique_lock<std::mutex> lck(g_mtx);
-  g_cv.wait(lck);
+  while(true)
+  {
+    auto timeout = steady_clock::now() + milliseconds(10);
+    // Wait with timeout
+    if (g_cv.wait_until(lck, timeout) == std::cv_status::timeout) {
+        // Handle timeout logic here
+        // std::cout << "Timeout occurred after 10ms." << std::endl;
+        // std::cout << (int)(demo_ptr->sources_driver_[0]->publish_pointcloud_flag) << std::endl;
+        for(int i=0; i<demo_ptr->sources_driver_.size(); i++)
+        {
+          if(demo_ptr->sources_driver_[i]->publish_pointcloud_flag)
+          {
+            demo_ptr->sources_driver_[i]->publish_pointcloud_flag=false;
+            demo_ptr->sources_driver_[i]->publishPointcloud();
+          }
+        }
+        
+    } else {
+        // Continue with normal processing as the condition variable was signaled
+        // ...
+        std::cout << "Condition variable was set succesffuly" << std::endl;
+        break;
+    }
+  }
+  // g_cv.wait(lck);
 #endif
 
   return 0;

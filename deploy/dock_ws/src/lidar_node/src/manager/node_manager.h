@@ -51,7 +51,7 @@ public:
   ~NodeManager();
   NodeManager() = default;
 
-private:
+// private:
 
   std::vector<SourceDriver::Ptr> sources_driver_;
 };
