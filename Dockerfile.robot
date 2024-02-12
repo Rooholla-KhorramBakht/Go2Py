@@ -6,6 +6,7 @@ SHELL ["/bin/bash", "-c"]
 RUN apt-get update && apt-get install -y \
     ros-humble-rmw-cyclonedds-cpp ros-humble-rosidl-generator-dds-idl \
     libyaml-cpp-dev \
+    ros-humble-xacro \
     # ros-humble-isaac-ros-visual-slam \
     # ros-humble-isaac-ros-occupancy-grid-localizer\
     libboost-all-dev\

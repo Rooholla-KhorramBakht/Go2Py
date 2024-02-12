@@ -1,7 +1,7 @@
 [Unit]
 Description=ROS2 device driver container
-Requires=docker.service
-After=docker.service
+Requires=multi-user.target
+After=multi-user.target
 
 [Service]
 Restart=always
