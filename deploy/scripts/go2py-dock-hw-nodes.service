@@ -6,7 +6,7 @@ After=docker.service
 [Service]
 Restart=always
 ExecStartPre=/usr/bin/docker rm -f go2py_docker || true
-ExecStart=/bin/bash -c '/usr/bin/docker run --rm --name go2py_docker --privileged --network host -v /home/unitree/locomotion:/home/locomotion -v /dev/*:/dev/* -v /etc/localtime:/etc/localtime:ro --runtime nvidia go2py:latest' 
+ExecStart=/bin/bash -c '/usr/bin/docker run --rm --name go2py_docker --privileged --network host -v /home/unitree/locomotion:/home/locomotion -v /dev/*:/dev/* -v /etc/localtime:/etc/localtime:ro --runtime nvidia go2py_dock_hw:latest' 
 ExecStop=/usr/bin/docker stop -t 2 go2py_docker
 
 [Install]
