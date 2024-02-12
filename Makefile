@@ -13,3 +13,13 @@ docker_dock_uninstall:
 	@systemctl disable go2py-dock-hw-nodes.service
 	@systemctl stop go2py-dock-hw-nodes.service
 	@rm /etc/systemd/system/go2py-dock-hw-nodes.service
+
+docker_robot_install:
+	@cp deploy/scripts/go2py-robot-hw-nodes.service /etc/systemd/system/
+	@systemctl enable go2py-robot-hw-nodes.service
+	@systemctl start go2py-robot-hw-nodes.service
+
+docker_robot_uninstall:
+	@systemctl disable go2py-robot-hw-nodes.service
+	@systemctl stop go2py-robot-hw-nodes.service
+	@rm /etc/systemd/system/go2py-robot-hw-nodes.service
