@@ -86,7 +86,8 @@ target_link_libraries(sample
 # )
 
 find_package(CUDA )
-if(${CUDA_FOUND})
+if(OFF)
+# if(${CUDA_FOUND})
 	set(CUDA_SOURCE_PROPERTY_FORMAT OBJ)
 	set(CUDA_SEPARABLE_COMPILATION ON)
 	include_directories(${CUDA_INCLUDE_DIRS})

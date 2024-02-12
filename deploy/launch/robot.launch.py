@@ -35,26 +35,26 @@ def generate_launch_description():
             name='b1_hesai_ros_driver_node'
         ),
 
-        Node(
-            name='go2_d455_cam',
-            namespace='go2/d435i_cam',
-            package='realsense2_camera',
-            executable='realsense2_camera_node',
-            parameters=[{
-                    'enable_infra1': True,
-                    'enable_infra2': True,
-                    'enable_color': False,
-                    'enable_depth': False,
-                    'depth_module.emitter_enabled': 0,
-                    'depth_module.profile': '640x480x60',
-                    'enable_gyro': True,
-                    'enable_accel': True,
-                    'gyro_fps': 400,
-                    'accel_fps': 200,
-                    'unite_imu_method': 2,
-                    # 'tf_publish_rate': 0.0
-            }]
-        ),
+        # Node(
+        #     name='go2_d455_cam',
+        #     namespace='go2/d435i_cam',
+        #     package='realsense2_camera',
+        #     executable='realsense2_camera_node',
+        #     parameters=[{
+        #             'enable_infra1': True,
+        #             'enable_infra2': True,
+        #             'enable_color': False,
+        #             'enable_depth': False,
+        #             'depth_module.emitter_enabled': 0,
+        #             'depth_module.profile': '640x480x60',
+        #             'enable_gyro': True,
+        #             'enable_accel': True,
+        #             'gyro_fps': 400,
+        #             'accel_fps': 200,
+        #             'unite_imu_method': 2,
+        #             # 'tf_publish_rate': 0.0
+        #     }]
+        # ),
 
         # Launch the front looking D455 camera
         # IncludeLaunchDescription(
