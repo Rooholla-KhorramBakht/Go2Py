@@ -1,0 +1,2 @@
+Requirement already up-to-date: jinja2 in /home/meshin/.local/lib/python3.8/site-packages (3.1.3)
+Requirement already satisfied, skipping upgrade: MarkupSafe>=2.0 in /home/meshin/.local/lib/python3.8/site-packages (from jinja2) (2.1.4)
