@@ -1,0 +1,7 @@
+Defaulting to user installation because normal site-packages is not writeable
+Collecting jinja2
+  Downloading Jinja2-2.11.3-py2.py3-none-any.whl (125 kB)
+Collecting MarkupSafe>=0.23
+  Downloading MarkupSafe-1.1.1-cp27-cp27mu-manylinux1_x86_64.whl (24 kB)
+Installing collected packages: MarkupSafe, jinja2
+Successfully installed MarkupSafe-1.1.1 jinja2-2.11.3
