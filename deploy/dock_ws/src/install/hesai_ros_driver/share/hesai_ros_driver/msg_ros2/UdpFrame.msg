@@ -1,1 +1,0 @@
-/home/unitree/locomotion/Go2Py/deploy/dock_ws/src/lidar_node/msg/msg_ros2/UdpFrame.msg

@@ -168,5 +168,8 @@ deploy/dock_ws/log
 deploy/dock_ws/install
 deploy/dock_ws/build
 
+deploy/nav2_ws/install
+deploy/nav2_ws/log
+
 _isaac_sim
 .vscode
