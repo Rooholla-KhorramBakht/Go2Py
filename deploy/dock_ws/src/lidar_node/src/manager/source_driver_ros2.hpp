@@ -40,6 +40,8 @@
 #include <string>
 #include <functional>
 #include <stdbool.h>
+#include <math.h>
+#include "sensor_msgs/msg/laser_scan.hpp"
 #ifdef __CUDACC__
   #include "hesai_lidar_sdk_gpu.cuh"
 #else
@@ -62,6 +64,9 @@ public:
   LidarDecodedFrame<LidarPointXYZIRT> pointcloud_;
   void publishPointcloud(void);
   bool publish_pointcloud_flag;
+  void publishLaserScan(
+  sensor_msgs::msg::PointCloud2 *cloud_msg);
+  
 protected:
   // Save packets subscribed by 'ros_recv_packet_topic'
   void RecievePacket(const hesai_ros_driver::msg::UdpFrame::SharedPtr msg);
@@ -82,8 +87,10 @@ protected:
   rclcpp::Subscription<hesai_ros_driver::msg::UdpFrame>::SharedPtr pkt_sub_;
   rclcpp::Publisher<hesai_ros_driver::msg::UdpFrame>::SharedPtr pkt_pub_;
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_;
+  std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::LaserScan>> laserscan_pub_;
   //spin thread while recieve data from ROS topic
   boost::thread* subscription_spin_thread_;
+  
 };
 
 
@@ -137,7 +144,7 @@ inline void SourceDriver::Init(const YAML::Node& config)
     YamlRead<std::string>(config["ros"], "ros_send_packet_topic", ros_send_packet_topic, "hesai_packets");
     pkt_pub_ = node_ptr_->create_publisher<hesai_ros_driver::msg::UdpFrame>(ros_send_packet_topic, 1);
   }
-
+  laserscan_pub_ = node_ptr_->create_publisher<sensor_msgs::msg::LaserScan>("/go2/scan", rclcpp::SensorDataQoS());
   if (driver_param.input_param.source_type == DATA_FROM_ROS_PACKET) {
     std::string ros_recv_packet_topic;
     YamlRead<std::string>(config["ros"], "ros_recv_packet_topic", ros_recv_packet_topic, "hesai_packets");
@@ -193,7 +200,9 @@ inline void SourceDriver::SendPointCloud(const LidarDecodedFrame<LidarPointXYZIR
 
 inline void SourceDriver::publishPointcloud(void)
 {
-  pub_->publish(ToRosMsg(pointcloud_, frame_id_));
+  sensor_msgs::msg::PointCloud2 msg = ToRosMsg(pointcloud_, frame_id_);
+  pub_->publish(msg);
+  publishLaserScan(&msg);
 }
 
 inline sensor_msgs::msg::PointCloud2 SourceDriver::ToRosMsg(const LidarDecodedFrame<LidarPointXYZIRT>& frame, const std::string& frame_id)
@@ -277,4 +286,62 @@ inline void SourceDriver::RecievePacket(const hesai_ros_driver::msg::UdpFrame::S
   }
 }
 
+inline void SourceDriver::publishLaserScan(
+  sensor_msgs::msg::PointCloud2 *cloud_msg)
+{
+  // build laserscan output
+  auto scan_msg = std::make_unique<sensor_msgs::msg::LaserScan>();
+  scan_msg->header = cloud_msg->header;
+
+  scan_msg->angle_min = -3.1415;
+  scan_msg->angle_max =  3.1415;
+  scan_msg->angle_increment = 2*3.1415/1800.;
+  scan_msg->time_increment = 0.0;
+  scan_msg->scan_time = 1./10.;
+  scan_msg->range_min = 0.2;
+  scan_msg->range_max = 100;
+  float max_height_ = 0.5;
+  float min_height_ = -0.5;
+  
+
+  // determine amount of rays to create
+  uint32_t ranges_size = std::ceil(
+    (scan_msg->angle_max - scan_msg->angle_min) / scan_msg->angle_increment);
+
+  // determine if laserscan rays with no obstacle data will evaluate to infinity or max_range
+  scan_msg->ranges.assign(ranges_size, std::numeric_limits<double>::infinity());
+  // Iterate through pointcloud
+  for (sensor_msgs::PointCloud2ConstIterator<float> iter_x(*cloud_msg, "x"),
+    iter_y(*cloud_msg, "y"), iter_z(*cloud_msg, "z");
+    iter_x != iter_x.end(); ++iter_x, ++iter_y, ++iter_z)
+    {
+      if (std::isnan(*iter_x) || std::isnan(*iter_y) || std::isnan(*iter_z)) {
+        continue;
+      }
+
+      if (*iter_z > max_height_ || *iter_z < min_height_) {
+        continue;
+      }
+
+      double range = hypot(*iter_x, *iter_y);
+      if (range <  scan_msg->range_min) {
+        continue;
+      }
+      if (range >  scan_msg->range_max) {
+        continue;
+      }
+
+      double angle = atan2(*iter_y, *iter_x);
+      if (angle < scan_msg->angle_min || angle > scan_msg->angle_max) {
+        continue;
+      }
+
+      // overwrite range at laserscan ray if new range is smaller
+      int index = (angle - scan_msg->angle_min) / scan_msg->angle_increment;
+      if (range < scan_msg->ranges[index]) {
+        scan_msg->ranges[index] = range;
+      }
+    }
+  laserscan_pub_->publish(std::move(scan_msg));
+}
 
