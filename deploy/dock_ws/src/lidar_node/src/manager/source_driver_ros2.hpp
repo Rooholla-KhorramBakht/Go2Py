@@ -295,13 +295,13 @@ inline void SourceDriver::publishLaserScan(
 
   scan_msg->angle_min = -3.1415;
   scan_msg->angle_max =  3.1415;
-  scan_msg->angle_increment = 2*3.1415/1800.;
+  scan_msg->angle_increment = 0.0087/2.;
   scan_msg->time_increment = 0.0;
-  scan_msg->scan_time = 1./10.;
+  scan_msg->scan_time = 0.3333;
   scan_msg->range_min = 0.2;
   scan_msg->range_max = 100;
-  float max_height_ = 0.5;
-  float min_height_ = -0.5;
+  float max_height_ = 1.0;
+  float min_height_ = 0.;
   
 
   // determine amount of rays to create
@@ -310,6 +310,7 @@ inline void SourceDriver::publishLaserScan(
 
   // determine if laserscan rays with no obstacle data will evaluate to infinity or max_range
   scan_msg->ranges.assign(ranges_size, std::numeric_limits<double>::infinity());
+  // scan_msg->intensities.assign(ranges_size, 255);
   // Iterate through pointcloud
   for (sensor_msgs::PointCloud2ConstIterator<float> iter_x(*cloud_msg, "x"),
     iter_y(*cloud_msg, "y"), iter_z(*cloud_msg, "z");
