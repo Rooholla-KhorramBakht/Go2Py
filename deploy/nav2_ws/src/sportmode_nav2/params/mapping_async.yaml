@@ -13,7 +13,7 @@ slam_toolbox:
     odom_frame: odom
     map_frame: map
     base_frame: base_link # ToDo: add a base_footprint to the URDF
-    scan_topic: /go2/lidar_scans
+    scan_topic: /go2/scan
     mode: mapping #localization
 
     # if you'd like to immediately start continuing a map at a given pose
