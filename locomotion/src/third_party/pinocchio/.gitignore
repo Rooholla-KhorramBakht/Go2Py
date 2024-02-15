@@ -1,0 +1,7 @@
+build*
+Xcode*
+*~
+*.pyc
+coverage*
+.travis
+.vscode*

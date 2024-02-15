@@ -1,0 +1,127 @@
+//
+// Copyright (c) 2016 CNRS
+// Author: Florian Valenza
+//
+
+//
+// This file strutures pages and modules into a convenient hierarchical structure.
+//
+
+/// \brief Main pinocchio namespace
+namespace pinocchio {
+
+
+  //
+  // Pages/ tutorials organization
+  //
+
+  // \page md_doc__porting
+
+  /** \page md_doc_a-features_intro Features
+        - \subpage md_doc_a-features_a-spatial
+        - \subpage md_doc_a-features_b-model-data
+        - \subpage md_doc_a-features_c-joints
+        - \subpage md_doc_a-features_d-model
+        - \subpage md_doc_a-features_e-lie
+        - \subpage md_doc_a-features_f-kinematic
+        - \subpage md_doc_a-features_g-dynamic
+        - \subpage md_doc_a-features_h-frames
+        - \subpage md_doc_a-features_i-geometric-models
+        - \subpage md_doc_a-features_j-analytical-derivatives
+        - \subpage md_doc_a-features_k-automatic-differentiation
+        - \subpage md_doc_a-features_l-python
+        - \subpage md_doc_a-features_m-tests
+  */
+
+  /** \page md_doc_b-examples_intro Examples
+        - \subpage md_doc_b-examples_a-model
+        - \subpage md_doc_b-examples_ab-geometry-models
+        - \subpage md_doc_b-examples_b-display
+        - \subpage md_doc_b-examples_c-collisions
+        - \subpage md_doc_b-examples_d-inverse-kinematics
+        - \subpage md_doc_b-examples_e-reduced-model
+  */
+
+  /** \page md_doc_b-examples_b-display
+        - \subpage md_doc_b-examples_display_a-gepetto-viewer
+        - \subpage md_doc_b-examples_display_b-meshcat-viewer
+        - \subpage md_doc_b-examples_display_c-robot-wrapper-viewer
+  */
+
+  /** \page md_doc_c-maths_intro Mathematical Formulation
+        - \subpage md_doc_c-maths_a-overview
+        - \subpage md_doc_c-maths_b-rigid-bodies
+        - \subpage md_doc_c-maths_c-joints
+        - \subpage md_doc_c-maths_d-articulated
+        - \subpage md_doc_c-maths_dynamics
+        - \subpage md_doc_c-maths_e-collisions
+        - \subpage md_doc_c-maths_e-miscs
+        - \subpage md_doc_c-maths_f-algorithms
+        - \subpage md_doc_c-maths_se3
+  */
+
+  /** \page md_doc_d-practical-exercises_intro Practical Exercises
+       - \subpage md_doc_d-practical-exercises_1-directgeom
+       - \subpage md_doc_d-practical-exercises_2-invgeom
+       - \subpage md_doc_d-practical-exercises_3-invkine
+       - \subpage md_doc_d-practical-exercises_4-dyn
+       - \subpage md_doc_d-practical-exercises_5-planner
+       - \subpage md_doc_d-practical-exercises_6-wpg
+       - \subpage md_doc_d-practical-exercises_7-learn
+  */
+
+  /** \page md_doc_e-implementation_intro Implementation / Technical details
+        - \subpage md_doc_e-implementation_a-overview
+        - \subpage md_doc_e-implementation_b-sparsity
+        - \subpage md_doc_e-implementation_c-crtp
+        - \subpage md_doc_e-implementation_d-miscs
+  */
+
+  /** \page md_doc_f-benchmarks_intro Benchmarks
+        - \subpage md_doc_f-benchmarks_a-overview
+        - \subpage md_doc_f-benchmarks_b-howto
+  */
+
+  /** \page md_doc_g-success-stories_intro Success Stories
+  */
+
+  //
+  // Modules organization
+  //
+
+  /** \defgroup pinocchio_spatial Spatial */
+  /** \defgroup pinocchio_multibody Multibody */
+  /** \defgroup pinocchio_joint Joint */
+  /** \defgroup pinocchio_parsers Parsers */
+  /** \defgroup pinocchio_algorithms Algorithms */
+
+  /// \namespace pinocchio::container
+  /// \brief Specialized containers
+
+  /// \namespace pinocchio::cholesky
+  /// \brief Cholesky decompositions
+
+  /// \namespace pinocchio::buildModels
+  /// \brief Build simple models
+
+  /// \namespace pinocchio::forceSet
+  /// \brief Group force actions
+
+  /// \namespace pinocchio::motionSet
+  /// \brief Group motion actions
+
+  /// \namespace pinocchio::quaternion
+  /// \brief Quaternion operations
+
+  /// \namespace pinocchio::rpy
+  /// \brief Roll-pitch-yaw operations
+
+  /// \namespace pinocchio::urdf
+  /// \brief URDF parsing
+
+  /// \namespace pinocchio::srdf
+  /// \brief SRDF parsing
+
+  /// \namespace pinocchio::lua
+  /// \brief Lua parsing
+}
