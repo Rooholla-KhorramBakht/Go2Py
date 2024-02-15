@@ -50,6 +50,12 @@ class Custom: public rclcpp::Node
             lowcmd_suber = this->create_subscription<unitree_go::msg::Go2pyLowCmd>(
             "/go2/lowcmd", 1, std::bind(&Custom::lowcmd_callback, this, std::placeholders::_1));
 
+            joint_cmd_suber = this->create_subscription<sensor_msgs::msg::JointState>(
+                "/go2/joint_cmd",
+                1,
+                std::bind(&Custom::joint_cmd_callback, this, std::placeholders::_1)
+            );
+
             lowcmd_puber = this->create_publisher<unitree_go::msg::LowCmd>("/lowcmd", 10);
 
         }
@@ -77,8 +83,10 @@ class Custom: public rclcpp::Node
         // Lowlevel interface
         void lowstate_callback(unitree_go::msg::LowState::SharedPtr data);
         void lowcmd_callback(unitree_go::msg::Go2pyLowCmd::SharedPtr data);
+        void joint_cmd_callback(sensor_msgs::msg::JointState::SharedPtr data);
         rclcpp::Subscription<unitree_go::msg::LowState>::SharedPtr lowstate_suber;
         rclcpp::Subscription<unitree_go::msg::Go2pyLowCmd>::SharedPtr lowcmd_suber;
+        rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_cmd_suber;
         // A struct to store the highlevel states for later use
         rclcpp::Publisher<unitree_go::msg::LowCmd>::SharedPtr lowcmd_puber;
         unitree_go::msg::LowCmd lowcmd_msg;
@@ -87,7 +95,6 @@ class Custom: public rclcpp::Node
 
         void init_lowcmd()
         {
-
             for (int i = 0; i < 20; i++)
             {
                 lowcmd_msg.motor_cmd[i].mode = 0x01; //Set toque mode, 0x00 is passive mode
@@ -97,6 +104,25 @@ class Custom: public rclcpp::Node
                 lowcmd_msg.motor_cmd[i].kd = 0;
                 lowcmd_msg.motor_cmd[i].tau = 0;
             }
+            // taken from unitree_ros servo.cpp example
+            for (int i = 0; i < 4; ++i) {
+                // lowcmd_msg.motor_cmd[i*3+0].mode = 0x0A;
+                lowcmd_msg.motor_cmd[i*3+0].kp = 70;
+                // lowcmd_msg.motor_cmd[i*3+0].dq = 0;
+                lowcmd_msg.motor_cmd[i*3+0].kd = 3;
+                lowcmd_msg.motor_cmd[i*3+0].tau = 0;
+                // lowcmd_msg.motor_cmd[i*3+1].mode = 0x0A;
+                lowcmd_msg.motor_cmd[i*3+1].kp = 180;
+                // lowcmd_msg.motor_cmd[i*3+1].dq = 0;
+                lowcmd_msg.motor_cmd[i*3+1].kd = 8;
+                lowcmd_msg.motor_cmd[i*3+1].tau = 0;
+                // lowcmd_msg.motor_cmd[i*3+2].mode = 0x0A;
+                lowcmd_msg.motor_cmd[i*3+2].kp = 300;
+                // lowcmd_msg.motor_cmd[i*3+2].dq = 0;
+                lowcmd_msg.motor_cmd[i*3+2].kd = 15;
+                lowcmd_msg.motor_cmd[i*3+2].tau = 0;    
+            }
+            
         }
 
         struct {
@@ -270,6 +296,33 @@ void Custom::lowcmd_callback(unitree_go::msg::Go2pyLowCmd::SharedPtr data)
         }
     }else
     {
+        for(int i=0; i<12; i++)
+        {
+            lowcmd_msg.motor_cmd[i].q =   0.;   // Taregt angular(rad)
+            lowcmd_msg.motor_cmd[i].kp =  0.;  // Poinstion(rad) control kp gain
+            lowcmd_msg.motor_cmd[i].dq =  0.;  // Taregt angular velocity(rad/ss)
+            lowcmd_msg.motor_cmd[i].kd =  0;  // Poinstion(rad) control kd gain
+            lowcmd_msg.motor_cmd[i].tau = 0.; // Feedforward toque 1N.m
+            get_crc(lowcmd_msg); //Compute the CRC and load it into the message
+            lowcmd_puber->publish(lowcmd_msg); //Publish lowcmd message
+        }
+    }
+}
+
+void Custom::joint_cmd_callback(sensor_msgs::msg::JointState::SharedPtr data) {
+    if(Estop == 0)
+    {
+        for(int i=0; i<12; i++)
+        {
+            lowcmd_msg.motor_cmd[i].q =   data->position[i];   // Taregt angular(rad)
+            // lowcmd_msg.motor_cmd[i].kp =  data->kp[i];  // Poinstion(rad) control kp gain
+            lowcmd_msg.motor_cmd[i].dq =  data->velocity[i];  // Taregt angular velocity(rad/ss)
+            // lowcmd_msg.motor_cmd[i].kd =  data->kd[i];  // Poinstion(rad) control kd gain
+            lowcmd_msg.motor_cmd[i].tau = data->effort[i]; // Feedforward toque 1N.m
+            get_crc(lowcmd_msg); //Compute the CRC and load it into the message
+            lowcmd_puber->publish(lowcmd_msg); //Publish lowcmd message
+        }
+    } else {
         for(int i=0; i<12; i++)
         {
             lowcmd_msg.motor_cmd[i].q =   0.;   // Taregt angular(rad)
