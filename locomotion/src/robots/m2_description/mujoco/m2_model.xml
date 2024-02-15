@@ -1,0 +1,121 @@
+<mujoco model="m2_description">
+  <compiler angle="radian"/>
+  <asset>
+    <mesh name="BASE" file="/home/meshin/dev/quadruped/xterra/quadruped_locomotion/src/robots/m2_description/meshes/BASE.STL"/>
+    <mesh name="RF_HIP" file="/home/meshin/dev/quadruped/xterra/quadruped_locomotion/src/robots/m2_description/meshes/RF_HIP.STL"/>
+    <mesh name="RF_THIGH" file="/home/meshin/dev/quadruped/xterra/quadruped_locomotion/src/robots/m2_description/meshes/RF_THIGH.STL"/>
+    <mesh name="RF_SHANK" file="/home/meshin/dev/quadruped/xterra/quadruped_locomotion/src/robots/m2_description/meshes/RF_SHANK.STL"/>
+    <mesh name="LF_HIP" file="/home/meshin/dev/quadruped/xterra/quadruped_locomotion/src/robots/m2_description/meshes/LF_HIP.STL"/>
+    <mesh name="LF_THIGH" file="/home/meshin/dev/quadruped/xterra/quadruped_locomotion/src/robots/m2_description/meshes/LF_THIGH.STL"/>
+    <mesh name="LF_SHANK" file="/home/meshin/dev/quadruped/xterra/quadruped_locomotion/src/robots/m2_description/meshes/LF_SHANK.STL"/>
+    <mesh name="RH_HIP" file="/home/meshin/dev/quadruped/xterra/quadruped_locomotion/src/robots/m2_description/meshes/RH_HIP.STL"/>
+    <mesh name="RH_THIGH" file="/home/meshin/dev/quadruped/xterra/quadruped_locomotion/src/robots/m2_description/meshes/RH_THIGH.STL"/>
+    <mesh name="RH_SHANK" file="/home/meshin/dev/quadruped/xterra/quadruped_locomotion/src/robots/m2_description/meshes/RH_SHANK.STL"/>
+    <mesh name="LH_HIP" file="/home/meshin/dev/quadruped/xterra/quadruped_locomotion/src/robots/m2_description/meshes/LH_HIP.STL"/>
+    <mesh name="LH_THIGH" file="/home/meshin/dev/quadruped/xterra/quadruped_locomotion/src/robots/m2_description/meshes/LH_THIGH.STL"/>
+    <mesh name="LH_SHANK" file="/home/meshin/dev/quadruped/xterra/quadruped_locomotion/src/robots/m2_description/meshes/LH_SHANK.STL"/>
+  </asset>
+  <worldbody>
+    <body name="base">
+      <inertial pos="0.0047249 -1.77e-05 0.0011585" quat="-0.000260903 0.717627 0.00016572 0.696428" mass="3.4234" diaginertia="0.0511653 0.0425922 0.0163651"/>
+      <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.75294 0.75294 0.75294 1" mesh="BASE"/>
+      <geom type="mesh" rgba="0.75294 0.75294 0.75294 1" mesh="BASE"/>
+      <body name="fr_abd_l" pos="0.155 -0.06 0">
+        <inertial pos="0.0492121 -0.0779589 0.0008006" quat="0.566519 0.534654 -0.463805 0.422002" mass="1.35095" diaginertia="0.00339256 0.00334788 0.00111396"/>
+        <joint name="fr_abd_j" pos="0 0 0" axis="1 0 0" range="-4.8 4.8"/>
+        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.75294 0.75294 0.75294 1" mesh="RF_HIP"/>
+        <geom type="mesh" rgba="0.75294 0.75294 0.75294 1" mesh="RF_HIP"/>
+        <body name="fr_hip_l" pos="0.043751 -0.0796 0">
+          <inertial pos="-4.2e-06 0.0008381 -0.0603416" quat="0.707013 0.00792999 -0.00786517 0.707113" mass="0.250246" diaginertia="0.00115964 0.0011437 7.14571e-05"/>
+          <joint name="fr_hip_j" pos="0 0 0" axis="0 -1 0" range="-4.0472 4.18879"/>
+          <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.75294 0.75294 0.75294 1" mesh="RF_THIGH"/>
+          <geom type="mesh" rgba="0.75294 0.75294 0.75294 1" mesh="RF_THIGH"/>
+          <body name="fr_knee_l" pos="0 0 -0.1915">
+            <inertial pos="-0.0035383 -2.73e-05 -0.068842" quat="0.70615 0.0239868 0.0246387 0.707227" mass="0.20174" diaginertia="0.0010692 0.00104837 3.76251e-05"/>
+            <joint name="fr_knee_j" pos="0 0 0" axis="0 -1 0" range="-4.69653 4.9163"/>
+            <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.75294 0.75294 0.75294 1" mesh="RF_SHANK"/>
+            <geom type="mesh" rgba="0.75294 0.75294 0.75294 1" mesh="RF_SHANK"/>
+            <body name="foot_FR" pos="0 0 -0.16693">
+              <inertial pos="0.00149798 0 7.77349e-05" mass="0.025" diaginertia="2e-06 2e-06 2e-06"/>
+              <joint name="fr_dummy_j" pos="0 0 0" axis="0 0 1"/>
+              <geom size="0.02" contype="0" conaffinity="0" group="1" density="0"/>
+              <geom size="0.02"/>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="fl_abd_l" pos="0.155 0.06 0">
+        <inertial pos="0.0492121 0.0779589 0.0008006" quat="0.534654 0.566519 -0.422002 0.463805" mass="1.35095" diaginertia="0.00339256 0.00334788 0.00111396"/>
+        <joint name="fl_abd_j" pos="0 0 0" axis="1 0 0" range="-3.80285 3.80285"/>
+        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.752941 0.752941 0.752941 1" mesh="LF_HIP"/>
+        <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="LF_HIP"/>
+        <body name="fl_hip_l" pos="0.043751 0.0796 0">
+          <inertial pos="-4.2e-06 -0.0008381 -0.0603416" quat="0.707113 0.00786517 -0.00792999 0.707013" mass="0.250246" diaginertia="0.00115964 0.0011437 7.14571e-05"/>
+          <joint name="fl_hip_j" pos="0 0 0" axis="0 1 0" range="-4.0472 4.18879"/>
+          <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.752941 0.752941 0.752941 1" mesh="LF_THIGH"/>
+          <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="LF_THIGH"/>
+          <body name="fl_knee_a" pos="0 0 -0.1915">
+            <inertial pos="-0.0035383 2.73e-05 -0.068842" quat="0.707227 0.0246387 0.0239868 0.70615" mass="0.20174" diaginertia="0.0010692 0.00104837 3.76251e-05"/>
+            <joint name="fl_knee_j" pos="0 0 0" axis="0 1 0" range="-4.69653 4.9163"/>
+            <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.752941 0.752941 0.752941 1" mesh="LF_SHANK"/>
+            <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="LF_SHANK"/>
+            <body name="foot_FL" pos="0 0 -0.16693">
+              <inertial pos="0.00149798 0 7.77349e-05" mass="0.025" diaginertia="2e-06 2e-06 2e-06"/>
+              <joint name="fl_dummy_j" pos="0 0 0" axis="0 0 1"/>
+              <geom size="0.02" contype="0" conaffinity="0" group="1" density="0"/>
+              <geom size="0.02"/>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="rr_abd_l" pos="-0.155 -0.06 0">
+        <inertial pos="-0.0492121 -0.0779589 0.0008006" quat="0.422002 0.463805 -0.534654 0.566519" mass="1.35095" diaginertia="0.00339256 0.00334788 0.00111396"/>
+        <joint name="rr_abd_j" pos="0 0 0" axis="-1 0 0" range="-4.80285 4.80285"/>
+        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="1 1 1 1" mesh="RH_HIP"/>
+        <geom type="mesh" rgba="1 1 1 1" mesh="RH_HIP"/>
+        <body name="rr_hip_l" pos="-0.043751 -0.0796 0">
+          <inertial pos="4.2e-06 0.0008381 -0.0603416" quat="0.707113 -0.00786517 0.00792999 0.707013" mass="0.250246" diaginertia="0.00115964 0.0011437 7.14571e-05"/>
+          <joint name="rr_hip_j" pos="0 0 0" axis="0 -1 0" range="-4.0472 4.18879"/>
+          <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.752941 0.752941 0.752941 1" mesh="RH_THIGH"/>
+          <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="RH_THIGH"/>
+          <body name="rr_knee_l" pos="0 0 -0.1915">
+            <inertial pos="0.0035383 2.73e-05 -0.068842" quat="0.709529 0.0238733 0.0247487 0.703836" mass="0.20174" diaginertia="0.0010692 0.00104837 3.76251e-05"/>
+            <joint name="rr_knee_j" pos="0 0 0" axis="0 -1 0" range="-4.69653 4.9163"/>
+            <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.752941 0.752941 0.752941 1" mesh="RH_SHANK"/>
+            <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="RH_SHANK"/>
+            <body name="foot_RR" pos="0 0 -0.16802">
+              <inertial pos="0.00149798 0 7.77349e-05" mass="0.025" diaginertia="2e-06 2e-06 2e-06"/>
+              <joint name="rr_dummy_j" pos="0 0 0" axis="0 0 1"/>
+              <geom size="0.02" contype="0" conaffinity="0" group="1" density="0"/>
+              <geom size="0.02"/>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="rl_abd_l" pos="-0.155 0.06 0">
+        <inertial pos="-0.0492121 0.0779589 0.0008006" quat="0.463805 0.422002 -0.566519 0.534654" mass="1.35095" diaginertia="0.00339256 0.00334788 0.00111396"/>
+        <joint name="rl_abd_j" pos="0 0 0" axis="-1 0 0" range="-4.80285 4.80285"/>
+        <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.752941 0.752941 0.752941 1" mesh="LH_HIP"/>
+        <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="LH_HIP"/>
+        <body name="rl_hip_l" pos="-0.043751 0.0796 0">
+          <inertial pos="-4.2e-06 -0.0008381 -0.0603416" quat="0.707013 0.00792999 -0.00786517 0.707113" mass="0.250246" diaginertia="0.00115964 0.0011437 7.14571e-05"/>
+          <joint name="rl_hip_j" pos="0 0 0" axis="0 1 0" range="-4.0472 4.18879"/>
+          <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.752941 0.752941 0.752941 1" mesh="LH_THIGH"/>
+          <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="LH_THIGH"/>
+          <body name="rl_knee_l" pos="0 0 -0.1915">
+            <inertial pos="0.0035383 -2.73e-05 -0.068842" quat="0.703836 0.0247487 0.0238733 0.709529" mass="0.20174" diaginertia="0.0010692 0.00104837 3.76251e-05"/>
+            <joint name="rl_knee_j" pos="0 0 0" axis="0 1 0" range="-4.69653 4.9163"/>
+            <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.752941 0.752941 0.752941 1" mesh="LH_SHANK"/>
+            <geom type="mesh" rgba="0.752941 0.752941 0.752941 1" mesh="LH_SHANK"/>
+            <body name="foot_RL" pos="0 0 -0.16802">
+              <inertial pos="0.00149798 0 7.77349e-05" mass="0.025" diaginertia="2e-06 2e-06 2e-06"/>
+              <joint name="rl_dummy_j" pos="0 0 0" axis="0 0 1"/>
+              <geom size="0.02" contype="0" conaffinity="0" group="1" density="0"/>
+              <geom size="0.02"/>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+</mujoco>
