@@ -1,0 +1,137 @@
+name: CI - Linux via APT
+
+on: [push,pull_request]
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-22.04,ubuntu-20.04]
+
+    env:
+      CCACHE_DIR: /github/home/.ccache
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: recursive
+
+    - name: Setup ccache
+      uses: actions/cache@v4
+      with:
+        key: ${{ matrix.os }}
+        path: ${{ env.CCACHE_DIR }}
+        max-size: 5G
+
+    # extract branch name
+    - name: Get branch name (merge)
+      if: github.event_name != 'pull_request'
+      shell: bash
+      run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
+
+    # extract branch name on pull request
+    - name: Get branch name (pull request)
+      if: github.event_name == 'pull_request'
+      shell: bash
+      run: echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF})" >> $GITHUB_ENV
+
+    # print branch name
+    - name: Debug
+      run: echo ${{ env.BRANCH_NAME }}
+
+    - name: Register robotpkg
+      run: |
+        sudo sh -c "echo \"deb [arch=amd64] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -cs) robotpkg\" >> /etc/apt/sources.list "
+        sudo apt-key adv --fetch-keys http://robotpkg.openrobots.org/packages/debian/robotpkg.key
+    - name: Set and install dependencies
+      run: |
+        sudo rm -rf /usr/local/share/boost/1.69.0
+        export PYTHON3_VERSION=$(python3 -c "import sys; print(str(sys.version_info.major)+str(sys.version_info.minor))")
+        export APT_DEPENDENCIES="doxygen libboost-system-dev libboost-test-dev libboost-filesystem-dev libboost-program-options-dev libeigen3-dev liburdfdom-dev texlive-font-utils"
+        export APT_DEPENDENCIES=$APT_DEPENDENCIES" libboost-python-dev robotpkg-py"$PYTHON3_VERSION"-eigenpy python3-numpy"
+        export APT_DEPENDENCIES=$APT_DEPENDENCIES" robotpkg-py"$PYTHON3_VERSION"-hpp-fcl"
+        echo $APT_DEPENDENCIES
+        sudo apt-get update -qq
+        sudo apt-get install -qq curl cppcheck ${APT_DEPENDENCIES}
+        sudo apt install libomp-dev libomp5
+    - name: Free disk space
+      run: |
+        sudo apt clean
+        df -h
+    - name: Install casadi
+      run: |
+        mkdir third-party && cd third-party
+        git clone https://github.com/casadi/casadi.git -b 3.5.0 --depth 1
+        cd casadi
+        mkdir build && cd build
+        export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
+        cmake .. -DCMAKE_BUILD_TYPE=Release -DWITH_EXAMPLES=OFF
+        sudo make install
+        cd ../..
+        rm -rf casadi
+        cd ..
+    - name: Run cmake
+      run: |
+        git submodule update --init
+        export PATH=$PATH:/opt/openrobots/bin
+        export PYTHON3_DOT_VERSION=$(python3 -c "import sys; print(str(sys.version_info.major)+'.'+str(sys.version_info.minor))")
+        export PYTHONPATH=${PYTHONPATH}:/opt/openrobots/lib/python$PYTHON3_DOT_VERSION/site-packages
+        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/openrobots/lib:/usr/local/lib:/usr/lib:/usr/lib/x86_64-linux-gnu
+        export MAKEFLAGS="-j1"
+        export PATH="/usr/lib/ccache:/usr/local/opt/ccache/libexec:$PATH"
+
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Debug -DBUILD_WITH_COLLISION_SUPPORT=ON -DBUILD_ADVANCED_TESTING=ON -DBUILD_WITH_CASADI_SUPPORT=ON -DPYTHON_EXECUTABLE=$(which python3) -DBUILD_WITH_OPENMP_SUPPORT=ON -DINSTALL_DOCUMENTATION=ON
+        make
+        make build_tests
+        export CTEST_OUTPUT_ON_FAILURE=1
+        make test
+        sudo make install
+
+    - name: Test packaging
+      run: |
+        export PATH=$PATH:/opt/openrobots/bin
+        export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/opt/openrobots/lib/pkgconfig
+        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/openrobots/lib:/usr/local/lib:/usr/lib:/usr/lib/x86_64-linux-gnu
+        cd ./unittest/packaging/cmake
+        mkdir build
+        cd build
+        export CMAKE_PREFIX_PATH=/usr/local
+        cmake -DPYTHON_EXECUTABLE=$(which python3) ..
+        make
+        ./run_rnea
+        ./load_urdf
+        cd ../../pkgconfig
+        mkdir build
+        cd build
+        cmake -DPYTHON_EXECUTABLE=$(which python3) ..
+        make
+        ./run_rnea
+        cd ../../external
+        export PINOCCHIO_GIT_REPOSITORY="file://"$GITHUB_WORKSPACE
+        #export PINOCCHIO_GIT_REPOSITORY=$(git remote get-url origin)
+        export PINOCCHIO_GIT_TAG="test-external-"$(git rev-parse --short HEAD)
+        git tag $PINOCCHIO_GIT_TAG
+        mkdir build
+        cd build
+        cmake -DPYTHON_EXECUTABLE=$(which python3) ..
+        make
+        ./run_rnea
+        ./load_urdf
+        cd ../../pinocchio_header
+        mkdir build
+        cd build
+        cmake -DPYTHON_EXECUTABLE=$(which python3) ..
+        make
+        ./run_fk
+
+
+    - name: Uninstall project
+      run: |
+        cd build
+        sudo make uninstall

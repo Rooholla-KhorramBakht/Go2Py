@@ -1,0 +1,30 @@
+name: cmake CI of jrl-cmakemodules
+
+on: [push,pull_request]
+
+jobs:
+  build-ubuntu:
+
+    runs-on: [ubuntu-22.04]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Run project tests
+      run: |
+        set -e
+        set -x
+        cd _unittests
+        CMAKE_BIN="cmake"
+        $CMAKE_BIN --version
+        ./run_unit_tests.sh
+
+    - name: Run script tests
+      run: |
+        set -e
+        set -x
+        cd _unittests
+        ln -s .. cmake
+        CMAKE_BIN="cmake"
+        $CMAKE_BIN --version
+        $CMAKE_BIN -P test_pkg-config.cmake

@@ -1,0 +1,1066 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-1-g15f4949  Build Version: 1.6.7594.29634
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="m2_description">
+  <!-- <mujoco> <compiler discardvisual="false" strippath="false" fusestatic="false"/> </mujoco> -->
+  <mujoco>
+  <compiler 
+    meshdir="../meshes/" 
+    balanceinertia="true" 
+    discardvisual="false" />
+  </mujoco>
+  <!-- <link name="world"/>
+  <joint name="floating_base" type="floating">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="world"/>
+    <child link="base"/>
+  </joint> -->
+  <link
+    name="base">
+    <inertial>
+      <origin xyz="0.0047249 -0.0000177 0.0011585" rpy="0 0 0" />
+      <mass value="3.4234000" />
+      <inertia ixx="0.0163964" ixy="-0.0000159" ixz="0.0010427" iyy="0.0425922" iyz="-0.0000006" izz="0.0511340" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package:///m2_description/meshes/BASE.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.75294 0.75294 0.75294 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package:///m2_description/meshes/BASE.STL" />
+      </geometry>
+    </collision>
+  </link>
+<link name="fr_abd_l">
+    <inertial>
+      <origin xyz="0.0492121 -0.0779589 0.0008006" rpy="0 0 0" />
+      <mass value="1.3509490" />
+      <inertia ixx="0.0033376" ixy="-0.0001656" ixz="0.0000090" iyy="0.0011263" iyz="-0.0000051" izz="0.0033905" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package:///m2_description/meshes/RF_HIP.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.75294 0.75294 0.75294 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package:///m2_description/meshes/RF_HIP.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="fr_abd_j"
+    type="revolute">
+    <origin
+      xyz="0.155 -0.06 0"
+      rpy="0 0 0" />
+    <parent
+      link="base" />
+    <child
+      link="fr_abd_l" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-4.8"
+      upper="4.8"
+      effort="20"
+      velocity="52.4" />
+  </joint>
+  <link
+    name="fr_hip_l">
+    <inertial>
+      <origin xyz="-0.0000042 0.0008381 -0.0603416" rpy="0 0 0" />
+      <mass value="0.2502465" />
+      <inertia ixx="0.0011437" ixy="0.0000000" ixz="-0.0000001" iyy="0.0011591" iyz="0.0000243" izz="0.0000720" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package:///m2_description/meshes/RF_THIGH.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.75294 0.75294 0.75294 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package:///m2_description/meshes/RF_THIGH.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="fr_hip_j"
+    type="revolute">
+    <origin
+      xyz="0.043751 -0.0796 0"
+      rpy="0 0 0" />
+    <parent
+      link="fr_abd_l" />
+    <child
+      link="fr_hip_l" />
+    <axis
+      xyz="0 -1 0" />
+    <limit effort="55" lower="-4.0471975512" upper="4.18879020479" velocity="28.6"/>
+
+  </joint>
+  <link
+    name="fr_knee_l">
+    <inertial>
+      <origin xyz="-0.0035383 -0.0000273 -0.0688420" rpy="0 0 0" />
+      <mass value="0.2017400" />
+      <inertia ixx="0.0010436" ixy="-0.0000001" ixz="-0.0000693" iyy="0.0010692" iyz="-0.0000010" izz="0.0000424" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package:///m2_description/meshes/RF_SHANK.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.75294 0.75294 0.75294 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package:///m2_description/meshes/RF_SHANK.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="fr_knee_j"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.1915"
+      rpy="0 0 0" />
+    <parent
+      link="fr_hip_l" />
+    <child
+      link="fr_knee_l" />
+    <axis
+      xyz="0 -1 0" />
+    <limit effort="55" lower="-4.69653369433" upper="4.916297857297" velocity="28.6"/>
+  </joint>
+  <joint name="fr_dummy_j" type="revolute">
+    <origin
+      xyz="-0.0 0 -0.16693"
+      rpy="0 0 0" />
+    <parent
+      link="fr_knee_l" />
+    <child
+      link="foot_FR" />
+    <limit lower="0" upper="0" effort="0" velocity="0" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="fl_abd_l">
+    <inertial>
+      <origin xyz="0.0492121 0.0779589 0.0008006" rpy="0 0 0" />
+      <mass value="1.3509490" />
+      <inertia ixx="0.0033376" ixy="0.0001656" ixz="0.0000090" iyy="0.0011263" iyz="0.0000051" izz="0.0033905" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package:///m2_description/meshes/LF_HIP.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package:///m2_description/meshes/LF_HIP.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="fl_abd_j"
+    type="revolute">
+    <origin
+      xyz="0.155 0.06 0"
+      rpy="0 0 0" />
+    <parent
+      link="base" />
+    <child
+      link="fl_abd_l" />
+    <axis
+      xyz="1 0 0" />
+    <limit effort="20" lower="-3.802851455917" upper="3.802851455917" velocity="52.4"/>
+
+  </joint>
+  <link
+    name="fl_hip_l">
+    <inertial>
+      <origin xyz="-0.0000042 -0.0008381 -0.0603416" rpy="0 0 0" />
+      <mass value="0.2502465" />
+      <inertia ixx="0.0011437" ixy="0.0000000" ixz="0.0000001" iyy="0.0011591" iyz="0.0000243" izz="0.0000720" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package:///m2_description/meshes/LF_THIGH.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package:///m2_description/meshes/LF_THIGH.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="fl_hip_j"
+    type="revolute">
+    <origin
+      xyz="0.043751 0.0796 0"
+      rpy="0 0 0" />
+    <parent
+      link="fl_abd_l" />
+    <child
+      link="fl_hip_l" />
+    <axis
+      xyz="0 1 0" />
+    <limit effort="55" lower="-4.0471975512" upper="4.18879020479" velocity="28.6"/>
+
+  </joint>
+  <link
+    name="fl_knee_a">
+    <inertial>
+      <origin xyz="-0.0035383 0.0000273 -0.0688420" rpy="0 0 0" />
+      <mass value="0.2017400" />
+      <inertia ixx="0.0010436" ixy="0.0000001" ixz="-0.0000693" iyy="0.0010692" iyz="0.0000010" izz="0.0000424" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package:///m2_description/meshes/LF_SHANK.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package:///m2_description/meshes/LF_SHANK.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="fl_knee_j"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.1915"
+      rpy="0 0 0" />
+    <parent
+      link="fl_hip_l" />
+    <child
+      link="fl_knee_a" />
+    <axis
+      xyz="0 1 0" />
+    <limit effort="55" lower="-4.69653369433" upper="4.916297857297" velocity="28.6"/>
+
+  </joint>
+  <joint name="fl_dummy_j" type="revolute">
+    <origin
+      xyz="-0.0 0 -0.16693"
+      rpy="0 0 0" />
+    <parent
+      link="fl_knee_a" />
+    <child
+      link="foot_FL" />
+    <axis
+      xyz="0 0 1" />
+    <limit lower="0" upper="0" effort="1000" velocity="0" />
+  </joint>
+
+  <link
+    name="rr_abd_l">
+    <inertial>
+      <origin xyz="-0.0492121 -0.0779589 0.0008006" rpy="0 0 0" />
+      <mass value="1.3509490" />
+      <inertia ixx="0.0033376" ixy="0.0001656" ixz="-0.0000090" iyy="0.0011263" iyz="-0.0000051" izz="0.0033905" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package:///m2_description/meshes/RH_HIP.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package:///m2_description/meshes/RH_HIP.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="rr_abd_j"
+    type="revolute">
+    <origin
+      xyz="-0.155 -0.06 0"
+      rpy="0 0 0" />
+    <parent
+      link="base" />
+    <child
+      link="rr_abd_l" />
+    <axis
+      xyz="-1 0 0" />
+    <limit effort="20" lower="-4.802851455917" upper="4.802851455917" velocity="52.4"/>
+
+  </joint>
+  <link
+    name="rr_hip_l">
+    <inertial>
+      <origin xyz="0.0000042 0.0008381 -0.0603416" rpy="0 0 0" />
+      <mass value="0.2502465" />
+      <inertia ixx="0.0011437" ixy="0.0000000" ixz="-0.0000001" iyy="0.0011591" iyz="-0.0000243" izz="0.0000720" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package:///m2_description/meshes/RH_THIGH.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package:///m2_description/meshes/RH_THIGH.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="rr_hip_j"
+    type="revolute">
+    <origin
+      xyz="-0.043751 -0.0796 0"
+      rpy="0 0 0" />
+    <parent
+      link="rr_abd_l" />
+    <child
+      link="rr_hip_l" />
+    <axis
+      xyz="0 -1 0" />
+    <limit effort="55" lower="-4.0471975512" upper="4.18879020479" velocity="28.6"/>
+
+  </joint>
+  <link
+    name="rr_knee_l">
+    <inertial>
+      <origin xyz="0.0035383 0.0000273 -0.0688420" rpy="0 0 0" />
+      <mass value="0.2017400" />
+      <inertia ixx="0.0010436" ixy="0.0000001" ixz="-0.0000693" iyy="0.0010692" iyz="-0.0000010" izz="0.0000424" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package:///m2_description/meshes/RH_SHANK.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package:///m2_description/meshes/RH_SHANK.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="rr_knee_j"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.1915"
+      rpy="0 0 0" />
+    <parent
+      link="rr_hip_l" />
+    <child
+      link="rr_knee_l" />
+    <axis
+      xyz="0 -1 0" />
+    <limit effort="55" lower="-4.69653369433" upper="4.916297857297" velocity="28.6"/>
+
+  </joint>
+    <joint name="rr_dummy_j" type="revolute">
+    <origin
+      xyz="-0.0 0 -0.16802"
+      rpy="0 0 0" />
+    <parent
+      link="rr_knee_l" />
+    <child
+      link="foot_RR" />
+    <limit lower="0" upper="0" effort="1000" velocity="0" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="rl_abd_l">
+    <inertial>
+      <origin xyz="-0.0492121 0.0779589 0.0008006" rpy="0 0 0" />
+      <mass value="1.3509490" />
+      <inertia ixx="0.0033376" ixy="-0.0001656" ixz="-0.0000090" iyy="0.0011263" iyz="0.0000051" izz="0.0033905" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package:///m2_description/meshes/LH_HIP.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package:///m2_description/meshes/LH_HIP.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="rl_abd_j"
+    type="revolute">
+    <origin
+      xyz="-0.155 0.06 0"
+      rpy="0 0 0" />
+    <parent
+      link="base" />
+    <child
+      link="rl_abd_l" />
+    <axis
+      xyz="-1 0 0" />
+    <limit effort="20" lower="-4.802851455917" upper="4.802851455917" velocity="52.4"/>
+
+  </joint>
+  <link
+    name="rl_hip_l">
+    <inertial>
+      <origin xyz="-0.0000042 -0.0008381 -0.0603416" rpy="0 0 0" />
+      <mass value="0.2502465" />
+      <inertia ixx="0.0011437" ixy="0.0000000" ixz="-0.0000001" iyy="0.0011591" iyz="0.0000243" izz="0.0000720" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package:///m2_description/meshes/LH_THIGH.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package:///m2_description/meshes/LH_THIGH.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="rl_hip_j"
+    type="revolute">
+    <origin
+      xyz="-0.043751 0.0796 0"
+      rpy="0 0 0" />
+    <parent
+      link="rl_abd_l" />
+    <child
+      link="rl_hip_l" />
+    <axis
+      xyz="0 1 0" />
+    <limit effort="55" lower="-4.0471975512" upper="4.18879020479" velocity="28.6"/>
+
+  </joint>
+  <link
+    name="rl_knee_l">
+    <inertial>
+      <origin xyz="0.0035383 -0.0000273 -0.0688420" rpy="0 0 0" />
+      <mass value="0.2017400" />
+      <inertia ixx="0.0010436" ixy="-0.0000001" ixz="-0.0000693" iyy="0.0010692" iyz="0.0000010" izz="0.0000424" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package:///m2_description/meshes/LH_SHANK.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package:///m2_description/meshes/LH_SHANK.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="rl_knee_j"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.1915"
+      rpy="0 0 0" />
+    <parent
+      link="rl_hip_l" />
+    <child
+      link="rl_knee_l" />
+    <axis
+      xyz="0 1 0" />
+    <limit effort="55" lower="-4.69653369433" upper="4.916297857297" velocity="28.6"/>
+
+  </joint>
+
+  <link name="foot_FR">
+    <contact>
+      <friction_anchor/>
+      <stiffness value="30000.0"/>
+      <damping value="750.0"/>
+      <spinning_friction value="0.3"/>
+      <lateral_friction value="50"/>
+    </contact>
+    <inertial>
+        <origin xyz="0.0014979844072685 1.99840144432528E-15 7.77349055681165E-05"
+        rpy="0 0 0" /> 
+        <mass value="0.025" />
+        <inertia ixx="2e-6" ixy="0" ixz="0" iyy="2e-6" iyz="0" izz="2e-6" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <sphere radius="0.02" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <sphere radius="0.02" />
+        </geometry>
+      </collision>
+  </link>
+  <link name="foot_FL">
+    <contact>
+      <friction_anchor/>
+      <stiffness value="30000.0"/>
+      <damping value="750.0"/>
+      <spinning_friction value="0.3"/>
+      <lateral_friction value="50"/>
+    </contact>
+    <inertial>
+        <origin xyz="0.0014979844072685 1.99840144432528E-15 7.77349055681165E-05"
+        rpy="0 0 0" /> 
+        <mass value="0.025" />
+        <inertia ixx="2e-6" ixy="0" ixz="0" iyy="2e-6" iyz="0" izz="2e-6" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <sphere radius="0.02" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <sphere radius="0.02" />
+        </geometry>
+      </collision>
+  </link>
+  <link name="foot_RL">
+    <contact>
+      <friction_anchor/>
+      <stiffness value="30000.0"/>
+      <damping value="750.0"/>
+      <spinning_friction value="0.3"/>
+      <lateral_friction value="50"/>
+    </contact>
+    <inertial>
+        <origin xyz="0.0014979844072685 1.99840144432528E-15 7.77349055681165E-05"
+        rpy="0 0 0" /> 
+        <mass value="0.025" />
+        <inertia ixx="2e-6" ixy="0" ixz="0" iyy="2e-6" iyz="0" izz="2e-6" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <sphere radius="0.02" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <sphere radius="0.02" />
+        </geometry>
+      </collision>
+  </link>
+  <link name="foot_RR">
+    <contact>
+      <friction_anchor/>
+      <stiffness value="30000.0"/>
+      <damping value="750.0"/>
+      <spinning_friction value="0.3"/>
+      <lateral_friction value="50"/>
+    </contact>
+    <inertial>
+        <origin xyz="0.0014979844072685 1.99840144432528E-15 7.77349055681165E-05"
+        rpy="0 0 0" /> 
+        <mass value="0.025" />
+        <inertia ixx="2e-6" ixy="0" ixz="0" iyy="2e-6" iyz="0" izz="2e-6" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <sphere radius="0.02" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <sphere radius="0.02" />
+        </geometry>
+      </collision>
+  </link>
+  <joint name="rl_dummy_j" type="revolute" >
+    <origin
+      xyz="-0.0 0 -0.16802"
+      rpy="0 0 0" />
+    <parent
+      link="rl_knee_l" />
+    <child
+      link="foot_RL" />
+    <axis
+      xyz="0 0 1" />
+    <limit lower="0" upper="0" effort="1000" velocity="0" />
+  </joint>
+
+  <gazebo reference="foot_FR">
+      <material>Gazebo/Black</material>
+    <collision>
+      <surface>
+        <bounce>
+          <restitution_coefficient>0</restitution_coefficient>
+          <threshold>1e+06</threshold>
+        </bounce>
+        <friction>
+          <torsional>
+            <coefficient>0.3</coefficient>
+          </torsional>
+          <ode>
+            <mu>100.0</mu>
+            <mu2>50</mu2>
+          </ode>
+          <bullet>
+            <rolling_friction>0.3</rolling_friction>
+            <friction2>50</friction2>
+          </bullet>
+        </friction>
+        <contact>
+          <bullet>
+            <kp>30000.0</kp>
+            <kd>1000.0</kd>
+          </bullet>
+          <ode>
+            <kp>30000.0</kp>
+            <kd>1000.0</kd>
+          </ode>
+        </contact>
+      </surface>
+    </collision>
+  </gazebo>
+
+  <gazebo reference="foot_FL">
+      <material>Gazebo/Black</material>
+    <collision>
+      <surface>
+        <bounce>
+          <restitution_coefficient>0</restitution_coefficient>
+          <threshold>1e+06</threshold>
+        </bounce>
+        <friction>
+          <torsional>
+            <coefficient>0.3</coefficient>
+          </torsional>
+          <ode>
+            <mu>100.0</mu>
+            <mu2>50</mu2>
+          </ode>
+          <bullet>
+            <rolling_friction>0.3</rolling_friction>
+            <friction2>50</friction2>
+          </bullet>
+        </friction>
+        <contact>
+          <bullet>
+            <kp>30000.0</kp>
+            <kd>1000.0</kd>
+          </bullet>
+          <ode>
+            <kp>30000.0</kp>
+            <kd>1000.0</kd>
+          </ode>
+        </contact>
+      </surface>
+    </collision>
+  </gazebo>
+
+  <gazebo reference="foot_RL">
+      <material>Gazebo/Black</material>
+    <collision>
+      <surface>
+        <bounce>
+          <restitution_coefficient>0</restitution_coefficient>
+          <threshold>1e+06</threshold>
+        </bounce>
+        <friction>
+          <torsional>
+            <coefficient>0.3</coefficient>
+          </torsional>
+          <ode>
+            <mu>100.0</mu>
+            <mu2>50</mu2>
+          </ode>
+          <bullet>
+            <rolling_friction>0.3</rolling_friction>
+            <friction2>50</friction2>
+          </bullet>
+        </friction>
+        <contact>
+          <bullet>
+            <kp>30000.0</kp>
+            <kd>1000.0</kd>
+          </bullet>
+          <ode>
+            <kp>30000.0</kp>
+            <kd>1000.0</kd>
+          </ode>
+        </contact>
+      </surface>
+    </collision>
+  </gazebo>
+
+  <gazebo reference="foot_RR">
+      <material>Gazebo/Black</material>
+    <collision>
+      <surface>
+        <bounce>
+          <restitution_coefficient>0</restitution_coefficient>
+          <threshold>1e+06</threshold>
+        </bounce>
+        <friction>
+          <torsional>
+            <coefficient>0.3</coefficient>
+          </torsional>
+          <ode>
+            <mu>100.0</mu>
+            <mu2>50</mu2>
+          </ode>
+          <bullet>
+            <rolling_friction>0.3</rolling_friction>
+            <friction2>50</friction2>
+          </bullet>
+        </friction>
+        <contact>
+          <bullet>
+            <kp>30000.0</kp>
+            <kd>1000.0</kd>
+          </bullet>
+          <ode>
+            <kp>30000.0</kp>
+            <kd>1000.0</kd>
+          </ode>
+        </contact>
+      </surface>
+    </collision>
+  </gazebo>
+
+   <gazebo>
+        <plugin name="joint_state_sensor" filename="libjoint_state_sensor.so"/>
+    </gazebo>
+    <gazebo>
+        <plugin name="base_state_sensor" filename="libbase_state_sensor.so"/>
+    </gazebo>
+    <!-- <gazebo>
+        <plugin name="contact_plugin" filename="libcontact_plugin_new.so">
+          <link1>foot_FR</link1>
+          <link2>foot_FL</link2>
+          <link3>foot_RL</link3>
+          <link4>foot_RR</link4>
+          <contact_model>0</contact_model>
+        </plugin>
+    </gazebo> -->
+    <gazebo reference="foot_FR">
+      <sensor name="FR_contact_sensor" type="contact">
+        <always_on>1</always_on>
+        <plugin name="contact_plugin_default" filename="libcontact_plugin_default.so">
+          <foot_link>FR</foot_link>
+        </plugin>
+        <contact>
+          <collision>foot_FR_collision</collision>
+        </contact>
+      </sensor>
+    </gazebo>
+    <gazebo reference="foot_FL">
+      <sensor name="FL_contact_sensor" type="contact">
+        <always_on>1</always_on>
+        <plugin name="contact_plugin_default" filename="libcontact_plugin_default.so">
+          <foot_link>FL</foot_link>
+        </plugin>
+        <contact>
+          <collision>foot_FL_collision</collision>
+        </contact>
+      </sensor>
+    </gazebo>
+    <gazebo reference="foot_RL">
+      <sensor name="RL_contact_sensor" type="contact">
+        <always_on>1</always_on>
+        <plugin name="contact_plugin_default" filename="libcontact_plugin_default.so">
+          <foot_link>RL</foot_link>
+        </plugin>
+        <contact>
+          <collision>foot_RL_collision</collision>
+        </contact>
+      </sensor>
+    </gazebo>
+    <gazebo reference="foot_RR">
+      <sensor name="RR_contact_sensor" type="contact">
+        <always_on>1</always_on>
+        <plugin name="contact_plugin_default" filename="libcontact_plugin_default.so">
+          <foot_link>RR</foot_link>
+        </plugin>
+        <contact>
+          <collision>foot_RR_collision</collision>
+        </contact>
+      </sensor>
+    </gazebo>
+    <gazebo>
+        <plugin name="motor_controller" filename="libmotor_controller.so">
+          <!-- <kp0>75</kp0>
+          <kp1>30.2</kp1>
+          <kp2>18.415</kp2> -->
+          <kp0>200.2</kp0>
+          <kp1>60.2</kp1>
+          <kp2>42.415</kp2>
+          <kd0>1</kd0>
+          <kd1>1.5</kd1>
+          <kd2>0.5</kd2>
+          <!-- <kp0>80</kp0>
+          <kp1>40</kp1>
+          <kp2>20</kp2>
+          <kd0>1</kd0>
+          <kd1>1</kd1>
+          <kd2>0.5</kd2> -->
+          <!-- <kp0>200</kp0>
+          <kp1>120</kp1>
+          <kp2>60</kp2>
+          <kd0>1</kd0>
+          <kd1>1</kd1>
+          <kd2>0.5</kd2> -->
+          <!-- adding higher gains for the swing leg -->
+          <kpsw0>300</kpsw0>
+          <kpsw1>300</kpsw1>
+          <kpsw2>300</kpsw2>
+          <kdsw0>6</kdsw0>
+          <kdsw1>6</kdsw1>
+          <kdsw2>6</kdsw2>
+        </plugin>
+    </gazebo>
+    <gazebo>
+        <plugin name="imu_sensor" filename="libgazebo_ros_imu.so">
+            <alwaysOn>true</alwaysOn>
+            <bodyName>base</bodyName>
+            <frameName>base</frameName>
+            <topicName>/shvan/imu</topicName>
+            <serviceName>imu_service</serviceName>
+            <xyzOffset> 0 0 0 </xyzOffset>
+            <rpyOffset> 0 0 0 </rpyOffset>
+            <gaussianNoise>0.001</gaussianNoise>
+            <updateRate>1000.0</updateRate>
+        </plugin>
+    </gazebo>
+    
+    <gazebo reference='base'>
+      <material>Gazebo/Green</material>
+    </gazebo>
+
+
+    <gazebo reference='fr_knee_l'>
+      <material>Gazebo/Black</material>
+    </gazebo>
+
+    <gazebo reference='fl_knee_a'>
+      <material>Gazebo/Black</material>
+    </gazebo>
+
+    <gazebo reference='rr_knee_l'>
+      <material>Gazebo/Black</material>
+    </gazebo>
+
+   <gazebo reference='rl_knee_l'>
+      <material>Gazebo/Black</material>
+    </gazebo>
+
+
+
+    <gazebo reference='fr_hip_l'>
+      <material>Gazebo/Black</material>
+    </gazebo>
+
+    <gazebo reference='fl_hip_l'>
+      <material>Gazebo/Black</material>
+    </gazebo>
+
+    <gazebo reference='rr_hip_l'>
+      <material>Gazebo/Black</material>
+    </gazebo>
+
+   <gazebo reference='rl_hip_l'>
+      <material>Gazebo/Black</material>
+    </gazebo>
+
+
+
+    <gazebo reference='fr_abd_l'>
+      <material>Gazebo/Grey</material>
+    </gazebo>
+
+    <gazebo reference='fl_abd_l'>
+      <material>Gazebo/Grey</material>
+    </gazebo>
+
+    <gazebo reference='rr_abd_l'>
+      <material>Gazebo/Grey</material>
+    </gazebo>
+
+   <gazebo reference='rl_abd_l'>
+      <material>Gazebo/Grey</material>
+    </gazebo>
+</robot>
+
+

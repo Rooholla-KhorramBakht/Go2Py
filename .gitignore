@@ -168,5 +168,10 @@ deploy/dock_ws/log
 deploy/dock_ws/install
 deploy/dock_ws/build
 
+*build*
+*install*
+*log*
+*lib*
+
 _isaac_sim
 .vscode
