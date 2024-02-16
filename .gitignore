@@ -168,10 +168,15 @@ deploy/dock_ws/log
 deploy/dock_ws/install
 deploy/dock_ws/build
 
+<<<<<<< HEAD
 *build*
 *install*
 *log*
 *lib*
+=======
+deploy/nav2_ws/install
+deploy/nav2_ws/log
+>>>>>>> origin/main
 
 _isaac_sim
 .vscode

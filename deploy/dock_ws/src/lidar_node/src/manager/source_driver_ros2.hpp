@@ -39,6 +39,9 @@
 #include <chrono>
 #include <string>
 #include <functional>
+#include <stdbool.h>
+#include <math.h>
+#include "sensor_msgs/msg/laser_scan.hpp"
 #ifdef __CUDACC__
   #include "hesai_lidar_sdk_gpu.cuh"
 #else
@@ -58,6 +61,12 @@ public:
   SourceDriver(SourceType src_type) {};
   void SpinRos2(){rclcpp::spin(this->node_ptr_);}
   std::shared_ptr<rclcpp::Node> node_ptr_;
+  LidarDecodedFrame<LidarPointXYZIRT> pointcloud_;
+  void publishPointcloud(void);
+  bool publish_pointcloud_flag;
+  void publishLaserScan(
+  sensor_msgs::msg::PointCloud2 *cloud_msg);
+  
 protected:
   // Save packets subscribed by 'ros_recv_packet_topic'
   void RecievePacket(const hesai_ros_driver::msg::UdpFrame::SharedPtr msg);
@@ -78,13 +87,16 @@ protected:
   rclcpp::Subscription<hesai_ros_driver::msg::UdpFrame>::SharedPtr pkt_sub_;
   rclcpp::Publisher<hesai_ros_driver::msg::UdpFrame>::SharedPtr pkt_pub_;
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_;
+  std::shared_ptr<rclcpp::Publisher<sensor_msgs::msg::LaserScan>> laserscan_pub_;
   //spin thread while recieve data from ROS topic
   boost::thread* subscription_spin_thread_;
+  
 };
 
 
 inline void SourceDriver::Init(const YAML::Node& config)
 {
+  publish_pointcloud_flag = false;
   YAML::Node driver_config = YamlSubNodeAbort(config, "driver");
   DriverParam driver_param;
   // input related
@@ -124,15 +136,15 @@ inline void SourceDriver::Init(const YAML::Node& config)
   if (send_point_cloud_ros) {
     std::string ros_send_point_topic;
     YamlRead<std::string>(config["ros"], "ros_send_point_cloud_topic", ros_send_point_topic, "hesai_points");
-    pub_ = node_ptr_->create_publisher<sensor_msgs::msg::PointCloud2>(ros_send_point_topic, 100);
+    pub_ = node_ptr_->create_publisher<sensor_msgs::msg::PointCloud2>(ros_send_point_topic, 1);
   }
 
   if (send_packet_ros && driver_param.input_param.source_type != DATA_FROM_ROS_PACKET) {
     std::string ros_send_packet_topic;
     YamlRead<std::string>(config["ros"], "ros_send_packet_topic", ros_send_packet_topic, "hesai_packets");
-    pkt_pub_ = node_ptr_->create_publisher<hesai_ros_driver::msg::UdpFrame>(ros_send_packet_topic, 10);
+    pkt_pub_ = node_ptr_->create_publisher<hesai_ros_driver::msg::UdpFrame>(ros_send_packet_topic, 1);
   }
-
+  laserscan_pub_ = node_ptr_->create_publisher<sensor_msgs::msg::LaserScan>("/go2/scan", rclcpp::SensorDataQoS());
   if (driver_param.input_param.source_type == DATA_FROM_ROS_PACKET) {
     std::string ros_recv_packet_topic;
     YamlRead<std::string>(config["ros"], "ros_recv_packet_topic", ros_recv_packet_topic, "hesai_packets");
@@ -180,8 +192,17 @@ inline void SourceDriver::SendPacket(const UdpFrame_t& msg, double timestamp)
 }
 
 inline void SourceDriver::SendPointCloud(const LidarDecodedFrame<LidarPointXYZIRT>& msg)
+{ 
+  pointcloud_ = msg;
+  publish_pointcloud_flag = true;
+  // pub_->publish(ToRosMsg(msg, frame_id_));
+}
+
+inline void SourceDriver::publishPointcloud(void)
 {
-  pub_->publish(ToRosMsg(msg, frame_id_));
+  sensor_msgs::msg::PointCloud2 msg = ToRosMsg(pointcloud_, frame_id_);
+  pub_->publish(msg);
+  publishLaserScan(&msg);
 }
 
 inline sensor_msgs::msg::PointCloud2 SourceDriver::ToRosMsg(const LidarDecodedFrame<LidarPointXYZIRT>& frame, const std::string& frame_id)
@@ -217,25 +238,29 @@ inline sensor_msgs::msg::PointCloud2 SourceDriver::ToRosMsg(const LidarDecodedFr
   
   for (size_t i = 0; i < frame.points_num; i++)
   {
-    LidarPointXYZIRT point = frame.points[i];
-    *iter_x_ = point.x;
-    *iter_y_ = point.y;
-    *iter_z_ = point.z;
-    *iter_intensity_ = point.intensity;
-    *iter_ring_ = point.ring;
-    *iter_timestamp_ = point.timestamp;
-    ++iter_x_;
-    ++iter_y_;
-    ++iter_z_;
-    ++iter_intensity_;
-    ++iter_ring_;
-    ++iter_timestamp_;   
+    // if(i%2==0) //downsample the number of points by two
+    // {
+      LidarPointXYZIRT point = frame.points[i];
+      *iter_x_ = point.x;
+      *iter_y_ = point.y;
+      *iter_z_ = point.z;
+      *iter_intensity_ = point.intensity;
+      *iter_ring_ = point.ring;
+      *iter_timestamp_ = point.timestamp;
+      ++iter_x_;
+      ++iter_y_;
+      ++iter_z_;
+      ++iter_intensity_;
+      ++iter_ring_;
+      ++iter_timestamp_;   
+    // }
   }
   printf("frame:%d points:%u packet:%d start time:%lf end time:%lf\n",frame.frame_index, frame.points_num, frame.packet_num, frame.points[0].timestamp, frame.points[frame.points_num - 1].timestamp) ;
 
-  ros_msg.header.stamp.sec = (uint32_t)floor(frame.points[0].timestamp);
-  ros_msg.header.stamp.nanosec = (uint32_t)round((frame.points[0].timestamp - ros_msg.header.stamp.sec) * 1e9);
+  // ros_msg.header.stamp.sec = (uint32_t)floor(frame.points[0].timestamp);
+  // ros_msg.header.stamp.nanosec = (uint32_t)round((frame.points[0].timestamp - ros_msg.header.stamp.sec) * 1e9);
   ros_msg.header.frame_id = frame_id_;
+  ros_msg.header.stamp = rclcpp::Clock().now();
   return ros_msg;
 }
 
@@ -261,4 +286,63 @@ inline void SourceDriver::RecievePacket(const hesai_ros_driver::msg::UdpFrame::S
   }
 }
 
+inline void SourceDriver::publishLaserScan(
+  sensor_msgs::msg::PointCloud2 *cloud_msg)
+{
+  // build laserscan output
+  auto scan_msg = std::make_unique<sensor_msgs::msg::LaserScan>();
+  scan_msg->header = cloud_msg->header;
+
+  scan_msg->angle_min = -3.1415;
+  scan_msg->angle_max =  3.1415;
+  scan_msg->angle_increment = 0.0087/2.;
+  scan_msg->time_increment = 0.0;
+  scan_msg->scan_time = 0.3333;
+  scan_msg->range_min = 0.2;
+  scan_msg->range_max = 100;
+  float max_height_ = 1.0;
+  float min_height_ = 0.;
+  
+
+  // determine amount of rays to create
+  uint32_t ranges_size = std::ceil(
+    (scan_msg->angle_max - scan_msg->angle_min) / scan_msg->angle_increment);
+
+  // determine if laserscan rays with no obstacle data will evaluate to infinity or max_range
+  scan_msg->ranges.assign(ranges_size, std::numeric_limits<double>::infinity());
+  // scan_msg->intensities.assign(ranges_size, 255);
+  // Iterate through pointcloud
+  for (sensor_msgs::PointCloud2ConstIterator<float> iter_x(*cloud_msg, "x"),
+    iter_y(*cloud_msg, "y"), iter_z(*cloud_msg, "z");
+    iter_x != iter_x.end(); ++iter_x, ++iter_y, ++iter_z)
+    {
+      if (std::isnan(*iter_x) || std::isnan(*iter_y) || std::isnan(*iter_z)) {
+        continue;
+      }
+
+      if (*iter_z > max_height_ || *iter_z < min_height_) {
+        continue;
+      }
+
+      double range = hypot(*iter_x, *iter_y);
+      if (range <  scan_msg->range_min) {
+        continue;
+      }
+      if (range >  scan_msg->range_max) {
+        continue;
+      }
+
+      double angle = atan2(*iter_y, *iter_x);
+      if (angle < scan_msg->angle_min || angle > scan_msg->angle_max) {
+        continue;
+      }
+
+      // overwrite range at laserscan ray if new range is smaller
+      int index = (angle - scan_msg->angle_min) / scan_msg->angle_increment;
+      if (range < scan_msg->ranges[index]) {
+        scan_msg->ranges[index] = range;
+      }
+    }
+  laserscan_pub_->publish(std::move(scan_msg));
+}
 

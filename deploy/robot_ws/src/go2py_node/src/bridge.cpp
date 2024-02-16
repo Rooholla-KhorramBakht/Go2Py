@@ -185,10 +185,10 @@ void Custom::lowstate_callback(unitree_go::msg::LowState::SharedPtr data)
     joint_state.name.push_back("RL_thigh_joint");
     joint_state.name.push_back("RL_calf_joint");
     // add foot force joint state for contact detection
-    joint_state.name.push_back("FR_foot_force");
-    joint_state.name.push_back("FL_foot_force");
-    joint_state.name.push_back("RR_foot_force");
-    joint_state.name.push_back("RL_foot_force");
+    //joint_state.name.push_back("FR_foot_force");
+    //joint_state.name.push_back("FL_foot_force");
+    //joint_state.name.push_back("RR_foot_force");
+    //joint_state.name.push_back("RL_foot_force");
 
     for(int i=0; i<12; i++)
     {
@@ -197,10 +197,12 @@ void Custom::lowstate_callback(unitree_go::msg::LowState::SharedPtr data)
         joint_state.effort.push_back(data->motor_state[i].tau_est);
     }
     // use the last four joint_state.position to store the foot force
+    /*
     for(int i=0; i<4; i++)
     {
         joint_state.effort.push_back(data->foot_force[i]);
     }
+    */
     pub_joint->publish(joint_state);
     pub_imu->publish(imu);
     // Check for emergency stop
