@@ -1,0 +1,9 @@
+package unitree_lowlevel;
+struct UnitreeLowCommand {
+    double stamp;
+    float tau_ff[12];
+    float q_des[12];
+    float dq_des[12];
+    float kp[12];
+    float kd[12];
+}
