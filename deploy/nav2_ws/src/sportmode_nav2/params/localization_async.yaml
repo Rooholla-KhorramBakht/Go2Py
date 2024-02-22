@@ -19,7 +19,7 @@ slam_toolbox:
     # if you'd like to immediately start continuing a map at a given pose
     # or at the dock, but they are mutually exclusive, if pose is given
     # will use pose
-    map_file_name: /home/unitree/locomotion/Go2Py/deploy/nav2_ws/Feb21_hallway
+    map_file_name: /home/unitree/locomotion/Go2Py/deploy/nav2_ws/maps/Feb21_hallway
     #map_start_pose: [0.33, 1.49, 0.0]
     map_start_at_dock: true
 
