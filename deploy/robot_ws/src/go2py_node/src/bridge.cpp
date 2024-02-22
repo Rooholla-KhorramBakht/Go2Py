@@ -14,6 +14,7 @@
 #include "sensor_msgs/msg/temperature.hpp"
 #include "sensor_msgs/msg/battery_state.hpp"
 #include "geometry_msgs/msg/twist_stamped.hpp"
+#include "geometry_msgs/msg/twist.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include <tf2/LinearMath/Quaternion.h>
 
@@ -34,6 +35,7 @@ class Custom: public rclcpp::Node
             pub_imu  = this->create_publisher<sensor_msgs::msg::Imu>("/go2/imu", 1);
             pub_joint  = this->create_publisher<sensor_msgs::msg::JointState>("/go2/joint_states", 1);
             sub_twist = this->create_subscription<geometry_msgs::msg::TwistStamped>("/go2/twist_cmd", 1, std::bind(&Custom::twistCmdCallback, this, std::placeholders::_1));
+            nav2_twist = this->create_subscription<geometry_msgs::msg::Twist>("/go2/cmd_vel", 1, std::bind(&Custom::nav2TwistCmdCallback, this, std::placeholders::_1));
             
             // Go2 highlevel subscriber and publishers
             // the state_suber is set to subscribe "sportmodestate" topic
@@ -58,8 +60,11 @@ class Custom: public rclcpp::Node
         void watchdog();
         // Highlevel twist command through standard ROS2 message type
         void twistCmdCallback(const geometry_msgs::msg::TwistStamped::SharedPtr msg);
+        void nav2TwistCmdCallback(const geometry_msgs::msg::Twist::SharedPtr msg);
         geometry_msgs::msg::TwistStamped twist_cmd;
+        geometry_msgs::msg::Twist twist;
         rclcpp::Subscription<geometry_msgs::msg::TwistStamped>::SharedPtr sub_twist;
+        rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr nav2_twist;
         uint64_t last_highcmd_stamp = 0;
         
         // ROS2 standard joint state, IMU, and odometry publishers
@@ -249,6 +254,19 @@ void Custom::twistCmdCallback(const geometry_msgs::msg::TwistStamped::SharedPtr 
     last_highcmd_stamp = std::chrono::duration_cast<std::chrono::microseconds>(stamp_now.time_since_epoch()).count();
     if(Estop == 0)
         sport_req.Move(highreq, msg->twist.linear.x, msg->twist.linear.y, msg->twist.angular.z);
+    else
+        sport_req.Damp(highreq);
+    
+    // Publish request messages with desired body velocity
+    highreq_puber->publish(highreq);
+}
+
+void Custom::nav2TwistCmdCallback(const geometry_msgs::msg::Twist::SharedPtr msg)
+{
+    auto stamp_now = std::chrono::high_resolution_clock::now();
+    last_highcmd_stamp = std::chrono::duration_cast<std::chrono::microseconds>(stamp_now.time_since_epoch()).count();
+    if(Estop == 0)
+        sport_req.Move(highreq, msg->linear.x, msg->linear.y, msg->angular.z);
     else
         sport_req.Damp(highreq);
     
