@@ -169,6 +169,7 @@ deploy/dock_ws/install
 deploy/dock_ws/build
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 deploy/nav2_ws/install
 deploy/nav2_ws/log
 =======
@@ -177,6 +178,16 @@ deploy/nav2_ws/log
 *log*
 *lib*
 >>>>>>> Added simulation and locomotion files
+=======
+*build*
+*install*
+*log*
+*lib*
+=======
+deploy/nav2_ws/install
+deploy/nav2_ws/log
+>>>>>>> origin/main
+>>>>>>> 6fb83c776a12ae8b368f69e6b303593987c6dce1
 
 _isaac_sim
 .vscode
