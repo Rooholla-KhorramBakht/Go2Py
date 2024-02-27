@@ -1,3 +1,7 @@
 [submodule "mjsim_quad"]
 	path = mjsim_quad
+<<<<<<< HEAD
 	url = git@github.com:nimesh00/mjsim_quad.git
+=======
+	url = https://github.com/nimesh00/mjsim_quad.git
+>>>>>>> cleanup locomotion and add standalone simulation project (mjsim_quad)
