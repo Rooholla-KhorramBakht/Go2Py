@@ -71,10 +71,10 @@ class GO2Real():
     def getJointStates(self):
         """Returns the joint angles (q) and velocities (dq) of the robot"""
         motor_state = np.array([[self.state.motor_state[i].q,
-                         robot.state.motor_state[i].dq,
-                         robot.state.motor_state[i].ddq,
-                         robot.state.motor_state[i].tau_est,
-                         robot.state.motor_state[i].temperature] for i in range(12)])
+                                 self.state.motor_state[i].dq,
+                                 self.state.motor_state[i].ddq,
+                                 self.state.motor_state[i].tau_est,
+                                 self.state.motor_state[i].temperature] for i in range(12)])
         return {'q':motor_state[:,0], 
                 'dq':motor_state[:,1],
                 'ddq':motor_state[:,2],
