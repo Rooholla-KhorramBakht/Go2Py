@@ -2,6 +2,7 @@
 #include "unitree_go/msg/imu_state.hpp"
 #include "unitree_go/msg/motor_state.hpp"
 #include "unitree_go/msg/go2py_low_cmd.hpp"
+#include "unitree_go/msg/go2py_low_state.hpp"
 
 #include "unitree_go/msg/low_cmd.hpp"
 #include "unitree_go/msg/motor_cmd.hpp"
@@ -34,6 +35,8 @@ class Custom: public rclcpp::Node
             pub_odom = this->create_publisher<nav_msgs::msg::Odometry>("/go2/odom", 1);
             pub_imu  = this->create_publisher<sensor_msgs::msg::Imu>("/go2/imu", 1);
             pub_joint  = this->create_publisher<sensor_msgs::msg::JointState>("/go2/joint_states", 1);
+            lowstate_puber = this->create_publisher<unitree_go::msg::Go2pyLowState>("/go2/lowstate", 1);
+
             sub_twist = this->create_subscription<geometry_msgs::msg::TwistStamped>("/go2/twist_cmd", 1, std::bind(&Custom::twistCmdCallback, this, std::placeholders::_1));
             nav2_twist = this->create_subscription<geometry_msgs::msg::Twist>("/go2/cmd_vel", 1, std::bind(&Custom::nav2TwistCmdCallback, this, std::placeholders::_1));
             
@@ -94,7 +97,10 @@ class Custom: public rclcpp::Node
         rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_cmd_suber;
         // A struct to store the highlevel states for later use
         rclcpp::Publisher<unitree_go::msg::LowCmd>::SharedPtr lowcmd_puber;
+        rclcpp::Publisher<unitree_go::msg::Go2pyLowState>::SharedPtr lowstate_puber;
+
         unitree_go::msg::LowCmd lowcmd_msg;
+        unitree_go::msg::Go2pyLowState lowstate_msg;
         uint64_t last_lowcmd_stamp = 0;
         xRockerBtnDataStruct _keyData;
 
@@ -109,25 +115,6 @@ class Custom: public rclcpp::Node
                 lowcmd_msg.motor_cmd[i].kd = 0;
                 lowcmd_msg.motor_cmd[i].tau = 0;
             }
-            // taken from unitree_ros servo.cpp example
-            for (int i = 0; i < 4; ++i) {
-                // lowcmd_msg.motor_cmd[i*3+0].mode = 0x0A;
-                lowcmd_msg.motor_cmd[i*3+0].kp = 70;
-                // lowcmd_msg.motor_cmd[i*3+0].dq = 0;
-                lowcmd_msg.motor_cmd[i*3+0].kd = 3;
-                lowcmd_msg.motor_cmd[i*3+0].tau = 0;
-                // lowcmd_msg.motor_cmd[i*3+1].mode = 0x0A;
-                lowcmd_msg.motor_cmd[i*3+1].kp = 180;
-                // lowcmd_msg.motor_cmd[i*3+1].dq = 0;
-                lowcmd_msg.motor_cmd[i*3+1].kd = 8;
-                lowcmd_msg.motor_cmd[i*3+1].tau = 0;
-                // lowcmd_msg.motor_cmd[i*3+2].mode = 0x0A;
-                lowcmd_msg.motor_cmd[i*3+2].kp = 300;
-                // lowcmd_msg.motor_cmd[i*3+2].dq = 0;
-                lowcmd_msg.motor_cmd[i*3+2].kd = 15;
-                lowcmd_msg.motor_cmd[i*3+2].tau = 0;    
-            }
-            
         }
 
         struct {
@@ -153,6 +140,22 @@ class Custom: public rclcpp::Node
 
 void Custom::lowstate_callback(unitree_go::msg::LowState::SharedPtr data)
 {
+    
+    for (int i = 0; i < 12; ++i) {
+        lowstate_msg.q[i] = data->motor_state[i].q;
+        lowstate_msg.dq[i] = data->motor_state[i].dq;
+        lowstate_msg.tau_est[i] = data->motor_state[i].tau_est;
+    }
+    for (int i = 0; i < 4; ++i) {
+        lowstate_msg.quat[i] = data->imu_state.quaternion[i];
+    }
+    for (int i = 0; i < 3; ++i) {
+        lowstate_msg.accel[i] = data->imu_state.accelerometer[i];
+        lowstate_msg.gyro[i] = data->imu_state.gyroscope[i];
+    }
+
+    lowstate_puber->publish(lowstate_msg);
+    
     // std::cout << data->tick << std::endl;
     sensor_msgs::msg::Imu imu;
     sensor_msgs::msg::JointState joint_state;
@@ -334,6 +337,23 @@ void Custom::joint_cmd_callback(sensor_msgs::msg::JointState::SharedPtr data) {
     {
         for(int i=0; i<12; i++)
         {
+            // taken from unitree_ros servo.cpp example
+            // lowcmd_msg.motor_cmd[i*3+0].mode = 0x0A;
+            lowcmd_msg.motor_cmd[i*3+0].kp = 70;
+            // lowcmd_msg.motor_cmd[i*3+0].dq = 0;
+            lowcmd_msg.motor_cmd[i*3+0].kd = 3;
+            lowcmd_msg.motor_cmd[i*3+0].tau = 0;
+            // lowcmd_msg.motor_cmd[i*3+1].mode = 0x0A;
+            lowcmd_msg.motor_cmd[i*3+1].kp = 180;
+            // lowcmd_msg.motor_cmd[i*3+1].dq = 0;
+            lowcmd_msg.motor_cmd[i*3+1].kd = 8;
+            lowcmd_msg.motor_cmd[i*3+1].tau = 0;
+            // lowcmd_msg.motor_cmd[i*3+2].mode = 0x0A;
+            lowcmd_msg.motor_cmd[i*3+2].kp = 300;
+            // lowcmd_msg.motor_cmd[i*3+2].dq = 0;
+            lowcmd_msg.motor_cmd[i*3+2].kd = 15;
+            lowcmd_msg.motor_cmd[i*3+2].tau = 0;
+
             lowcmd_msg.motor_cmd[i].q =   data->position[i];   // Taregt angular(rad)
             // lowcmd_msg.motor_cmd[i].kp =  data->kp[i];  // Poinstion(rad) control kp gain
             lowcmd_msg.motor_cmd[i].dq =  data->velocity[i];  // Taregt angular velocity(rad/ss)
