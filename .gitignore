@@ -168,8 +168,32 @@ deploy/dock_ws/log
 deploy/dock_ws/install
 deploy/dock_ws/build
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 32acfb0ac560277c40ad17f56e1ea6f88c8f8b96
 deploy/nav2_ws/install
 deploy/nav2_ws/log
+=======
+*build*
+*install*
+*log*
+*lib*
+>>>>>>> Added simulation and locomotion files
+<<<<<<< HEAD
+=======
+=======
+*build*
+*install*
+*log*
+*lib*
+=======
+deploy/nav2_ws/install
+deploy/nav2_ws/log
+>>>>>>> origin/main
+>>>>>>> 6fb83c776a12ae8b368f69e6b303593987c6dce1
+>>>>>>> 32acfb0ac560277c40ad17f56e1ea6f88c8f8b96
 
 *build*
 *install*
