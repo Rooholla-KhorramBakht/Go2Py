@@ -3,6 +3,7 @@
 #include "kinodynamics.hpp"
 #include <string>
 #include "memory_types.hpp"
+#include "Iir.h"
 
 class Estimator {
 public:
@@ -26,11 +27,18 @@ public:
     void setPlannerDataPtr(QuadrupedPlannerData* pd) {
         m_planner_data_ptr = pd;
     }
-    void setStepTime(const float& dt) {
-        m_dt = dt;
+    void setMeasurementDataPtr(QuadrupedMeasurementData* md) {
+        m_measurement_data_ptr = md;
+    }
+    void setLoopRate(const float& rate) {
+        m_loop_rate = rate;
+        m_dt = 1./rate;
+        InitClass();
     }
 
-    void Step();
+    void Step(const float& dt);
+
+    void reset();
 protected:
     Quadruped m_robot;
 
@@ -41,6 +49,7 @@ protected:
     QuadrupedSensorData* m_sensor_data_ptr;
     QuadrupedEstimationData* m_estimation_data_ptr;
     QuadrupedPlannerData* m_planner_data_ptr;
+    QuadrupedMeasurementData* m_measurement_data_ptr;
 
     vec3 base_position;
     vec4 base_quat;
@@ -48,12 +57,22 @@ protected:
     vec3 base_omega;
 
     vec4 m_pc_ref;
+
+    vec12 m_fc_est;
     float m_dt;
+    float m_loop_rate = 1000;
 private:
     std::string m_name;
 
     void updateSensorData();
     void updateEstimationData();
+    // void updateMeasurementData();
 
     void InitClass();
+
+    Iir::Butterworth::LowPass<2> m_q_filter[12];
+    Iir::Butterworth::LowPass<2> m_qd_filter[12];
+    Iir::Butterworth::LowPass<2> m_tau_filter[12];
+    Iir::Butterworth::LowPass<2> m_imu_a_filter[3];
+    Iir::Butterworth::LowPass<2> m_imu_w_filter[3];
 };

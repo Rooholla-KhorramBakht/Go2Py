@@ -7,6 +7,7 @@
 // Randomy chosen key enums
 enum SHM_KEYS {
     SENSOR_DATA = 123,
+    MEASUREMENT_DATA = 496,
     COMMAND_DATA = 549
 };
 

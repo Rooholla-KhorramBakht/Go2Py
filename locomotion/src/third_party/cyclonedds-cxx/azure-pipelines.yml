@@ -1,0 +1,134 @@
+#
+# Copyright(c) 2021 ZettaScale Technology and others
+#
+# This program and the accompanying materials are made available under the
+# terms of the Eclipse Public License v. 2.0 which is available at
+# http://www.eclipse.org/legal/epl-2.0, or the Eclipse Distribution License
+# v. 1.0 which is available at
+# http://www.eclipse.org/org/documents/edl-v10.php.
+#
+# SPDX-License-Identifier: EPL-2.0 OR BSD-3-Clause
+#
+
+trigger: [ '*' ]
+pr: [ '*' ]
+
+strategy:
+  matrix:
+    'Ubuntu 20.04 LTS with Clang 10 (Release, x86_64)':
+      image: ubuntu-20.04
+      build_type: Release
+      cc: clang-10
+      cxx: clang++-10
+    'Ubuntu 20.04 LTS with GCC 10 (Release, x86_64)':
+      image: ubuntu-20.04
+      build_type: Release
+      cc: gcc-10
+      cxx: g++-10
+    'Ubuntu 22.04 LTS with GCC 12 (Debug, x86_64)':
+      image: ubuntu-22.04
+      #analyzer: on #analyzer is disabled here, due to the sheer number of false positives
+      sanitizer: address,undefined
+      cc: gcc-12
+      cxx: g++-12
+    'Ubuntu 22.04 LTS with GCC 12 (Debug, x86_64, Iceoryx)':
+      image: ubuntu-22.04
+      iceoryx: on
+      #analyzer: on #analyzer is disabled here, due to the sheer number of false positives
+      sanitizer: address,undefined
+      cc: gcc-12
+      cxx: g++-12
+    'Ubuntu 22.04 LTS with GCC 12 (Release, x86_64)':
+      image: ubuntu-22.04
+      build_type: Release
+      sanitizer: address,undefined
+      cc: gcc-12
+      cxx: g++-12
+    'Ubuntu 22.04 LTS with GCC 12 (Release, x86_64, Iceoryx)':
+      image: ubuntu-22.04
+      build_type: Release
+      iceoryx: on
+      sanitizer: address,undefined
+      cc: gcc-12
+      cxx: g++-12
+    'Ubuntu 22.04 LTS with CLang 13 (Debug, x86_64)':
+      image: ubuntu-22.04
+      analyzer: on
+      sanitizer: address
+      cc: clang-13
+      cxx: clang++-13
+    'Ubuntu 22.04 LTS with CLang 13 (Debug, x86_64, Iceoryx)':
+      image: ubuntu-22.04
+      iceoryx: on
+      analyzer: on
+      sanitizer: address,undefined
+      cc: clang-13
+      cxx: clang++-13
+    'Ubuntu 22.04 LTS with CLang 13 (Release, x86_64)':
+      image: ubuntu-22.04
+      build_type: Release
+      sanitizer: address,undefined
+      cc: clang-13
+      cxx: clang++-13
+    'Ubuntu 22.04 LTS with CLang 13 (Release, x86_64, Iceoryx)':
+      image: ubuntu-22.04
+      build_type: Release
+      iceoryx: on
+      sanitizer: address,undefined
+      cc: clang-13
+      cxx: clang++-13
+    # C++11 requires boost, installing boost on Windows takes forever, so use Linux
+    # Google test requires C++14 at minimum, so we can't build tests ...
+    'Ubuntu 22.04 LTS with CLang 13 (Debug, x86_64, C++11)':
+      image: ubuntu-22.04
+      build_type: Debug
+      cc: clang-13
+      cxx: clang++-13
+      legacy: on
+    'Ubuntu 22.04 LTS with GCC 12 (Debug, x86_64, no type lib)':
+      image: ubuntu-22.04
+      sanitizer: address
+      cc: gcc-12
+      cxx: g++-12
+      type_lib: off
+      topic_discovery: off
+    'macOS 11 with Clang 12 (Debug, x86_64)':
+      image: macOS-11
+      sanitizer: address
+      cc: clang
+      cxx: clang++
+    'macOS 11 with Clang 12 (Release, x86_64)':
+      image: macOS-11
+      build_type: Release
+      sanitizer: address,undefined
+      cc: clang
+      cxx: clang++
+    # disabled for now because 32-bit packages are missing
+    #'Windows 2019 with Visual Studio 2019 (Visual Studio 2017, Debug, x86)':
+    #  arch: x86
+    #  image: windows-2019
+    #  generator: 'Visual Studio 16 2019'
+    #  toolkit: v141
+    'Windows 2019 with Visual Studio 2019 (Debug, x86_64)':
+      image: windows-2019
+      analyzer: on
+      generator: 'Visual Studio 16 2019'
+    'Windows 2019 with Visual Studio 2019 (Release, x86_64)':
+      image: windows-2019
+      build_type: Release
+      generator: 'Visual Studio 16 2019'
+    #C++11 needs boost, installing boost takes forever on Windows
+    #'Windows 2019 with Visual Studio 2019 (Release, x86_64, c++11)':
+    #  image: windows-2019
+    #  build_type: Release
+    #  generator: 'Visual Studio 16 2019'
+    #  legacy: on
+
+pool:
+  vmImage: $(image)
+
+variables:
+  cyclonedds_uri: '<CycloneDDS><Domain><Internal><EnableExpensiveChecks>rhc,whc</EnableExpensiveChecks><LivelinessMonitoring>true</LivelinessMonitoring></Internal><Tracing><Verbosity>config</Verbosity><OutputFile>stderr</OutputFile></Tracing></Domain></CycloneDDS>'
+
+steps:
+  - template: /.azure/templates/build-test.yml

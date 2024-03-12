@@ -27,6 +27,7 @@ void Controller::InitClass() {
 
     m_joint_state_act = m_robot.getNeutralJointStates();
     m_joint_vel_act = vec18::Zero();
+    m_joint_acc_act = vec18::Zero();
 
     m_state_error = vec19::Zero();
     m_eta = vec18::Zero();
@@ -129,8 +130,9 @@ void Controller::Step() {
 void Controller::updateEstimationData() {
     m_joint_state_act = m_estimation_data_ptr -> js;
     m_joint_vel_act = m_estimation_data_ptr -> jv;
+    m_joint_acc_act = m_estimation_data_ptr -> ja;
     m_cs = m_estimation_data_ptr -> cs;
-    m_num_contact = m_cs.sum();
+    // m_num_contact = m_cs.sum();
 }
 
 void Controller::updatePlannerData() {
@@ -144,8 +146,8 @@ void Controller::updateJointCommand() {
     m_joint_command_ptr->q = m_joint_state_ref.block<12,1>(7, 0);
     m_joint_command_ptr->qd = m_joint_vel_ref.block<12,1>(6, 0);
     m_joint_command_ptr->tau = m_ff_torque;
-    m_joint_command_ptr->kp = 50 * vec12::Ones();
-    m_joint_command_ptr->kd = 1 * vec12::Ones();
+    m_joint_command_ptr->kp = 20 * vec12::Ones();
+    m_joint_command_ptr->kd = 5 * vec12::Ones();
 }
 
 vec12 Controller::GetDesiredContactForcePGD(const vec6 &b) {
@@ -201,9 +203,9 @@ vec12 Controller::GetDesiredContactForcePGD(const vec6 &b) {
     bool converged = false;
     float f_t = 1;
     float f_z = 10;
-    float mu = 0.6;
+    float mu = 0.2;
     float fn_max = 200;
-    float fn_min = 15;
+    float fn_min = 5;
 
     float pf_n = 10;
     int max_iters = 1e2;
@@ -256,6 +258,9 @@ vec12 Controller::GetDesiredContactForcePGD(const vec6 &b) {
 
     vec12 F = vec12::Zero();
 
+    // // First order filtering
+    float a = 0.2;
+
     nc = 0;
     for (int i = 0; i < 4; i++) {
         if (m_contact_flag_for_controller(i) == 0) {
@@ -263,24 +268,24 @@ vec12 Controller::GetDesiredContactForcePGD(const vec6 &b) {
             F.block<3, 1>(3 * i, 0) = Eigen::Vector3d(0, 0, 0);
             continue;
         }
-        F.block<3, 1>(3 * i, 0) = f.block<3, 1>(3 * nc++, 0);
+        F.block<3, 1>(3 * i, 0) = a * F_prev.block<3,1>(3 * i, 0) + (1 - alpha) * f.block<3, 1>(3 * nc++, 0);
     }
 
-    // First order filtering
-    float a = 0.1;
-    F = a * F_prev + (1 - a) * F;
+    
+    // F = a * F_prev + (1 - a) * F;
 
     F_prev = F;
 
     return F;
 }
 
-Controller::~Controller()
-{
-    // set zero torques + vel and init ee_state
+Controller::~Controller() {
+    // set zero torques, vel and init ee_state
     m_joint_command_ptr -> q = m_joint_state_init.block<12,1>(7, 0);
     m_joint_command_ptr -> qd = vec12::Zero();
     m_joint_command_ptr -> tau = vec12::Zero();
+
+    updateJointCommand();
 
     std::cout << "Shutting down the controller. Sending default commands.\n";
 }

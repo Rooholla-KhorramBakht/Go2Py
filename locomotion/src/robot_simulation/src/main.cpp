@@ -1,5 +1,6 @@
 #include "mjsim_helper.hpp"
 #include "utils.hpp"
+#include <filesystem>
 
 void UpdateSensorData() {
     for (int i = 0; i < 12; ++i) {
@@ -22,6 +23,21 @@ void UpdateSensorData() {
     // std::cout << "Quat: " << sensor_data.quat.transpose() << "\n";
 
     comm_data.writeSensorData(sensor_data);
+
+    // Updating measurement data
+    for (int i = 0; i < 3; ++i) {
+        measurement_data.base_position(i) = d -> sensordata[46 + i];
+        measurement_data.base_velocity.linear(i) = d -> sensordata[49 + i];
+        measurement_data.base_velocity.angular(i) = d -> sensordata[52 + i];
+        measurement_data.base_acceleration.linear(i) = d -> sensordata[55 + i];
+        measurement_data.base_acceleration.angular(i) = d -> sensordata[58 + i];
+    }
+    for (int i = 0; i < 4; ++i) {
+        measurement_data.contact_force(3 * i) = -d -> sensordata[61 + 3 * i];
+        measurement_data.contact_force(3 * i + 1) = -d -> sensordata[61 + 3 * i + 1];
+        measurement_data.contact_force(3 * i + 2) = -d -> sensordata[61 + 3 * i + 2];
+    }
+    comm_data.writeMeasurementData(measurement_data);
 }
 
 void CustomController(const mjModel* model, mjData* data) {
@@ -61,7 +77,10 @@ int main(int argc, char** argv) {
     std::string m_name = std::string(argv[1]);
 
     // std::string model_file = "/home/meshin/dev/quadruped/xterra/quadruped_locomotion/src/robots/" + m_name + "_description/mujoco/" + m_name + ".xml";
-    std::string model_file = "/home/meshin/dev/quadruped/xterra/quadruped_locomotion/src/robots/" + m_name + "_description/mujoco/scene.xml";
+    // std::string model_file = "/home/meshin/dev/quadruped/xterra/quadruped_locomotion/src/robots/" + m_name + "_description/mujoco/scene.xml";
+    std::string rel_model_path = "src/robots/" + m_name + "_description/mujoco/scene.xml";
+    std::filesystem::path filepath = std::filesystem::current_path().parent_path().parent_path() / rel_model_path;
+    std::string model_file = filepath.string();
 
     init_model(model_file);
 

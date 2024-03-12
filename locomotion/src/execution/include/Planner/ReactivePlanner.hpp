@@ -10,19 +10,21 @@ public:
 
     ~ReactivePlanner() {}
 
-    vec3 GetDesiredFootPosition(const uint8_t&, const float&) override;
+    vec3 getDesiredFootPosition(const uint8_t&, const float&) override;
 
-    void SetBaseTarget () override;
+    // void SetBaseTarget () override;
 
-    void InitClass();
+    void setTarget() override;
+
+    void initClass();
 private:
     
 
     // std_msgs::Float32MultiArray m_p_cs_phi;
-    Eigen::MatrixXd GetVPSPVertices(const float& t);
-    double GetVPSPStabilityMargin();
+    Eigen::MatrixXd getVPSPVertices(const float& t);
+    double getVPSPStabilityMargin();
     std::string m_name;
 
     bool use_vpsp = true;
-    bool m_use_capture_point_heuristic = false;
+    bool m_use_capture_point_heuristic = true;
 };

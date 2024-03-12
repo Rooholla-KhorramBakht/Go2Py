@@ -48,4 +48,8 @@ private:
     Eigen::Matrix<double, 28, 28> R;
 
     void InitEstimatorVars();
+    void InitTimedEstimatorVars();
+
+    vec18 m_jv_prev;
+    // Iir::Butterworth::LowPass<2> m_ja_filter[18];
 };

@@ -14,12 +14,14 @@ include_directories(
     ${COMMON_INCLUDE_DIR}
 )
 
+if(INSTALL_HEADERS_ONLY)
 install(DIRECTORY include/
     DESTINATION ${COMMON_INCLUDE_DIR}
     FILES_MATCHING PATTERN "*.h*"
 )
+else()
 
-add_library(quad_dynamics
+add_library(quad_dynamics SHARED
     src/kinodynamics.cpp
 )
 target_link_libraries(quad_dynamics
@@ -53,3 +55,4 @@ install(TARGETS profile_dynamics
     ARCHIVE DESTINATION ${COMMON_INSTALL_DIR}
     RUNTIME DESTINATION ${COMMON_INSTALL_DIR}
 )
+endif()

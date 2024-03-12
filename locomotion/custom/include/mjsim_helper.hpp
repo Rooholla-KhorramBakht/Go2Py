@@ -53,7 +53,8 @@ mjtNum ctrl;
 
 QuadrupedSensorData sensor_data;
 QuadrupedCommandData joint_command_data;
-SHM comm_data(DATA_ACCESS_MODE::PLANT_TO_EXECUTOR);
+QuadrupedMeasurementData measurement_data;
+SHM comm_data(DATA_ACCESS_MODE::PLANT);
 
 
 #ifdef COMPILE_WITH_VISUALIZATION

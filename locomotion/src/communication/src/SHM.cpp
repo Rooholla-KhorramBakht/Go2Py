@@ -1,6 +1,6 @@
 #include "SHM.hpp"
 
-SHM::SHM() : m_name("svan"), CommunicationManager(DATA_ACCESS_MODE::PLANT_TO_EXECUTOR) {
+SHM::SHM() : m_name("svan"), CommunicationManager(DATA_ACCESS_MODE::PLANT) {
     InitClass();
 }
 
@@ -56,6 +56,12 @@ void SHM::SetupMemory() {
     // std::cout << "Sensor data  size: " << totalSize << "\n";
     sharedMemory = getSHMPointer(key, totalSize);
     m_sensor_data_ptr = static_cast<QuadrupedSensorData*>(sharedMemory);
+
+    key = SHM_KEYS::MEASUREMENT_DATA;
+    totalSize = sizeof(QuadrupedMeasurementData);
+    // std::cout << "Sensor data  size: " << totalSize << "\n";
+    sharedMemory = getSHMPointer(key, totalSize);
+    m_measurement_data_ptr = static_cast<QuadrupedMeasurementData*>(sharedMemory);
     // std::cout << "Memory setup completed...\n";
 }
 

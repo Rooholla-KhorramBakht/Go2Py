@@ -4,8 +4,10 @@
 
 #include <csignal>
 
-#ifdef USE_ROS_COMM
+#if defined(USE_ROS_COMM)
 #include "QuadROSComm.hpp"
+#elif defined(USE_DDS_COMM)
+#include "QuadDDSComm.hpp"
 #else
 #include "SHM.hpp"
 #endif
@@ -57,6 +59,7 @@ void UpdateSensorData() {
 }
 
 void CustomController(const mjModel* model, mjData* data) {
+    UpdateSensorData();
     // get joint command
     comm_data_ptr->getCommandData(joint_command_data);
     // controller with sensor readings
@@ -119,9 +122,15 @@ int main(int argc, char** argv) {
     // Register signal handler for Ctrl+C
     signal(SIGINT, signalHandler);
 
-#ifdef USE_ROS_COMM
+#if defined(USE_ROS_COMM)
     std::cout << "Using ROS for communication...\n";
     comm_data_ptr = std::make_shared<QuadROSComm>(m_name, DATA_ACCESS_MODE::PLANT);
+    comm_data_ptr->setCommandDataPtr(&joint_command_data);
+    comm_data_ptr->setSensorDataPtr(&sensor_data);
+    comm_data_ptr->setMeasurementDataPtr(&measurement_data);
+#elif defined(USE_DDS_COMM)
+    std::cout << "Using DDS for communication...\n";
+    comm_data_ptr = std::make_shared<QuadDDSComm>(m_name, DATA_ACCESS_MODE::PLANT);
     comm_data_ptr->setCommandDataPtr(&joint_command_data);
     comm_data_ptr->setSensorDataPtr(&sensor_data);
     comm_data_ptr->setMeasurementDataPtr(&measurement_data);
@@ -130,17 +139,29 @@ int main(int argc, char** argv) {
 #endif
     // comm_data_ptr -> setAccessMode(DATA_ACCESS_MODE::PLANT);
 
-    std::thread comm_thread;
-#ifdef USE_ROS_COMM
+    // std::thread comm_thread;
+#if defined(USE_ROS_COMM)
     // Run ros on separate non-blocking thread
-    comm_thread = std::thread(&QuadROSComm::Run, comm_data_ptr);
-    comm_thread.detach();
+    // comm_thread = std::thread(&QuadROSComm::run, comm_data_ptr);
+    // comm_thread.detach();
+    comm_data_ptr->start_thread();
+#elif defined(USE_DDS_COMM)
+    comm_data_ptr->start_thread();
 #endif
     
     // Run the simulation for 10 seconds with visualization enabled with 60 fps
     run_simulation(10000, true, 60);
 
     shutdown_simulation();
+
+// #ifdef USE_ROS_COMM
+//     if (comm_thread.joinable()) {
+//         comm_thread.join();
+//     }
+// #endif
+#if defined(USE_ROS_COMM)
+    rclcpp::shutdown();
+#endif
 
     return 0;
 }

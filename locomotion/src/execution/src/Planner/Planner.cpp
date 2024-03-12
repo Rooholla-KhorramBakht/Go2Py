@@ -1,25 +1,26 @@
 #include "Planner/Planner.hpp"
 
 Planner::Planner() : m_name("svan_planner"), m_gait(Gait::TROT) {
-    InitClass();
+    initClass();
 }
 
 Planner::Planner(std::string name) : m_name(name), m_gait(Gait::TROT) {
-    InitClass();
+    initClass();
 }
 
-void Planner::InitClass() {
-    vec19 ee_stance = m_robot.getStanceStates();
+void Planner::initClass() {
+    vec19 ee_init = m_robot.getStanceStates();
+    if (m_sleep_start) {
+        ee_init = m_robot.getSleepStates();
+    }
     // Initialize the variables
-    m_ee_state_ref = m_robot.getStanceStates();
+    m_ee_state_ref = ee_init;
     m_ee_vel_ref = vec18::Zero();
     m_ee_acc_ref = vec18::Zero();
 
-    m_p_takeoff_full = m_robot.getStanceStates().block<12,1>(7, 0);
+    m_p_takeoff_full = ee_init.block<12,1>(7, 0);
 
-    m_ee_state_init = ee_stance;
-
-    // std::cout << "p_takeoff_init: " << m_p_takeoff_full.transpose() << "\n";
+    m_ee_state_init = ee_init;
 
     p_cs_phi = Eigen::Vector4d::Zero();
 
@@ -30,108 +31,171 @@ void Planner::InitClass() {
     m_joint_state_act = m_robot.getNeutralJointStates();
     m_joint_vel_act = vec18::Zero();
 
-    reset();
+    m_t_curr = 0;
 }
 
-void Planner::SetDesiredVelocity(const float& vx, const float& vy, const float& vyaw) {
-    if (m_gait.GetGaitType() == Gait::GAIT_TYPE::STANCE) {
+void Planner::startFromSleep(const bool& sleep_start) {
+    m_sleep_start = sleep_start;
+    initClass();
+}
+
+// Use this carefully! Might be a good idea to just remove it.
+void Planner::setStance() {
+    m_gait = Gait::GAIT_TYPE::STANCE;
+    m_sleep_start = false;
+    initClass();
+    // m_ee_state_ref = m_robot.getStanceStates();
+    // m_ee_vel_ref = vec18::Zero();
+    // m_ee_acc_ref = vec18::Zero();
+}
+
+// void Planner::sleepToStance() {
+// }
+
+// Set desired base velocity in reference yaw rotated base frame
+void Planner::setDesiredVelocity(const float& vx, const float& vy, const float& vyaw) {
+    if (m_gait.GetGaitType() == Gait::GAIT_TYPE::STANCE && ((vx != 0) || (vy != 0) || (vyaw != 0))) {
         std::cout << "STANCE gait selected. Cannot set velocities.\n";
         std::cout << "Setting desired velocities to zero.\n";
+        m_v_cmd_x = 0;
+        m_v_cmd_y = 0;
+        m_v_cmd_yaw = 0;
         return;
     }
-    m_v_cmd_x = vx;
-    m_v_cmd_y = vy;
-    m_v_cmd_yaw = vyaw;
+
+    Eigen::Vector2d vel_cmd = Eigen::Vector2d(m_v_cmd_x, m_v_cmd_y);
+    mat3x3 Rot_yaw = pinocchio::Rz(m_yaw);
+
+    vec4 v_cmd = vec4::Zero();
+    v_cmd.block<2,1>(0, 0) = Rot_yaw.block<2,2>(0, 0) * vel_cmd;
+    v_cmd(2) = m_v_cmd_z;
+    v_cmd(3) = m_v_cmd_yaw;    
+
+    float kp = 2.0;
+    float kd = 2.83;
+
+    m_ee_acc_ref.block<3,1>(0, 0) = kd * (v_cmd.block<3,1>(0, 0) - m_ee_vel_ref.block<3,1>(0, 0));
+    m_ee_acc_ref(5) = kd * (v_cmd(3) - m_ee_vel_ref(5));
+
+    m_ee_acc_ref(0) = std::min(std::max(m_ee_acc_ref(0), -m_a_max_x), m_a_max_x);
+    m_ee_acc_ref(1) = std::min(std::max(m_ee_acc_ref(1), -m_a_max_y), m_a_max_y);
+    m_ee_acc_ref(2) = std::min(std::max(m_ee_acc_ref(2), -m_a_max_z), m_a_max_z);
+    m_ee_acc_ref(5) = std::min(std::max(m_ee_acc_ref(5), -m_a_max_yaw), m_a_max_yaw);
+
+    m_ee_vel_ref(0) += m_ee_acc_ref(0) * m_dt;
+    m_ee_vel_ref(1) += m_ee_acc_ref(1) * m_dt;
+    m_ee_vel_ref(2) += m_ee_acc_ref(2) * m_dt;
+    m_ee_vel_ref(5) += m_ee_acc_ref(5) * m_dt;
+
+    m_ee_vel_ref(0) = std::min(std::max(m_ee_vel_ref(0), -max_vel_x), max_vel_x);
+    m_ee_vel_ref(1) = std::min(std::max(m_ee_vel_ref(1), -max_vel_y), max_vel_y);
+    m_ee_vel_ref(2) = std::min(std::max(m_ee_vel_ref(2), -max_vel_z), max_vel_z);
+    m_ee_vel_ref(5) = std::min(std::max(m_ee_vel_ref(5), -max_vel_yaw), max_vel_yaw);
+}
+
+bool Planner::setTargetBasePosition(const vec3& target_pos, const float& target_yaw) {
+
+    float kp = 2.0;
+    float kd = 3.0;
+
+    m_ee_acc_ref.block<3,1>(0, 0) = kp * (target_pos - m_ee_state_ref.block<3,1>(0, 0)) + kd * (vec3::Zero() - m_ee_vel_ref.block<3,1>(0, 0));
+    m_ee_acc_ref(5) = kp * (target_yaw - m_yaw) + kd * (0 - m_ee_vel_ref(5));
+
+    m_ee_acc_ref(0) = std::min(std::max(m_ee_acc_ref(0), -m_a_max_x), m_a_max_x);
+    m_ee_acc_ref(1) = std::min(std::max(m_ee_acc_ref(1), -m_a_max_y), m_a_max_y);
+    m_ee_acc_ref(2) = std::min(std::max(m_ee_acc_ref(2), -m_a_max_z), m_a_max_z);
+    m_ee_acc_ref(5) = std::min(std::max(m_ee_acc_ref(5), -m_a_max_yaw), m_a_max_yaw);
+
+    m_ee_vel_ref(0) += m_ee_acc_ref(0) * m_dt;
+    m_ee_vel_ref(1) += m_ee_acc_ref(1) * m_dt;
+    m_ee_vel_ref(2) += m_ee_acc_ref(2) * m_dt;
+    m_ee_vel_ref(5) += m_ee_acc_ref(5) * m_dt;
+
+    m_ee_vel_ref(0) = std::min(std::max(m_ee_vel_ref(0), -max_vel_x), max_vel_x);
+    m_ee_vel_ref(1) = std::min(std::max(m_ee_vel_ref(1), -max_vel_y), max_vel_y);
+    m_ee_vel_ref(2) = std::min(std::max(m_ee_vel_ref(2), -max_vel_z), max_vel_z);
+    m_ee_vel_ref(5) = std::min(std::max(m_ee_vel_ref(5), -max_vel_yaw), max_vel_yaw);
+
+    vec3 base_position = m_ee_state_ref.block<3,1>(0, 0);
+    vec3 delta_pos_pred = (target_pos - base_position);
+
+    if ((delta_pos_pred).norm() < 1e-3) {
+        // std::cout << "Target reached...\n";
+        return true;
+    }
+
+    return false;
+}
+
+bool Planner::sleepToStance() {
+    static float motion_start_time = m_t_curr;
+    bool finished = false;
+
+    m_gait = Gait::GAIT_TYPE::STANCE;
+    vec19 ee_stance = m_robot.getStanceStates();
+
+    float motion_timer = m_t_curr; // - motion_start_time;
+    // std::cout << "Motion timer: " << motion_timer << "\n";
+    // std::cout << "target pos: " << ee_stance.block<3,1>(0, 0).transpose() << "\n";
+    float alpha = 0.999;
+    if (motion_timer < 1.0) {
+        m_ee_state_ref.block<12,1>(7, 0) = alpha * m_ee_state_ref.block<12,1>(7, 0) + (1 - alpha) * ee_stance.block<12,1>(7, 0);
+    } else {
+        finished = setTargetBasePosition(ee_stance.block<3,1>(0, 0), m_yaw);
+    }
+
+    if (finished) {
+        motion_start_time = m_t_curr;
+    }
+
+    return finished;
+}
+
+bool Planner::stanceToSleep() {
+    static float motion_start_time = m_t_curr;
+    bool finished = false;
+
+    m_gait = Gait::GAIT_TYPE::STANCE;
+    setDesiredVelocity(0, 0, 0);
+
+    vec19 ee_sleep = m_robot.getSleepStates();
+
+    float motion_timer = m_t_curr - motion_start_time;
+
+    finished = setTargetBasePosition(ee_sleep.block<3,1>(0, 0), m_yaw);
+
+
+    // if (motion_timer < 4) {
+    //     finished = setTargetBasePosition(ee_sleep.block<3,1>(0, 0), m_yaw, vec3(0, 0, 0.2));
+    // } else {
+    //     m_gait = Gait::GAIT_TYPE::STANCE;
+    // }
+
+    if (finished == true) {
+        motion_start_time = m_t_curr;
+    }
+
+    return finished;
 }
 
 Planner::~Planner() {
-    // // publish the initial reference values and call ros::shutdown()
-    // svan_msgs::Trajectory ee_init;
-    // ee_init.position.clear();
-    // ee_init.velocity.clear();
-    // ee_init.acceleration.clear();
-
-    // for (int i = 0; i < 18; i++) {
-    //     ee_init.position.push_back(m_ee_state_init(i));
-    //     ee_init.velocity.push_back(0);
-    //     ee_init.acceleration.push_back(0);
-    // }
-    // std::cout << "Sending default stance commands!\n";
 }
 
-void Planner::SetBaseTarget() {
-    vec3 v_cmd = vec3::Zero();
-    vec3 acc_cmd = vec3::Zero();
+void Planner::setBaseTarget() {
     float t = m_t_curr;
 
-    v_cmd(0) = std::min(m_v_cmd_x, max_vel_x);
-    v_cmd(1) = std::min(m_v_cmd_y, max_vel_y);
-    v_cmd(2) = std::min(m_v_cmd_yaw, max_vel_yaw);
+    m_ee_state_ref(0) += m_ee_vel_ref(0) * m_dt + 0.5 * m_ee_acc_ref(0) * m_dt * m_dt;
+    m_ee_state_ref(1) += m_ee_vel_ref(1) * m_dt + 0.5 * m_ee_acc_ref(1) * m_dt * m_dt;
+    m_ee_state_ref(2) += m_ee_vel_ref(2) * m_dt + 0.5 * m_ee_acc_ref(2) * m_dt * m_dt;
 
-    // @meshin: Set the maximum acceleration as a fraction/multiple of the commanded velocity 
-    acc_cmd = 0.8 * v_cmd;
-
-    if (v_cmd(0) != 0) {
-        // updating reference X commands
-        float t_acc = v_cmd(0) / acc_cmd(0);
-        // constant acceleration phase
-        if (t <= t_acc)
-        {
-            // m_ee_ref.acceleration[0] = acc_cmd(0);
-            // m_ee_ref.velocity[0] = acc_cmd(0) * t;
-            // m_ee_ref.position[0] = 0.5 * acc_cmd(0) * t * t;
-            m_ee_acc_ref(0) = acc_cmd(0);
-            m_ee_vel_ref(0) = acc_cmd(0) * t;
-            m_ee_state_ref(0) = 0.5 * acc_cmd(0) * t * t;
-        }
-        // constant velocity phase
-        else
-        {
-            // m_ee_ref.acceleration[0] = 0;
-            // m_ee_ref.velocity[0] = v_cmd(0);
-            // m_ee_ref.position[0] = 0.5 * acc_cmd(0) * t_acc * t_acc + v_cmd(0) * (t - t_acc);
-            m_ee_acc_ref(0) = 0;
-            m_ee_vel_ref(0) = v_cmd(0);
-            m_ee_state_ref(0) = 0.5 * acc_cmd(0) * t_acc * t_acc + v_cmd(0) * (t - t_acc);
-        }
-    }
-
-    if (v_cmd[1] != 0)
-    {
-        // updating reference Y commands
-        float t_acc = v_cmd(1) / acc_cmd(1);
-        // constant acceleration phase
-        if (t <= t_acc)
-        {
-            // m_ee_ref.acceleration[1] = acc_cmd(1);
-            // m_ee_ref.velocity[1] = acc_cmd(1) * t;
-            // m_ee_ref.position[1] = 0.5 * acc_cmd(1) * t * t;
-            m_ee_acc_ref(1) = acc_cmd(1);
-            m_ee_vel_ref(1) = acc_cmd(1) * t;
-            m_ee_state_ref(1) = 0.5 * acc_cmd(1) * t * t;
-        }
-        // constant velocity phase
-        else
-        {
-            // m_ee_ref.acceleration[1] = 0;
-            // m_ee_ref.velocity[1] = v_cmd(1);
-            // m_ee_ref.position[1] = 0.5 * acc_cmd(1) * t_acc * t_acc + v_cmd(1) * (t - t_acc);
-            m_ee_state_ref(1) = 0;
-            m_ee_vel_ref(1) = v_cmd(1);
-            m_ee_state_ref(1) = 0.5 * acc_cmd(1) * t_acc * t_acc + v_cmd(1) * (t - t_acc);
-        }
-    }
-
-    // m_ee_ref.acceleration[5] = 0;
-    // m_ee_ref.velocity[5] = v_cmd(2);
-    m_ee_acc_ref(5) = 0;
-    m_ee_vel_ref(5) = v_cmd(2);
-    float yaw = fmod(v_cmd(2) * t, 2 * M_PI);
-    // Convert orientation to quaternion then pass it to m_ee_ref.position[3:7]
-    // m_ee_ref.position[5] = (yaw > M_PI) ? yaw - 2 * M_PI : yaw;
+    vec3 eul = pinocchio::Rot2EulXYZ(pinocchio::quat2rot(m_ee_state_ref.block<4,1>(3, 0)));
+    m_yaw = fmod(eul(2) + m_ee_vel_ref(5) * m_dt + 0.5 * m_ee_acc_ref(5) * m_dt * m_dt, 2 * M_PI);
+    m_yaw = (m_yaw > M_PI) ? m_yaw - 2 * M_PI : m_yaw;
+    vec3 ref_eul = vec3(0., 0., m_yaw);
+    m_ee_state_ref.block<4,1>(3, 0) = pinocchio::EulXYZ2quat(ref_eul);
 }
 
-void Planner::UpdateTakeoffData() {
+void Planner::updateTakeoffData() {
     Eigen::Array4i cs_ref_next = m_gait.GetScheduledContact(m_t_curr);
 
     // AM: m_cs_ref being updated in SetFeetTarget()
@@ -142,32 +206,23 @@ void Planner::UpdateTakeoffData() {
             // going from stance to swing phase
             m_t_takeoff(i) = m_t_curr;
 
-            // using the reference feet position
-            // m_p_takeoff_full(3 * i) = m_ee_ref.position[7 + 3 * i];
-            // m_p_takeoff_full(3 * i + 1) = m_ee_ref.position[7 + 3 * i + 1];
             m_p_takeoff_full(3 * i) = m_ee_state_ref(7 + 3 * i);
             m_p_takeoff_full(3 * i + 1) = m_ee_state_ref(7 + 3 * i + 1);
-
-            // using the actual feet position
-            // vec12 pf_act = m_robot.forwardKinematics(m_joint_state_act);
-            // m_p_takeoff_full.block<2, 1>(3 * i, 0) = pf_act.block<2, 1>(3 * i, 0);
         }
     }
 }
 
-Eigen::Vector3d Planner::GetDesiredFootPosition(const uint8_t& leg_id, const float& t_stance) {
+vec3 Planner::getRaibertHeuristic(const uint8_t& leg_id, const float& t_stance) {
     Eigen::Vector3d p_step_i = Eigen::Vector3d::Zero();
     Eigen::VectorXd ee_ref = Eigen::VectorXd::Zero(19);
     Eigen::Vector2d base_ref_vel;
 
     // base_ref_vel << m_ee_ref.velocity[0], m_ee_ref.velocity[1];
     base_ref_vel << m_ee_vel_ref(0), m_ee_vel_ref(1);
+    vec3 base_w_des = m_ee_vel_ref.block<3,1>(3, 0);
 
-    // for (int i = 0; i < 19; ++i) {
-    //     // ee_ref(i) = m_ee_ref.position[i];
-    //     ee_ref(i) = m_ee_state_ref(i);
-    // }
     ee_ref = m_ee_state_ref;
+    vec3 base_pos_ref = m_ee_state_ref.block<3,1>(0, 0);
 
     vec19 js_ref = vec19::Zero();
     js_ref.block<7,1>(0, 0) = ee_ref.block<7,1>(0, 0);
@@ -177,9 +232,31 @@ Eigen::Vector3d Planner::GetDesiredFootPosition(const uint8_t& leg_id, const flo
 
     Eigen::Vector3d p_hip_i = p_hip.block<3, 1>(3 * leg_id, 0);
 
-    p_step_i.block<2,1>(0, 0) = p_hip_i.block<2,1>(0, 0) + 0.5 * t_stance * base_ref_vel;
+    vec3 r_hip_B = p_hip_i - base_pos_ref;
+    Eigen::Vector3d ang_correction = base_w_des.cross(r_hip_B);
+
+    p_step_i.block<2, 1>(0, 0) = p_hip_i.block<2, 1>(0, 0) + 0.5 * t_stance * ( base_ref_vel + ang_correction.block<2,1>(0, 0) );
+
+    if (js_ref.hasNaN()) {
+        std::cout << "dt: " << m_dt << "\n";
+        std::cout << "t_curr: " << m_t_curr << "\n";
+        std::cout << "ee_ref: " << ee_ref.transpose() << "\n";
+        std::cout << "js_ref: " << js_ref.transpose() << "\n";
+        std::cout << "p_hip: " << p_hip.transpose() << "\n";
+        std::cout << "p_hip_i: " << leg_id << ": " << p_hip_i.transpose() << "\n";
+        std::cout << "t_stance: " << t_stance << "\n";
+        std::cout << "r_hip_B: " << r_hip_B.transpose() << "\n";
+        std::cout << "p_step_i: " << leg_id << ": " << p_step_i.transpose() << "\n";
+        std::cout << "leg_command: " << (p_step_i - m_p_takeoff_full.block<3,1>(3 * leg_id, 0)).transpose() << "\n";
+        std::cout << "ang_correction: " << ang_correction.transpose() << "\n";
+        exit(1);
+    }
 
     return p_step_i;
+}
+
+Eigen::Vector3d Planner::getDesiredFootPosition(const uint8_t& leg_id, const float& t_stance) {
+    return getRaibertHeuristic(leg_id, t_stance);
 }
 
 // // TODO: add z-height checks and print statements
@@ -217,20 +294,21 @@ Eigen::Vector3d Planner::GetDesiredFootPosition(const uint8_t& leg_id, const flo
 
 // }
 
-void Planner::SetFeetTarget() {
-
+void Planner::setFeetTarget() {
     for (int i = 0; i < 4; ++i) {
         // if not in contact as per reference
         if (!m_cs_ref(i)) {
             // leg in swing phase, plan the swing trajectory
-            Eigen::Vector3d p_step = GetDesiredFootPosition(i, m_gait.GetStanceTime(i));
+            Eigen::Vector3d p_step = getDesiredFootPosition(i, m_gait.GetStanceTime(i));
 
             Eigen::Vector3d p_takeoff = m_p_takeoff_full.block<3, 1>(3 * i, 0);
+            // std::cout << "p_takeoff: " << p_takeoff.transpose() << "\n";
 
             Eigen::Vector3d leg_command = p_step -  p_takeoff;
+            // std::cout << "leg command: " << leg_command.transpose() << "\n";
             // CheckDesiredFootholds(leg_command);
 
-            p_step = p_takeoff + leg_command;
+            // p_step = p_takeoff + leg_command;
 
             float t_takeoff = m_t_takeoff(i);
             float t_swing = m_gait.GetSwingTime(i);
@@ -247,9 +325,6 @@ void Planner::SetFeetTarget() {
             Eigen::Vector3f leg_vel = ref_foot_traj[i].getVelocity();
             Eigen::Vector3f leg_acc = ref_foot_traj[i].getAcceleration();
 
-            // m_ee_ref.position[7 + 3 * i + 0] = leg_pos(0);
-            // m_ee_ref.position[7 + 3 * i + 1] = leg_pos(1);
-            // m_ee_ref.position[7 + 3 * i + 2] = leg_pos(2);
             m_ee_state_ref(7 + 3 * i + 0) = leg_pos(0);
             m_ee_state_ref(7 + 3 * i + 1) = leg_pos(1);
             m_ee_state_ref(7 + 3 * i + 2) = leg_pos(2);
@@ -265,13 +340,13 @@ void Planner::SetFeetTarget() {
     }
 }
 
-void Planner::SetTarget() {
-    SetFeetTarget();
-    SetBaseTarget();
+void Planner::setTarget() {
+    setFeetTarget();
+    setBaseTarget();
 }
 
 // bool Planner::CheckSafeOrientation(){
-//     if (abs(m_joint_state_act(3)) >= 0.5 || abs(m_joint_state_act(4)) >= 0.5)
+//     if (fabs(m_joint_state_act(3)) >= 0.5 || fabs(m_joint_state_act(4)) >= 0.5)
 //     {
 //         printf("Orientation safety check failed!\n");
 //         return false;
@@ -343,33 +418,44 @@ double Planner::getTimeSinceStart() {
 
 void Planner::reset() {
     m_startTimePoint = std::chrono::high_resolution_clock::now();
-}
 
-void Planner::Step() {
-    updateEstimationData();
+    m_gait = Gait::GAIT_TYPE::STANCE;
+    setDesiredVelocity(0, 0, 0);
 
-    m_t_curr = getTimeSinceStart();
-
-    // std::cout << "t_curr: " << m_t_curr << std::endl;
-    // reset if simulation restarted
-    if (m_t_curr < 0) {
-        reset();
+    if (m_planner_data_ptr == NULL) {
+        std::cout << "Planner data pointer not set.\n";
+        return;
     }
 
+    m_planner_data_ptr -> x = m_robot.getStanceStates();
+    m_planner_data_ptr -> xd = vec18::Zero();
+    m_planner_data_ptr -> xdd = vec18::Zero();
+    m_planner_data_ptr -> cs_ref = int4::Ones();
+    m_planner_data_ptr -> pc_ref = vec4::Ones();
+
+    initClass();
+}
+
+void Planner::step(const float& dt, const float& t_curr) {
+    m_dt = dt;
+    // std::cout << "m_dt: " << m_dt << "\n";
+    m_t_curr = t_curr;
+    // std::cout << "m_t_curr: " << m_t_curr << "\n";
+    updateEstimationData();
+
     // Step 1
-    UpdateTakeoffData();
+    updateTakeoffData();
 
     // Step 2
     m_cs_ref = m_gait.GetScheduledContact(m_t_curr);
 
     // Step 3
     updateExpectedStanceFlag();
-    // m_int32msg = copyArrayXiToMultiArray(m_expected_stance);
 
     p_cs_phi = getScheduledContactProbability(m_t_curr, m_gait);
 
     // Step 4
-    SetTarget();
+    setTarget();
 
     updatePlannerData();
 }

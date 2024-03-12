@@ -11,8 +11,11 @@
 #include <thread>
 
 #include "memory_types.hpp"
-#ifdef USE_ROS_COMM
+
+#if defined(USE_ROS_COMM)
 #include "QuadROSComm.hpp"
+#elif defined(USE_DDS_COMM)
+#include "QuadDDSComm.hpp"
 #else
 #include "SHM.hpp"
 #endif
@@ -59,8 +62,10 @@ QuadrupedSensorData sensor_data;
 QuadrupedCommandData joint_command_data;
 QuadrupedMeasurementData measurement_data;
 // SHM comm_data(DATA_ACCESS_MODE::PLANT_TO_EXECUTOR);
-#ifdef USE_ROS_COMM
+#if defined(USE_ROS_COMM)
 std::shared_ptr<QuadROSComm> comm_data_ptr;
+#elif defined(USE_DDS_COMM)
+std::shared_ptr<QuadDDSComm> comm_data_ptr;
 #else
 std::shared_ptr<SHM> comm_data_ptr;
 #endif
@@ -231,7 +236,6 @@ void run_simulation(float sim_time = 1, bool show_visualization=false, float fps
             dt = 1./fps;
         }
         while (d->time - simstart < dt) {
-            UpdateSensorData();
             mj_step(m, d);
         }
     }

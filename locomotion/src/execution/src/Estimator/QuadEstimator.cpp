@@ -13,21 +13,20 @@ void QuadEstimator::InitClass() {
 
     m_forces_estimated = vec12::Zero();
 
-    // m_sigma_pz = 0.841 * Eigen::Matrix4d::Identity(); // value from contact event detection paprt MIT
-    m_sigma_pz = 2.0 * mat4x4::Identity(); // value from contact event detection paprt MIT
-    // m_sigma_fz = 0.930 * Eigen::Matrix4d::Identity(); // value from contact event detection paprt MIT
-    m_sigma_fz = 1.0 * mat4x4::Identity(); // value from contact event detection paprt MIT
+    // m_sigma_pz = 0.841 * Eigen::Matrix4d::Identity(); // value from contact event detection paper MIT
+    m_sigma_pz = 10.0 * mat4x4::Identity(); // value from contact event detection paper MIT
+    // m_sigma_fz = 0.930 * Eigen::Matrix4d::Identity(); // value from contact event detection paper MIT
+    m_sigma_fz = 0.3 * mat4x4::Identity(); //
     m_sigma_measurement = mat8x8::Zero();
     m_sigma_measurement.block<4,4>(0, 0) = m_sigma_pz;
     m_sigma_measurement.block<4,4>(4, 4) = m_sigma_fz;
-    m_sigma_process = 1.5 * Eigen::Matrix4d::Identity();
+    m_sigma_process = 0.2 * Eigen::Matrix4d::Identity();
+    m_jv_prev = vec18::Zero();
 
     InitEstimatorVars();
 }
 
 void QuadEstimator::InitEstimatorVars() {
-    float dt = m_dt;
-
     sensor_noise_zfoot          =  0.001;
     sensor_noise_pimu_rel_foot  =  0.001;
     sensor_noise_vimu_rel_foot  =  0.1;
@@ -42,13 +41,13 @@ void QuadEstimator::InitEstimatorVars() {
 
     _A.setZero();
     _A.block<3,3>(0, 0) = Eigen::Matrix<double, 3, 3>::Identity();
-    _A.block<3,3>(0, 3) = dt * Eigen::Matrix<double, 3, 3>::Identity();
+    // _A.block<3,3>(0, 3) = dt * Eigen::Matrix<double, 3, 3>::Identity();
     _A.block<3,3>(3, 3) = Eigen::Matrix<double, 3, 3>::Identity();
     _A.block<12,12>(6, 6) = Eigen::Matrix<double, 12, 12>::Identity();
 
     _B.setZero();
-    _B.block<3,3>(0, 0) = 0.5 * dt * dt * Eigen::Matrix<double, 3, 3>::Identity();
-    _B.block<3,3>(3, 0) = dt * Eigen::Matrix<double, 3, 3>::Identity();
+    // _B.block<3,3>(0, 0) = 0.5 * dt * dt * Eigen::Matrix<double, 3, 3>::Identity();
+    // _B.block<3,3>(3, 0) = dt * Eigen::Matrix<double, 3, 3>::Identity();
     
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C1(3, 6);
     C1 << Eigen::Matrix<double, 3, 3>::Identity(), Eigen::Matrix<double, 3, 3>::Zero();
@@ -68,10 +67,11 @@ void QuadEstimator::InitEstimatorVars() {
     _P = 100. * _P;
 
     _Q0.setIdentity();
-    _Q0.block<3,3>(0, 0) = (dt / 20.f) * Eigen::Matrix<double, 3, 3>::Identity();
-    _Q0.block<3,3>(3, 3) =
-        (dt * 9.8f / 20.f) * Eigen::Matrix<double, 3, 3>::Identity();
-    _Q0.block<12,12>(6, 6) = dt * Eigen::Matrix<double, 12, 12>::Identity();
+    // _Q0.block<3,3>(0, 0) = (dt / 20.f) * Eigen::Matrix<double, 3, 3>::Identity();
+    // _Q0.block<3,3>(3, 3) =
+    //     (dt * 9.8f / 20.f) * Eigen::Matrix<double, 3, 3>::Identity();
+        // (dt * 1.0f / 20.f) * Eigen::Matrix<double, 3, 3>::Identity();
+    // _Q0.block<12,12>(6, 6) = dt * Eigen::Matrix<double, 12, 12>::Identity();
     _R0.setIdentity();
 
     Q = Eigen::Matrix<double, 18, 18>::Identity();
@@ -87,7 +87,21 @@ void QuadEstimator::InitEstimatorVars() {
     R.block<4,4>(24, 24) = _R0.block<4,4>(24, 24) * sensor_noise_zfoot;
 }
 
+void QuadEstimator::InitTimedEstimatorVars() {
+    float dt = m_dt;
+    _A.block<3,3>(0, 3) = dt * Eigen::Matrix<double, 3, 3>::Identity();
+    _B.block<3,3>(0, 0) = 0.5 * dt * dt * Eigen::Matrix<double, 3, 3>::Identity();
+    _B.block<3,3>(3, 0) = dt * Eigen::Matrix<double, 3, 3>::Identity();
+
+    _Q0.block<3,3>(0, 0) = (dt / 20.f) * Eigen::Matrix<double, 3, 3>::Identity();
+    _Q0.block<3,3>(3, 3) =
+        (dt * 9.8f / 20.f) * Eigen::Matrix<double, 3, 3>::Identity();
+    _Q0.block<12,12>(6, 6) = dt * Eigen::Matrix<double, 12, 12>::Identity();
+}
+
 void QuadEstimator::UpdatePoseEstimate() {
+    InitTimedEstimatorVars();
+
     Q = Eigen::Matrix<double, 18, 18>::Identity();
     R = Eigen::Matrix<double, 28, 28>::Identity();
 
@@ -105,15 +119,15 @@ void QuadEstimator::UpdatePoseEstimate() {
     int rindex2 = 0;
     int rindex3 = 0;
 
-    // vec3 g(0, 0, double(-9.81));
-    vec3 g(0, 0, 0);
+    vec3 g(0, 0, double(-9.81));
+    // vec3 g(0, 0, 0);
     
     // mat3x3 Rot = pinocchio::quat2rot(sensor_data.quat);
     vec3 a_world = sensor_data.a_W;
     vec3 w_world = sensor_data.w_W;
 
     vec3 a = a_world + g;
-    // std::cout << "A WORLD\n" << a << "\n";
+    // std::cout << "A WORLD" << a.transpose() << "\n";
     vec4 pzs = vec4::Zero();
     vec4 trusts = vec4::Zero();
     vec3 p0, v0;
@@ -141,19 +155,27 @@ void QuadEstimator::UpdatePoseEstimate() {
         rindex2 = 12 + i1;
         rindex3 = 24 + i;
 
-        double trust = double(1);
+        double trust = double(0);
+        // double trust = double(1);
         // Using Contact probability as phase
         // double phase = fmin(this->_stateEstimatorData.result->contactEstimate(i), double(1));
-        double phase = est_data.pc(i);
-        //double trust_window = double(0.25);
-        double trust_window = double(0.2);
+        double prob_c = est_data.pc(i);
+        // //double trust_window = double(0.25);
+        double trust_window = double(0.6);
 
-        if (phase < trust_window) {
-            trust = phase / trust_window;
-        } else if (phase > (double(1) - trust_window)) {
-            trust = (double(1) - phase) / trust_window;
+        // if (phase < trust_window && (phase > (double(1) - trust_window))) {
+        if (prob_c < trust_window) {
+            trust = 0;
+        } else {
+            trust = prob_c;
         }
-        //double high_suspect_number(1000);
+        // if (phase < trust_window) {
+        //     trust = phase / trust_window;
+        // } else if (phase > (double(1) - trust_window)) {
+        //     trust = (double(1) - phase) / trust_window;
+        // }
+        // trust = phase;
+        // double high_suspect_number(1000);
         double high_suspect_number(100);
 
         // printf("Trust %d: %.3f\n", i, trust);
@@ -178,7 +200,10 @@ void QuadEstimator::UpdatePoseEstimate() {
         _ps.segment(i1, 3) = -p_f;
         _vs.segment(i1, 3) = (1.0f - trust) * v0 + trust * (-dp_f);
         pzs(i) = (1.0f - trust) * (p0(2) + p_f(2));
+        // pzs(i) = 0;
     }
+
+    // std::cout << "feet vel: " << _vs(0) << ", " << _vs(3) << ", " << _vs(6) << ", " << _vs(9) << "\n";
 
     Eigen::Matrix<double, 28, 1> y;
     y << _ps, _vs, pzs;
@@ -190,12 +215,21 @@ void QuadEstimator::UpdatePoseEstimate() {
     Eigen::Matrix<double, 28, 1> ey = y - yModel;
     Eigen::Matrix<double, 28, 28> S = _C * Pm * Ct + R;
 
-    // todo compute LU only once
-    Eigen::Matrix<double, 28, 1> S_ey = S.lu().solve(ey);
-    _xhat += Pm * Ct * S_ey;
+    // std::cout << "y: " << y.transpose() << "\n";
+    // std::cout << "yModel: " << yModel.transpose() << "\n";
+    // std::cout << "Innovation (ey): " << ey.transpose() << "\n";
 
-    Eigen::Matrix<double, 28, 18> S_C = S.lu().solve(_C);
-    _P = (Eigen::Matrix<double, 18, 18>::Identity() - Pm * Ct * S_C) * Pm;
+    Eigen::Matrix<double, 18, 28> K = Pm * Ct * S.inverse();
+
+    // todo compute LU only once
+    // Eigen::Matrix<double, 28, 1> S_ey = S.lu().solve(ey);
+    // _xhat += Pm * Ct * S_ey;
+    // std::cout << "Kalman correction: " << (K * ey).transpose() << "\n";
+    _xhat += K * ey;
+
+    // Eigen::Matrix<double, 28, 18> S_C = S.lu().solve(_C);
+    // _P = (Eigen::Matrix<double, 18, 18>::Identity() - Pm * Ct * S_C) * Pm;
+    _P = (mat18x18::Identity() - K * _C) * Pm;
 
     Eigen::Matrix<double, 18, 18> Pt = _P.transpose();
     _P = (_P + Pt) / double(2);
@@ -220,6 +254,19 @@ void QuadEstimator::UpdatePoseEstimate() {
     est_data.rB = _xhat.block<3,1>(0, 0);
     est_data.vB = _xhat.block<3,1>(3, 0);
     est_data.rP = _xhat.block<12,1>(6, 0);
+
+    est_data.js.block<3,1>(0, 0) = _xhat.block<3,1>(0, 0);
+    est_data.jv.block<3,1>(0, 0) = _xhat.block<3,1>(3, 0);
+    
+    est_data.js.block<4,1>(3, 0) = sensor_data.quat;
+    est_data.jv.block<3,1>(3, 0) = sensor_data.w_W;
+
+    est_data.js.block<12,1>(7, 0) = sensor_data.q;
+    est_data.jv.block<12,1>(7, 0) = sensor_data.qd;
+
+    est_data.ja = (est_data.jv - m_jv_prev) * m_loop_rate;
+
+    m_jv_prev = est_data.jv;
     // est_data.rB = base_position;
     // est_data.vB = base_vel;
     // vec19 js_tmp = m_robot.getNeutralJointStates();
@@ -238,7 +285,7 @@ inline float QuadEstimator::get_pc_fz(const float& fz, const float& mu_fz, const
 
 vec4 QuadEstimator::get_pc_pz(const vec4& pz) {
     float mu_pz = 0.0;
-    float sigma_pz = 0.1;
+    float sigma_pz = 0.05;
     vec4 m_pz_prob = vec4::Zero();
     for (int i = 0; i < 4; ++i) {
         m_pz_prob(i) = get_pc_pz(pz(i), mu_pz, sigma_pz);
@@ -247,8 +294,8 @@ vec4 QuadEstimator::get_pc_pz(const vec4& pz) {
 }
 vec4 QuadEstimator::get_pc_fz(const vec4& fz) {
     // mu_fz and sigma_fz can be made in to an indexable array to give different value for each foot
-    float mu_fz = 15;
-    float sigma_fz = 10;
+    float mu_fz = 10;
+    float sigma_fz = 15;
     vec4 m_fz_prob = vec4::Zero();
     for (int i = 0; i < 4; ++i) {
         m_fz_prob(i) = get_pc_fz(fz(i), mu_fz, sigma_fz);
@@ -267,9 +314,14 @@ void QuadEstimator::UpdateContactEstimate() {
     jv_tmp.block<12,1>(6, 0) = sensor_data.qd;
     vec18 g = m_robot.gravitationalTerms(js_tmp);
     vec18 h = m_robot.nonLinearEffects(js_tmp, jv_tmp);
+    // m_forces_estimated = -jac.block<12,12>(6, 6).transpose().completeOrthogonalDecomposition().solve(sensor_data.tau - h.block<12,1>(6, 0));
     m_forces_estimated = -jac.block<12,12>(6, 6).transpose().completeOrthogonalDecomposition().solve(sensor_data.tau - h.block<12,1>(6, 0));
-
-    std::cout << "Fc_est: " << m_forces_estimated.transpose() << "\n";
+    double _alpha = 0.0;
+    m_fc_est = _alpha * m_fc_est + (1 - _alpha) * m_forces_estimated;
+    // for (int i = 0; i < 4; ++i) {
+    //     m_fc_est(3 * i + 2) = std::fmax(m_fc_est(3 * i + 2), 0.);
+    // }
+    // std::cout << "Fc_est: " << m_forces_estimated.transpose() << "\n";
 
     vec4 m_mu_Pc = m_pc_ref;
     mat4x4 m_sigma_Pc = m_sigma_process;
@@ -281,7 +333,8 @@ void QuadEstimator::UpdateContactEstimate() {
     }
     vec4 fz = vec4::Zero();
     for (int i = 0; i < 4; ++i) {
-        fz(i) = m_forces_estimated(3 * i + 2);
+        // fz(i) = std::fmax(m_forces_estimated(3 * i + 2), 0.);
+        fz(i) = m_fc_est(3 * i + 2);
     }
 
     // first measurement: P_c_pz (based on foot height estimate) (now probably pose estiamtor and this will feed each other. Hope things don't blow up!)
@@ -308,16 +361,16 @@ void QuadEstimator::UpdateContactEstimate() {
 
     for (int i = 0; i < 4; ++i) {
         float P_c = m_mu_Pc(i);
-        // if (P_c > 0.7 && m_cs_act(i) == 0) {
-        //     m_cs_act(i) = 1;
-        // } else if (P_c < 0.4 && m_cs_act(i) == 1) {
-        //     m_cs_act(i) = 0;
-        // }
-        if (P_c > 0.5) {
+        if (P_c > 0.7 && est_data.cs(i) == 0) {
             est_data.cs(i) = 1;
-        } else {
+        } else if (P_c < 0.3 && est_data.cs(i) == 1) {
             est_data.cs(i) = 0;
         }
+        // if (P_c > 0.5) {
+        //     est_data.cs(i) = 1;
+        // } else {
+        //     est_data.cs(i) = 0;
+        // }
     }
 }
 

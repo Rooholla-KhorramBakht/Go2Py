@@ -53,8 +53,9 @@ mjtNum ctrl;
 
 QuadrupedSensorData sensor_data;
 QuadrupedCommandData joint_command_data;
+QuadrupedMeasurementData measurement_data;
 // SHM comm_data(DATA_ACCESS_MODE::PLANT_TO_EXECUTOR);
-std::shared_ptr<CommROSP2E> comm_data_ptr;
+std::shared_ptr<QuadROSComm> comm_data_ptr;
 
 
 #ifdef COMPILE_WITH_VISUALIZATION

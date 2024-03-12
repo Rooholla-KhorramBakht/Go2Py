@@ -1,0 +1,36 @@
+module unitree_go {
+    module msg {
+        module dds_ {
+            struct MotorCmd {
+                uint8 mode;
+                float q;
+                float dq;
+                float tau;
+                float kp;
+                float kd;
+                uint32 reserve[3];
+            };
+            struct BmsCmd {
+                uint8 off;
+                uint8 reserve[3];
+            };
+            struct LowCmd_ {
+                uint8 head[2];
+                uint8 level_flag;
+                uint8 frame_reserve;
+                uint32 sn[2];
+                uint32 version[2];
+                uint16 bandwidth;
+                MotorCmd motor_cmd[20];
+                BmsCmd bms_cmd;
+                uint8 wireless_remote[40];
+                uint8 led[12];
+                uint8 fan[2];
+                uint8 gpio;
+                uint32 reserve;
+                uint32 crc;
+            };
+        };
+    };
+};
+

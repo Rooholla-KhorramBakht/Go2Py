@@ -1,6 +1,7 @@
 #include <kinodynamics.hpp>
+#include <filesystem>
 
-Quadruped::Quadruped() : urdf_filepath("/home/meshin/dev/quadruped/xterra/quadruped_locomotion/src/robots/go2_description/urdf/go2_description.urdf") {
+Quadruped::Quadruped() : urdf_filepath("") {
     InitClass();
 }
 
@@ -9,6 +10,11 @@ Quadruped::Quadruped(std::string urdf_path) : urdf_filepath(urdf_path) {
 }
 
 void Quadruped::InitClass() {
+    if (urdf_filepath.length() == 0) {
+        // urdf_filepath = "/home/meshin/dev/quadruped/xterra/quadruped_locomotion/src/robots/go2_description/urdf/go2_description.urdf";
+        std::filesystem::path filepath = std::filesystem::current_path().parent_path().parent_path() / "src/robots/go2_description/urdf/go2_description.urdf";
+        urdf_filepath = filepath.string();
+    }
     pinocchio::urdf::buildModel(urdf_filepath, pinocchio::JointModelFreeFlyer(), model);
     pinocchio::Data tmp_data(model);
     data = tmp_data;

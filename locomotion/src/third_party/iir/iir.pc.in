@@ -1,0 +1,10 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+libdir=@libdir_for_pc_file@
+includedir=@includedir_for_pc_file@
+
+Name: @PROJECT_NAME@
+Description: IIR filter library.
+Version: @PROJECT_VERSION@
+URL: https://www.berndporr.me.uk/iir/
+Libs: -L${libdir} -liir
+Cflags: -I${includedir}
