@@ -1,0 +1,10 @@
+module msgs{
+    struct Imu {
+        float q[4];
+        float gyro[3];
+        float accel[3];
+        float rpy[3];
+        octet tmp;
+    };
+};
+

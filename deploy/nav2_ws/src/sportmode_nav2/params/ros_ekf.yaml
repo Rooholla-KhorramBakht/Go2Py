@@ -66,7 +66,7 @@ ekf_filter_node:
 #     3a. Set your "world_frame" to your map_frame value
 #     3b. MAKE SURE something else is generating the odom->base_link transform. Note that this can even be another state
 #         estimation node from robot_localization! However, that instance should *not* fuse the global data.
-        map_frame: map              # Defaults to "map" if unspecified
+        map_frame: odom              # Defaults to "map" if unspecified
         odom_frame: odom            # Defaults to "odom" if unspecified
         base_link_frame: base_link  # Defaults to "base_link" if unspecified
         world_frame: odom           # Defaults to the value of odom_frame if unspecified
@@ -114,7 +114,7 @@ ekf_filter_node:
 # for all future measurements. While you can achieve the same effect with the differential paremeter, the key
 # difference is that the relative parameter doesn't cause the measurement to be converted to a velocity before
 # integrating it. If you simply want your measurements to start at 0 for a given sensor, set this to true.
-        odom0_relative: false
+        odom0_relative: true
 
 # [ADVANCED] If your data is subject to outliers, use these threshold settings, expressed as Mahalanobis distances, to
 # control how far away from the current vehicle state a sensor measurement is permitted to be. Each defaults to

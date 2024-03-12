@@ -1,0 +1,18 @@
+package unitree_lowlevel;
+struct UnitreeLowState {
+    double stamp;
+    float q[12];
+    float dq[12];
+    float tau_est[12];
+    float contact_state[4];
+    float accel[3];
+    float gyro[3];
+    float temperature;
+    float quaternion[4];
+    float rpy[3];
+    float gravity[3];
+    float gt_pos[3];
+    float gt_quat[4];
+    float gt_lin_vel[3];    
+    float gt_ang_vel[3];
+}

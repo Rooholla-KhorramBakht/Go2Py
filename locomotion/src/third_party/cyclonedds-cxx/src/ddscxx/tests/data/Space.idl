@@ -1,0 +1,56 @@
+
+module Space {
+    enum Enumeration
+    {
+        VALUE1,
+        VALUE2
+    };
+
+    struct Type1 {
+        @key long long_1;
+        long long_2;
+        long long_3;
+    };
+
+    struct Type2 {
+        @key long long_1;
+        long long_2;
+        long long_3;
+        Enumeration enum_1;
+    };
+};
+
+module TraitTest {
+    struct StructDefault {
+        long l;
+    };
+
+    @nested struct StructNested {
+        long l;
+    };
+
+    @topic struct StructTopic {
+        long l;
+    };
+
+    union UnionDefault switch(long) {
+        case 1:
+            long l;
+        case 2:
+            double d;
+    };
+
+    @nested union UnionNested switch(long) {
+        case 1:
+            long l;
+        case 2:
+            double d;
+    };
+
+    @topic union UnionTopic switch(long) {
+        case 1:
+            long l;
+        case 2:
+            double d;
+    };
+};

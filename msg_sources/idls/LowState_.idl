@@ -1,0 +1,74 @@
+// generated from rosidl_generator_dds_idl/resource/idl.idl.em
+// with input from unitree_go:msg/LowState.idl
+// generated code does not contain a copyright notice
+#include "BmsState_.idl"
+#include "IMUState_.idl"
+#include "MotorState_.idl"
+
+#ifndef __unitree_go__msg__low_state__idl__
+#define __unitree_go__msg__low_state__idl__
+
+module Go2Py {
+
+module unitree_go {
+
+module msg {
+
+module dds_ {
+
+
+struct LowState_ {
+octet head[2];               //帧头，数据校验用（0xFE,0xEF）。
+
+octet level_flag;            //沿用的，但是目前不用。
+octet frame_reserve;         //沿用的，但是目前不用。
+unsigned long sn[2];         //已经改为文件存储形式，目前没用。
+unsigned long version[2];    //沿用的，但是目前不用。
+unsigned short bandwidth;    //沿用的，但是目前不用。。
+  
+unitree_go::msg::dds_::IMUState_ imu_state;           //IMU数据信息。
+
+// FR_0 -> 0 , FR_1 -> 1  , FR_2 -> 2   电机顺序，目前只用12电机，后面保留。
+// FL_0 -> 3 , FL_1 -> 4  , FL_2 -> 5
+// RR_0 -> 6 , RR_1 -> 7  , RR_2 -> 8
+// RL_0 -> 9 , RL_1 -> 10 , RL_2 -> 11
+unitree_go::msg::dds_::MotorState_ motor_state[20];   //电机总数据。
+unitree_go::msg::dds_::BmsState_ bms_state;           //电池总数据。
+
+short foot_force[4];        //足端力（范围0-4095），可按照实际数值显示。（数组：0-FR，1-FL，2-RR, 3-RL）
+short foot_force_est[4];    //沿用的，但是目前不用。
+
+unsigned long tick;         //1ms计时用，按照1ms递增。
+octet wireless_remote[40];  //遥控器原始数据。
+
+//&0x80 -  电机               超时标志          1-超时   0-正常
+//&0x40 -  小Mcu              超时标志          1-超时   0-正常
+//&0x20 -  遥控器             超时标志          1-超时   0-正常
+//&0x10 -  电池               超时标志          1-超时   0-正常
+
+//&0x04 -  自动充电           自动充电状态标志  1-不充电           0-充电
+//&0x02 -  板载电流错误标志   错误标志          1-板载电流异常     0-正常
+//&0x01 -  运控命令超时       超时标志          1-超时             0-正常
+octet bit_flag;             //各个组件状态显示
+  
+float adc_reel;             //卷线器电流（范围：0 - 3A）。
+octet temperature_ntc1;    	//主板中心温度值（范围：-20 - 100℃）。
+octet temperature_ntc2;    	//自动充电温度（范围：-20 - 100℃）。
+float power_v;      				//此电压值为主板电压 -> 电池电压 。
+float power_a;      				//此电流值为主板电流值 -> 电机电流。
+  
+unsigned short fan_frequency[4];    //风扇转速（目前可按照实际数值显示0-10000）。（0-左后转速 , 1-右后转速，2-前转速，单位转/分钟）（堵转检测：3-&0x01：左后堵转 , &0x02：右后堵转，&0x04：前堵转）
+
+unsigned long reserve;   //保留位。
+unsigned long crc;       //数据CRC校验用。
+
+};
+
+
+};  // module dds_
+
+};  // module msg
+
+};  // module unitree_go
+};
+#endif  // __unitree_go__msg__low_state__idl__

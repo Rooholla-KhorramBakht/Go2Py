@@ -61,9 +61,9 @@ typedef struct QuadrupedEstimationData {
     vec12 rP;
     int4 cs;
     vec4 pc;
-    int num_contact;
     vec19 js;
     vec18 jv;
+    vec18 ja;
     QuadrupedEstimationData() {
         rB = vec3::Zero();
         vB = vec3::Zero();
@@ -72,6 +72,7 @@ typedef struct QuadrupedEstimationData {
         pc = vec4::Zero();
         js = vec19::Zero();
         jv = vec18::Zero();
+        ja = vec18::Zero();
     }
 
     void copy(const QuadrupedEstimationData& est) {
@@ -80,6 +81,9 @@ typedef struct QuadrupedEstimationData {
         this->rP = est.rP;
         this->cs = est.cs;
         this->pc = est.pc;
+        this->js = est.js;
+        this->jv = est.jv;
+        this->ja = est.ja;
     }
 } QuadrupedEstimationData;
 
@@ -114,3 +118,51 @@ typedef struct QuadrupedPlannerData {
         pc_ref = vec4::Zero();
     }
 } QuadrupedPlannerData;
+
+typedef struct QuadrupedMeasurementData {
+    vec3 base_position;
+    // A better name might be PluckerVector?
+    struct TotalVelocity {
+        vec3 linear;
+        vec3 angular;
+        TotalVelocity() {
+            linear = vec3::Zero();
+            angular = vec3::Zero();
+        }
+    };
+    TotalVelocity base_velocity;
+    TotalVelocity base_acceleration;
+    vec12 contact_force;
+    vec12 estimated_contact_force;
+    QuadrupedMeasurementData() {
+        base_position = vec3::Zero();
+        base_velocity = TotalVelocity();
+        base_acceleration = TotalVelocity();
+        contact_force = vec12::Zero();
+        estimated_contact_force = vec12::Zero();
+    }
+    void copy(const QuadrupedMeasurementData& m) {
+        this->base_position = m.base_position;
+        this->base_velocity.linear = m.base_velocity.linear;
+        this->base_velocity.angular = m.base_velocity.angular;
+        this->base_acceleration.linear = m.base_acceleration.linear;
+        this->base_acceleration.angular = m.base_acceleration.angular;
+        this->contact_force = m.contact_force;
+        this->estimated_contact_force = m.estimated_contact_force;
+    }
+} QuadrupedMeasurementData;
+
+typedef struct QuadrupedJoystickData {
+    double vel_x = 0;
+    double vel_y = 0;
+    double vel_yaw = 0;
+    int mode = 0; // 0: sleepToStance, 1: stanceToSleep(), 2: move
+    int gait = 0; // 0: stance, 1: trot
+    void copy(const QuadrupedJoystickData& jd) {
+        this->vel_x = jd.vel_x;
+        this->vel_y = jd.vel_y;
+        this->vel_yaw = jd.vel_yaw;
+        this->mode = jd.mode;
+        this->gait = jd.gait;
+    }
+} QuadrupedJoystickData;

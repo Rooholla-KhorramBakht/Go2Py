@@ -46,9 +46,9 @@ public:
     void startFromSleep(const bool& sleep_start) {
         m_starting_from_sleep = sleep_start;
         if (sleep_start) {
-            std::cout << "Starting from sleep...\n";
+            std::cout << "Controller starting from sleep...\n";
         } else {
-            std::cout << "Starting from stance...\n";
+            std::cout << "Controller starting from stance...\n";
         }
         InitClass();
     }
@@ -57,7 +57,7 @@ public:
 
     vec19 m_joint_state_ref, m_ee_state_init, m_ee_state_default_stance, m_joint_state_init;
     vec19 m_ee_state_ref, m_joint_state_act;
-    vec18 m_ee_vel_ref, m_ee_acc_ref, m_joint_vel_act;
+    vec18 m_ee_vel_ref, m_ee_acc_ref, m_joint_vel_act, m_joint_acc_act;
     vec18 m_joint_vel_ref;
     vec12 m_ff_torque;
     int4 m_contact_flag_for_controller;

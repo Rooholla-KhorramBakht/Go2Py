@@ -1,0 +1,3 @@
+[submodule "mjsim_quad"]
+	path = mjsim_quad
+	url = git@github.com:nimesh00/mjsim_quad.git

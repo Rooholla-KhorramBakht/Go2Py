@@ -12,7 +12,7 @@ from rclpy.executors import MultiThreadedExecutor
 from geometry_msgs.msg import TransformStamped
 from Go2Py.joy import xKeySwitch, xRockerBtn
 from geometry_msgs.msg import TwistStamped
-from unitree_go.msg import LowState, Go2pyLowCmd
+from Go2Py.msgs.unitree_go.msg import LowState, Go2pyLowCmd
 from nav_msgs.msg import Odometry   
 
 

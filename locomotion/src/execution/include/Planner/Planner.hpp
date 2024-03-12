@@ -16,19 +16,19 @@ public:
     Planner(std::string name);
     ~Planner();
 
-    virtual Eigen::Vector3d GetDesiredFootPosition(const uint8_t&, const float&);
-    virtual void SetFeetTarget();
-    virtual void SetBaseTarget();
-    virtual void SetTarget();
+    vec3 getRaibertHeuristic(const uint8_t& leg_id, const float& t_stance);
+    virtual Eigen::Vector3d getDesiredFootPosition(const uint8_t&, const float&);
+    virtual void setFeetTarget();
+    virtual void setBaseTarget();
+    virtual void setTarget();
 
-    void SetRobot(Quadruped& robot) {
+    void setRobot(Quadruped& robot) {
         m_robot = robot;
-        InitClass();
+        initClass();
     }
 
-    void SetGait(Gait& gait) {
+    void setGait(Gait& gait) {
         m_gait = gait;
-        InitClass();
     }
 
     void setPlannerDataPtr(QuadrupedPlannerData* pd) {
@@ -38,9 +38,14 @@ public:
         m_estimation_data_ptr = est_ptr;
     }
 
-    void SetDesiredVelocity(const float& vx, const float& vy, const float& vyaw);
+    void setDesiredVelocity(const float& vx, const float& vy, const float& vyaw);
+    bool setTargetBasePosition(const vec3& target_pos, const float& target_yaw);
+    bool sleepToStance();
+    bool stanceToSleep();
+    
+    void setStance();
 
-    virtual void Step();
+    virtual void step(const float& dt, const float& t_curr);
 
     float m_t_curr = 0;
     Gait m_gait;
@@ -48,23 +53,38 @@ public:
     bool m_check_safe_orientation = true;
     bool m_check_desired_footholds = true;
 
-    void InitClass();
+    void initClass();
 
     void reset();
+
+    void startFromSleep(const bool& sleep_start);
 protected:
     Quadruped m_robot;
     Eigen::Vector4d getScheduledContactProbability(const float &t, Gait &gait);
     Eigen::Array4i m_cs_ref;
     int4 m_cs_act;
     Eigen::Vector4d p_cs_phi;
-    float m_v_cmd_x = 0.0;
-    float m_v_cmd_y = 0.0;
-    float m_v_cmd_yaw = 0.0;
-    float max_vel_x = 1.0;
-    float max_vel_y = 1.0;
-    float max_vel_yaw = 1.0;
-    float m_loop_rate = 1000;
-    float m_dt = 0.001;
+    double m_v_cmd_x = 0.0;
+    double m_v_cmd_y = 0.0;
+    double m_v_cmd_z = 0.0;
+    double m_v_cmd_yaw = 0.0;
+    double m_a_max_x = 0.2;
+    double m_a_max_y = 0.2;
+    double m_a_max_z = 0.2;
+    double m_a_max_yaw = 1.0;
+    double max_vel_x = 1.0;
+    double max_vel_y = 1.0;
+    double max_vel_z = 1.0;
+    double max_vel_yaw = 3.0;
+    double m_loop_rate = 1000;
+    double m_dt = 0.001;
+
+    double m_yaw = 0;
+
+    // vec12 p_step_;
+
+    vec3 m_target_base_position;
+    double m_target_yaw;
 
     vec4 m_Pc_act;
     vec12 m_theta;
@@ -75,10 +95,12 @@ protected:
     vec19 m_ee_state_ref;
     vec18 m_ee_vel_ref, m_ee_acc_ref;
 
+    vec12 m_p_takeoff_full;
+
 private:
-    Eigen::VectorXd GetHipPosition(const Eigen::VectorXd&);
+    Eigen::VectorXd getHipPosition(const Eigen::VectorXd&);
     void updateExpectedStanceFlag();
-    void UpdateTakeoffData();
+    void updateTakeoffData();
     void adjustStanceLegs();
 
     double getTimeSinceStart();
@@ -91,12 +113,13 @@ private:
     // bool CheckSafeOrientation();
     // void CheckDesiredFootholds(Eigen::Vector3d&);
 
+    bool m_sleep_start = false;
+
     std::string m_name;
     std::chrono::time_point<std::chrono::high_resolution_clock> m_startTimePoint;
     std::chrono::time_point<std::chrono::high_resolution_clock> m_currentTimePoint;
     
     vec4 m_t_takeoff;
-    vec12 m_p_takeoff_full;
     vec19 m_ee_state_init;
     int4 m_expected_stance;
     

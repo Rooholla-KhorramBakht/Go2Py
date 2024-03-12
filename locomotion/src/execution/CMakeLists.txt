@@ -1,20 +1,30 @@
+find_package(iir REQUIRED)
+find_package(Threads REQUIRED)
+
 include_directories(
     include
     ${COMMON_INCLUDE_DIR}
 )
 
+if(INSTALL_HEADERS_ONLY)
+if($ENV{USE_COMM_TYPE} STREQUAL "dds")
+    add_definitions(-DUSE_DDS_COMM)
+elseif($ENV{USE_COMM_TYPE} STREQUAL "ros2")
+    add_definitions(-DUSE_ROS_COMM)
+endif()
 install(DIRECTORY include/
     DESTINATION ${COMMON_INCLUDE_DIR}
     FILES_MATCHING PATTERN "*.h*"
 )
+else()
 
-add_library(pd_controller
+add_library(pd_controller SHARED
     src/Controller/Controller.cpp
 )
 target_link_libraries(pd_controller
     quad_dynamics
 )
-add_library(didc
+add_library(didc SHARED
     src/Controller/DistributedIDC.cpp
 )
 target_link_libraries(didc
@@ -22,15 +32,16 @@ target_link_libraries(didc
     pd_controller
 )
 
-add_library(quad_estimator
+add_library(quad_estimator SHARED
     src/Estimator/Estimator.cpp
     src/Estimator/QuadEstimator.cpp
 )
 target_link_libraries(quad_estimator
     quad_dynamics
+    iir::iir
 )
 
-add_library(base_planner
+add_library(base_planner SHARED
     src/Planner/Planner.cpp
     src/Planner/Gait.cpp
     src/Planner/FootSwingTrajectory.cpp
@@ -38,7 +49,7 @@ add_library(base_planner
 target_link_libraries(base_planner
     quad_dynamics
 )
-add_library(reactive_planner
+add_library(reactive_planner SHARED
     src/Planner/ReactivePlanner.cpp
 )
 target_link_libraries(reactive_planner
@@ -54,10 +65,16 @@ install(TARGETS
     LIBRARY DESTINATION ${COMMON_LIBRARY_DIR}
 )
 
-add_executable(quad_execute src/execute.cpp src/Executor.cpp)
-add_dependencies(quad_execute
-    # quad_communication
-    ros_comm
+add_executable(execute src/execute.cpp src/Executor.cpp)
+
+if($ENV{USE_COMM_TYPE} STREQUAL "dds")
+    add_definitions(-DUSE_DDS_COMM)
+elseif($ENV{USE_COMM_TYPE} STREQUAL "ros2")
+    add_definitions(-DUSE_ROS_COMM)
+endif()
+
+add_dependencies(execute
+    quad_communication
     # pd_controller
     didc
     quad_dynamics
@@ -65,43 +82,28 @@ add_dependencies(quad_execute
     # base_planner
     reactive_planner
 )
-target_link_libraries(quad_execute
-    # quad_communication
-    ros_comm
+target_link_libraries(execute
     # pd_controller
     didc
     quad_dynamics
     quad_estimator
     base_planner
     reactive_planner
+    Threads::Threads
+    quad_communication
 )
-install(TARGETS quad_execute
-    ARCHIVE DESTINATION ${COMMON_INSTALL_DIR}
-    RUNTIME DESTINATION ${COMMON_INSTALL_DIR}
-)
+if($ENV{USE_COMM_TYPE} STREQUAL "dds")
+    target_link_libraries(execute
+        dds_comm
+    )
+elseif($ENV{USE_COMM_TYPE} STREQUAL "ros2")
+    target_link_libraries(execute
+        ros_comm
+    )
+endif()
 
-add_executable(execute_shm src/execute_shm.cpp src/ExecutorSHM.cpp)
-add_dependencies(execute_shm
-    quad_communication
-    # ros_comm
-    # pd_controller
-    didc
-    # quad_dynamics
-    quad_estimator
-    # base_planner
-    reactive_planner
-)
-target_link_libraries(execute_shm
-    quad_communication
-    # ros_comm
-    # pd_controller
-    didc
-    # quad_dynamics
-    quad_estimator
-    # base_planner
-    reactive_planner
-)
-install(TARGETS execute_shm
+install(TARGETS execute
     ARCHIVE DESTINATION ${COMMON_INSTALL_DIR}
     RUNTIME DESTINATION ${COMMON_INSTALL_DIR}
 )
+endif()

@@ -36,8 +36,8 @@ void DistributedIDC::InitClass() {
 
     // load gains from a param file
     vec6 kpb;
-    kpb << 316.22, 316.22, 26.22,
-        316.22, 316.22, 26.22;
+    kpb << 0.0 * 316.22, 0.0 * 316.22, 26.22,
+        316.22, 316.22, 316.22;
     // kpb << 0, 0, 26.22,
     //     316.22, 316.22, 26.26;
     // kpb << 0, 0, 26.22,
@@ -45,20 +45,22 @@ void DistributedIDC::InitClass() {
     Kpb = kpb.asDiagonal();
 
     vec6 kdb;
-    kdb << 50.40, 50.40, 13.40,
-        50.4, 50.4, 13.40;
+    kdb << 150.40, 150.40, 50.40,
+        50.4, 50.4, 50.40;
     // kdb << 0 * 13.40, 0 * 13.40, 13.40,
     //     50.4, 50.4, 0 * 13.40;
     Kdb = kdb.asDiagonal();
 
     vec12 kpa;
     vec3 kp(26.26, 26.26, 26.26);
+    // vec3 kp(316.26, 316.22, 316.22);
     // vec3 kp(10.26, 10.26, 10.26);
     kpa << kp, kp, kp, kp;
     Kpa = kpa.asDiagonal();
 
     vec12 kda;
     vec3 kd(13.03, 13.53, 13.53);
+    // vec3 kd(50.40, 50.40, 50.40);
     // vec3 kd(1.4, 1.4, 1.4);
     kda << kd, kd, kd, kd;
     Kda = kda.asDiagonal();
@@ -88,11 +90,31 @@ vec12 DistributedIDC::CalculateFeedForwardTorque() {
     // std::cout << "G: \n" << G.transpose() << "\n";
 
     vec6 base_err = vec6::Zero();
-    base_err.block<3,1>(0, 0) = q_r.block<3,1>(0, 0) - q.block<3,1>(0, 0);
+    // base_err.block<3,1>(0, 0) = q_r.block<3,1>(0, 0) - q.block<3,1>(0, 0);
+
+    // Apply translatinal base force if position wrt foot is not matching
+    vec3 r_B_p_ref = vec3::Zero();
+    vec3 r_B_p_act = vec3::Zero();
+    vec19 js_tmp = m_robot.getNeutralJointStates();
+    js_tmp.block<4,1>(3, 0) = q.block<4,1>(3 ,0);
+    js_tmp.block<12,1>(7, 0) = q.block<12,1>(7, 0);
+    vec12 feet_pos_act = m_robot.forwardKinematics(js_tmp);
+    for (int i = 0; i < 4; ++i) {
+        if (m_contact_flag_for_controller(i)) {
+            r_B_p_ref += (m_ee_state_ref.block<3,1>(0, 0) - m_ee_state_ref.block<3,1>(7 + 3 * i, 0));
+            r_B_p_act -= (feet_pos_act.block<3,1>(3 * i, 0));
+        }
+    }
+    r_B_p_ref /= 1./m_num_contact;
+    r_B_p_act /= 1./m_num_contact;
+    base_err.block<3,1>(0, 0) = r_B_p_ref - r_B_p_act;
+
     mat3x3 R_ref = pinocchio::quat2rot(q_r.block<4,1>(3, 0));
     mat3x3 R_act = pinocchio::quat2rot(q.block<4,1>(3, 0));
     // log(R_ref.transpose() * R_act)
     base_err.block<3,1>(3, 0) = pinocchio::matrixLogRot(R_ref * R_act.transpose());
+    // std::cout << "Orientation error: " << pinocchio::matrixLogRot(R_ref * R_act.transpose()).transpose() << "\n";
+    // base_err.block<3,1>(3, 0) = pinocchio::matrixLogRot(R_ref.transpose() * R_act);
     // std::cout << "base err: " << base_err.transpose() << "\n";
     PD.block<6, 1>(0, 0) = 1 * Kpb * (base_err)
                          + 1 * Kdb * (qd_r.block<6, 1>(0, 0) - qd.block<6, 1>(0, 0));
@@ -139,16 +161,24 @@ vec12 DistributedIDC::CalculateFeedForwardTorque() {
     b.block<3,1>(0, 0) = tau_full.block<3,1>(0, 0);
     b.block<3,1>(3, 0) = tau_full.block<3,1>(3, 0);
     // Fc = getFeetForces(clipVector(b, 50));
-    std::cout << "b: " << b.transpose() << "\n";
-    // b(0) = std::min(std::max(b(0), -20.), 20.);
-    // b(1) = std::min(std::max(b(1), -20.), 20.);
-    // b(3) = std::min(std::max(b(3), -20.), 20.);
-    // b(4) = std::min(std::max(b(4), -20.), 20.);
-    // b(5) = std::min(std::max(b(5), -20.), 20.);
+    // std::cout << "b: " << b.transpose() << "\n";
+    b(0) = std::min(std::max(b(0), -20.), 20.);
+    b(1) = std::min(std::max(b(1), -20.), 20.);
+    b(3) = std::min(std::max(b(3), -100.), 100.);
+    b(4) = std::min(std::max(b(4), -100.), 100.);
+    b(5) = std::min(std::max(b(5), -100.), 100.);
     // std::cout << "b_clipped: " << b.transpose() << "\n";
     Fc = GetDesiredContactForcePGD(b);
-    std::cout << "cs: " << m_contact_flag_for_controller.transpose() << "\n";
-    std::cout << "Fc: " << Fc.transpose() << std::endl;
+    // std::cout << "cs: " << m_contact_flag_for_controller.transpose() << "\n";
+    // std::cout << "Fc: " << Fc.transpose() << std::endl;
+
+    // Transform Fc in robot reference yaw frame
+    vec3 eul = pinocchio::Rot2EulXYZ(pinocchio::quat2rot(q.block<4,1>(3, 0)));
+    mat3x3 R_yaw_ref_T = pinocchio::Rz(eul(2)).transpose();
+
+    for (int i = 0; i < 4; ++i) {
+        Fc.block<3,1>(3 * i, 0) = R_yaw_ref_T * Fc.block<3,1>(3 * i, 0);
+    }
 
     tau_ff = -JaaT * Fc + N_b2t * tau_full.block<12,1>(6, 0);
     // tau_ff = tau_full.block<12,1>(6, 0);

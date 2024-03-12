@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
     std::string robot_name = m_name;
     Executor quad_exec(robot_name);
 
-    quad_exec.setUpdateRate(1000);
+    quad_exec.setUpdateRate(5000);
     quad_exec.run();
 
     return 0;

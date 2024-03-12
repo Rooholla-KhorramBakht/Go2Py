@@ -1,11 +1,12 @@
 #include "mjsim_helper_ros.hpp"
 #include "utils.hpp"
+#include <filesystem>
 
 #include <csignal>
 
 // Signal handler to gracefully handle Ctrl+C
 void signalHandler(int signum) {
-    std::cout << "Interrupt signal (" << signum << ") received.\n";
+    // std::cout << "Interrupt signal (" << signum << ") received.\n";
     // Add cleanup or exit logic as needed
     exit(signum);
 }
@@ -31,6 +32,22 @@ void UpdateSensorData() {
     // std::cout << "Quat: " << sensor_data.quat.transpose() << "\n";
 
     comm_data_ptr -> writeSensorData(sensor_data);
+
+    // Updating measurement data
+    for (int i = 0; i < 3; ++i) {
+        measurement_data.base_position(i) = d -> sensordata[46 + i];
+        measurement_data.base_velocity.linear(i) = d -> sensordata[49 + i];
+        measurement_data.base_velocity.angular(i) = d -> sensordata[52 + i];
+        measurement_data.base_acceleration.linear(i) = d -> sensordata[55 + i];
+        measurement_data.base_acceleration.angular(i) = d -> sensordata[58 + i];
+    }
+    for (int i = 0; i < 4; ++i) {
+        measurement_data.contact_force(3 * i) = -d -> sensordata[61 + 3 * i];
+        measurement_data.contact_force(3 * i + 1) = -d -> sensordata[61 + 3 * i + 1];
+        measurement_data.contact_force(3 * i + 2) = -d -> sensordata[61 + 3 * i + 2];
+    }
+    comm_data_ptr -> writeMeasurementData(measurement_data);
+        
 }
 
 void CustomController(const mjModel* model, mjData* data) {
@@ -42,8 +59,12 @@ void CustomController(const mjModel* model, mjData* data) {
         return;
     }
     // std::cout << "cmd js: " << joint_command_data.q.transpose() << "\n";
-    float Kp = 300;
-    float Kd = 8;
+    // float Kp = 20;
+    // float Kd = 0.5;
+    float Kp = 60;
+    float Kd = 5;
+    // float Kp = 26.16;
+    // float Kd = 13.13;
     if (data->time - last_update > 1.0/ctrl_update_freq) {
         // Get the velocity of joint directly from MuJoCo?
         // mjtNum vel = (data->sensordata[0] - position_history)/(d->time-previous_time);
@@ -72,7 +93,10 @@ int main(int argc, char** argv) {
     std::string m_name = std::string(argv[1]);
 
     // std::string model_file = "/home/meshin/dev/quadruped/xterra/quadruped_locomotion/src/robots/" + m_name + "_description/mujoco/" + m_name + ".xml";
-    std::string model_file = "/home/meshin/dev/quadruped/xterra/quadruped_locomotion/src/robots/" + m_name + "_description/mujoco/scene.xml";
+    // std::string model_file = "/home/meshin/dev/quadruped/xterra/quadruped_locomotion/src/robots/" + m_name + "_description/mujoco/scene.xml";
+    std::string rel_model_path = "src/robots/" + m_name + "_description/mujoco/scene.xml";
+    std::filesystem::path filepath = std::filesystem::current_path().parent_path().parent_path() / rel_model_path;
+    std::string model_file = filepath.string();
 
     init_model(model_file);
 
@@ -90,12 +114,14 @@ int main(int argc, char** argv) {
     // Register signal handler for Ctrl+C
     signal(SIGINT, signalHandler);
 
-    comm_data_ptr = std::make_shared<CommROSP2E>(m_name);
+    comm_data_ptr = std::make_shared<QuadROSComm>(m_name, DATA_ACCESS_MODE::PLANT);
+    // comm_data_ptr -> setAccessMode(DATA_ACCESS_MODE::PLANT);
     comm_data_ptr->setSensorDataPtr(&sensor_data);
     comm_data_ptr->setCommandDataPtr(&joint_command_data);
+    comm_data_ptr->setMeasurementDataPtr(&measurement_data);
 
     std::thread comm_thread;
-    comm_thread = std::thread(&CommROSP2E::Run, comm_data_ptr);
+    comm_thread = std::thread(&QuadROSComm::Run, comm_data_ptr);
     comm_thread.detach();
     
     // Run the simulation for 10 seconds with visualization enabled with 60 fps

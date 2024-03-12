@@ -8,7 +8,7 @@ Stephen Brawner (brawner@gmail.com)
      Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
 <robot name="go2_description">
-  <link name="base">
+  <link name="base_link">
     <inertial>
       <origin rpy="0 0 0" xyz="0.021112 0 -0.005366"/>
       <mass value="6.921"/>
@@ -45,7 +45,7 @@ Stephen Brawner (brawner@gmail.com)
   </link>
   <joint dont_collapse="true" name="Head_upper_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0.285 0 0.01"/>
-    <parent link="base"/>
+    <parent link="base_link"/>
     <child link="Head_upper"/>
     <axis xyz="0 0 0"/>
   </joint>
@@ -92,7 +92,7 @@ Stephen Brawner (brawner@gmail.com)
   </link>
   <joint name="FL_hip_joint" type="revolute">
     <origin rpy="0 0 0" xyz="0.1934 0.0465 0"/>
-    <parent link="base"/>
+    <parent link="base_link"/>
     <child link="FL_hip"/>
     <axis xyz="1 0 0"/>
     <dynamics damping="0" friction="0"/>
@@ -238,7 +238,7 @@ Stephen Brawner (brawner@gmail.com)
   </link>
   <joint name="FR_hip_joint" type="revolute">
     <origin rpy="0 0 0" xyz="0.1934 -0.0465 0"/>
-    <parent link="base"/>
+    <parent link="base_link"/>
     <child link="FR_hip"/>
     <axis xyz="1 0 0"/>
     <dynamics damping="0" friction="0"/>
@@ -384,7 +384,7 @@ Stephen Brawner (brawner@gmail.com)
   </link>
   <joint name="RL_hip_joint" type="revolute">
     <origin rpy="0 0 0" xyz="-0.1934 0.0465 0"/>
-    <parent link="base"/>
+    <parent link="base_link"/>
     <child link="RL_hip"/>
     <axis xyz="1 0 0"/>
     <dynamics damping="0" friction="0"/>
@@ -530,7 +530,7 @@ Stephen Brawner (brawner@gmail.com)
   </link>
   <joint name="RR_hip_joint" type="revolute">
     <origin rpy="0 0 0" xyz="-0.1934 -0.0465 0"/>
-    <parent link="base"/>
+    <parent link="base_link"/>
     <child link="RR_hip"/>
     <axis xyz="1 0 0"/>
     <dynamics damping="0" friction="0"/>
@@ -652,7 +652,7 @@ Stephen Brawner (brawner@gmail.com)
     <child link="RR_foot"/>
     <axis xyz="0 0 0"/>
   </joint>
-  <link name="imu">
+  <link name="imu_link">
     <inertial>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <mass value="0"/>
@@ -661,8 +661,8 @@ Stephen Brawner (brawner@gmail.com)
   </link>
   <joint name="imu_joint" type="fixed">
     <origin rpy="0 0 0" xyz="-0.02557 0 0.04232"/>
-    <parent link="base"/>
-    <child link="imu"/>
+    <parent link="base_link"/>
+    <child link="imu_link"/>
     <axis xyz="0 0 0"/>
   </joint>
   <link name="radar">
@@ -674,7 +674,7 @@ Stephen Brawner (brawner@gmail.com)
   </link>
   <joint name="radar_joint" type="fixed">
     <origin rpy="0 2.8782 0" xyz="0.28945 0 -0.046825"/>
-    <parent link="base"/>
+    <parent link="base_link"/>
     <child link="radar"/>
     <axis xyz="0 0 0"/>
   </joint>

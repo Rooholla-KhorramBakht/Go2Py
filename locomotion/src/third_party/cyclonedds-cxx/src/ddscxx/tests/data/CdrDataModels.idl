@@ -1,0 +1,247 @@
+
+module CDR_testing {
+
+  //ID fields
+  struct basicstruct {
+    long l;
+    @key char c;
+    string str;
+    double d;
+  };
+
+  @appendable struct appendablestruct {
+    @id(7) long l;
+    @key @id(5) char c;
+    @id(3) string str;
+    @id(1) double d;
+  };
+
+  @mutable struct mutablestruct {
+    @id(7) long l;
+    @key @id(5) char c;
+    @id(3) string str;
+    @id(1) double d;
+  };
+
+  //nested
+  struct inner {
+    char c_inner;
+    long l_inner;
+  };
+
+  struct outer {
+    inner a;
+    inner b;
+    @key inner c;
+  };
+
+  //inheritance
+  struct base {
+    string str;
+    @key char c;
+  };
+
+  struct derived : base {
+    string str_d;
+    char c_d;
+  };
+
+  //sequence
+  struct sequence_struct {
+    @key sequence<char> c;
+    sequence<long> l;
+  };
+
+  @mutable struct sequence_struct_mutable {
+    @key sequence<char> c;
+    sequence<long> l;
+  };
+
+  //array
+  struct array_struct {
+    @key char c[5];
+    long l[5];
+  };
+
+  //typedefs
+  typedef sequence<char> td_sequence_char;
+
+  struct typedef_base_struct {
+    @key td_sequence_char c;
+    td_sequence_char l;
+  };
+
+  typedef sequence<base> td_sequence_struct;
+
+  struct typedef_constr_struct {
+    @key td_sequence_struct c;
+    td_sequence_struct l;
+  };
+
+  //enums
+  @bit_bound(8)
+  enum enum_8
+  {
+    first_8,
+    second_8,
+    third_8,
+    fourth_8
+  };
+
+  @bit_bound(16)
+  enum enum_16
+  {
+    first_16,
+    second_16,
+    third_16,
+    fourth_16
+  };
+
+  enum enum_32
+  {
+    first_32,
+    second_32,
+    third_32,
+    fourth_32
+  };
+
+  struct enum_struct {
+    @key enum_8 c;
+    enum_16 b;
+    enum_32 a;
+  };
+
+  //d-headers on sequences and arrays of non-primitives
+  struct d_hdr_sequences {
+    @key enum_8 c[4];
+    sequence<sequence<enum_8> > l;
+  };
+
+  //optional
+  struct optional_final_struct {
+    @optional(true) char a;
+    @optional(false) char b;
+    @key char c;
+  };
+
+  @appendable struct optional_appendable_struct {
+    @optional(true) char a;
+    @optional(false) char b;
+    @key char c;
+  };
+
+  @mutable struct optional_mutable_struct {
+    @optional(true) char a;
+    @optional(false) char b;
+    @key char c;
+  };
+
+  struct optional_array_struct {
+    @key char c;
+    @optional char l[5];
+  };
+
+  //must_understand
+  @mutable struct must_understand_struct {
+    @id(1) char a;
+    @must_understand char b;
+    @key char c;
+  };
+
+  //unions
+  union un switch (char) {
+    case 'a':
+    case 'b': char c;
+    case 'c':
+    case 'd': short s;
+    case 'e':
+    case 'f': long l;
+    default: string str;
+  };
+
+  union un_k switch (@key char) {
+    case 'a':
+    case 'b': char c;
+    case 'c':
+    case 'd': short s;
+    case 'e':
+    case 'f': long l;
+    default: string str;
+  };
+
+  struct union_struct {
+    @key un c;
+  };
+
+  struct union_struct_k {
+    @key un_k c;
+  };
+
+  @bit_bound(15) bitmask bm1 {
+    @position(2) bm_2,
+    bm_3,
+    @position(5) bm_5,
+    bm_6
+  };
+
+  @bit_bound(15) bitmask bm2 {
+    @position(0) bm_0,
+    bm_1,
+    @position(7) bm_7,
+    bm_8
+  };
+
+  struct bitmask_struct {
+    @key bm1 c;
+    bm2 d;
+  };
+
+  /* this should also check the deduplication for the variant container
+     as both bitmasks map to the same type as unsigned short */
+  union bitmask_union switch(@key long) {
+    case 1:
+        bm1 c;
+    case 2:
+        bm2 d;
+    case 3:
+        unsigned short s;
+  };
+
+};
+
+module DataModels_testing {
+
+  enum test_enum {
+    e_0,
+    e_1,
+    @default_literal e_2
+  };
+
+  bitmask test_bitmask {
+    f_0,
+    f_1,
+    f_2
+  };
+
+  struct explicit_defaults_struct {
+    @default(123) long l;
+    @default(.456) double d;
+    @default('a') char c;
+    @default("def") string s;
+    /*
+    the idl parser does not yet support enumerator values as annotation parameters
+    @default(e_1) test_enum e;
+    */
+    @default(5) test_bitmask b; /*currently you need to set the bitmask defaults as integers*/
+  };
+
+  struct implicit_defaults_struct {
+    long l;
+    double d;
+    char c;
+    string s;
+    test_enum e;
+    test_bitmask b;
+  };
+
+};

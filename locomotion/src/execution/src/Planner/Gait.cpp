@@ -134,7 +134,7 @@ void Gait::InitClass()
     if (m_gait_type == TROT) {
         m_t0 = 0;
         m_phi_thresh = 0.5 * Eigen::Vector4d::Ones();
-        m_phi_offset << 0.5f, 0.0f, 0.5f, 0.0f;
+        m_phi_offset << 0.5f, 0.0f, 0.0f, 0.5f;
         m_cs_ref_data = Eigen::Array4i::Ones();
         m_gait_period = 0.5;
         m_step_height = 0.06;
@@ -144,7 +144,7 @@ void Gait::InitClass()
         m_phi_offset = Eigen::Vector4d::Zero();
         m_cs_ref_data = Eigen::Array4i::Ones();
         m_gait_period = 1;
-        m_step_height = 0.08;
+        m_step_height = 0.0;
     } else {
         m_t0 = 0;
         m_phi_thresh = Eigen::Vector4d::Ones();

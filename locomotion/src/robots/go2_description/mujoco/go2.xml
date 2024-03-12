@@ -6,7 +6,7 @@
   <default>
     <default class="go2">
       <geom friction="0.6" margin="0.001" condim="1"/>
-      <joint axis="0 1 0" damping="2" armature="0.01" frictionloss="0.2"/>
+      <joint axis="0 1 0" damping="0" armature="0.01" frictionloss="0.0"/>
       <motor ctrlrange="-23.7 23.7"/>
       <default class="abduction">
         <joint axis="1 0 0" range="-1.0472 1.0472"/>
@@ -62,6 +62,7 @@
 
   <worldbody>
     <body name="base" pos="0 0 0.445" childclass="go2">
+    <site name="base" pos="0 0 0"/>
       <inertial pos="0.021112 0 -0.005366" quat="-0.000543471 0.713435 -0.00173769 0.700719" mass="6.921"
         diaginertia="0.107027 0.0980771 0.0244531"/>
       <freejoint/>
@@ -98,6 +99,7 @@
             <geom size="0.011 0.0325" pos="0.02 0 -0.148" quat="0.999688 0 0.0249974 0" type="cylinder" class="collision"/>
             <geom pos="0 0 -0.213" mesh="foot" class="visual" material="black"/>
             <geom name="FL" class="foot"/>
+            <site name="FL_foot" pos="0 0 -0.213"/>
           </body>
         </body>
       </body>
@@ -125,6 +127,7 @@
             <geom size="0.011 0.0325" pos="0.02 0 -0.148" quat="0.999688 0 0.0249974 0" type="cylinder" class="collision"/>
             <geom pos="0 0 -0.213" mesh="foot" class="visual" material="black"/>
             <geom name="FR" class="foot"/>
+            <site name="FR_foot" pos="0 0 -0.213"/>
           </body>
         </body>
       </body>
@@ -152,6 +155,7 @@
             <geom size="0.011 0.0325" pos="0.02 0 -0.148" quat="0.999688 0 0.0249974 0" type="cylinder" class="collision"/>
             <geom pos="0 0 -0.213" mesh="foot" class="visual" material="black"/>
             <geom name="RL" class="foot"/>
+            <site name="RL_foot" pos="0 0 -0.213"/>
           </body>
         </body>
       </body>
@@ -179,6 +183,7 @@
             <geom size="0.011 0.0325" pos="0.02 0 -0.148" quat="0.999688 0 0.0249974 0" type="cylinder" class="collision"/>
             <geom pos="0 0 -0.213" mesh="foot" class="visual" material="black"/>
             <geom name="RR" class="foot"/>
+            <site name="RR_foot" pos="0 0 -0.213"/>
           </body>
         </body>
       </body>
@@ -227,23 +232,47 @@
     <jointvel name="RR_thigh_velocity_sensor" joint="RR_thigh_joint" noise="0.001"/>
     <jointvel name="RR_calf_velocity_sensor" joint="RR_calf_joint" noise="0.001"/>
 
-    <jointactuatorfrc name="FL_hip_force_sensor" joint="FL_hip_joint" noise="0.001"/>
-    <jointactuatorfrc name="FL_thigh_force_sensor" joint="FL_thigh_joint" noise="0.001"/>
-    <jointactuatorfrc name="FL_calf_force_sensor" joint="FL_calf_joint" noise="0.001"/>
-    <jointactuatorfrc name="FR_hip_force_sensor" joint="FR_hip_joint" noise="0.001"/>
-    <jointactuatorfrc name="FR_thigh_force_sensor" joint="FR_thigh_joint" noise="0.001"/>
-    <jointactuatorfrc name="FR_calf_force_sensor" joint="FR_calf_joint" noise="0.001"/>
-    <jointactuatorfrc name="RL_hip_force_sensor" joint="RL_hip_joint" noise="0.001"/>
-    <jointactuatorfrc name="RL_thigh_force_sensor" joint="RL_thigh_joint" noise="0.001"/>
-    <jointactuatorfrc name="RL_calf_force_sensor" joint="RL_calf_joint" noise="0.001"/>
-    <jointactuatorfrc name="RR_hip_force_sensor" joint="RR_hip_joint" noise="0.001"/>
-    <jointactuatorfrc name="RR_thigh_force_sensor" joint="RR_thigh_joint" noise="0.001"/>
-    <jointactuatorfrc name="RR_calf_force_sensor" joint="RR_calf_joint" noise="0.001"/>
+    <!-- <jointactuatorfrc name="FL_hip_force_sensor" joint="FL_hip_joint" noise="0.001"/> -->
+    <!-- <jointactuatorfrc name="FL_thigh_force_sensor" joint="FL_thigh_joint" noise="0.001"/> -->
+    <!-- <jointactuatorfrc name="FL_calf_force_sensor" joint="FL_calf_joint" noise="0.001"/> -->
+    <!-- <jointactuatorfrc name="FR_hip_force_sensor" joint="FR_hip_joint" noise="0.001"/> -->
+    <!-- <jointactuatorfrc name="FR_thigh_force_sensor" joint="FR_thigh_joint" noise="0.001"/> -->
+    <!-- <jointactuatorfrc name="FR_calf_force_sensor" joint="FR_calf_joint" noise="0.001"/> -->
+    <!-- <jointactuatorfrc name="RL_hip_force_sensor" joint="RL_hip_joint" noise="0.001"/> -->
+    <!-- <jointactuatorfrc name="RL_thigh_force_sensor" joint="RL_thigh_joint" noise="0.001"/> -->
+    <!-- <jointactuatorfrc name="RL_calf_force_sensor" joint="RL_calf_joint" noise="0.001"/> -->
+    <!-- <jointactuatorfrc name="RR_hip_force_sensor" joint="RR_hip_joint" noise="0.001"/> -->
+    <!-- <jointactuatorfrc name="RR_thigh_force_sensor" joint="RR_thigh_joint" noise="0.001"/> -->
+    <!-- <jointactuatorfrc name="RR_calf_force_sensor" joint="RR_calf_joint" noise="0.001"/> -->
+
+    <actuatorfrc name="FL_hip_force_sensor" actuator="FL_hip" noise="0.001"/>
+    <actuatorfrc name="FL_thigh_force_sensor" actuator="FL_thigh" noise="0.001"/>
+    <actuatorfrc name="FL_calf_force_sensor" actuator="FL_calf" noise="0.001"/>
+    <actuatorfrc name="FR_hip_force_sensor" actuator="FR_hip" noise="0.001"/>
+    <actuatorfrc name="FR_thigh_force_sensor" actuator="FR_thigh" noise="0.001"/>
+    <actuatorfrc name="FR_calf_force_sensor" actuator="FR_calf" noise="0.001"/>
+    <actuatorfrc name="RL_hip_force_sensor" actuator="RL_hip" noise="0.001"/>
+    <actuatorfrc name="RL_thigh_force_sensor" actuator="RL_thigh" noise="0.001"/>
+    <actuatorfrc name="RL_calf_force_sensor" actuator="RL_calf" noise="0.001"/>
+    <actuatorfrc name="RR_hip_force_sensor" actuator="RR_hip" noise="0.001"/>
+    <actuatorfrc name="RR_thigh_force_sensor" actuator="RR_thigh" noise="0.001"/>
+    <actuatorfrc name="RR_calf_force_sensor" actuator="RR_calf" noise="0.001"/>
 
     <accelerometer name="linear_acceleration" site="imu" noise="0.001"/>
     <gyro name="angular_velocity" site="imu" noise="0.001"/>
 
     <framequat name="imu_orientation" objtype="site" objname="imu" noise="0.001"/>
+
+    <framepos name="base_position" objtype="site" objname="base" noise="0.001"/>
+    <framelinvel name="base_lin_vel" objtype="site" objname="base" noise="0.001"/>
+    <frameangvel name="base_ang_vel" objtype="site" objname="base" noise="0.001"/>
+    <framelinacc name="base_lin_acc" objtype="site" objname="base" noise="0.001"/>
+    <frameangacc name="base_ang_acc" objtype="site" objname="base" noise="0.001"/>
+
+    <force name="contact_force_FL" site="FL_foot" />
+    <force name="contact_force_FR" site="FR_foot" />
+    <force name="contact_force_RL" site="RL_foot" />
+    <force name="contact_force_RR" site="RR_foot" />
   </sensor>
 
   <keyframe>

@@ -1,0 +1,84 @@
+module Bounded
+{
+
+  struct Msg
+  {
+    string<255> bounded_string;
+    sequence<long,255> bounded_sequence;
+    sequence<boolean,255> boolean_sequence;
+  };
+
+};
+
+module UnBounded
+{
+
+  struct Msg
+  {
+    string unbounded_string;
+    sequence<long> unbounded_sequence_long;
+    sequence<boolean> unbounded_sequence_bool;
+  };
+
+};
+
+module Endianness
+{
+
+  struct Msg
+  {
+    char chars[3];
+    unsigned long l;
+  };
+
+  struct Seqs
+  {
+    sequence<boolean> b_seq;
+    sequence<char> c_seq;
+    sequence<short> s_seq;
+    sequence<long> l_seq;
+    sequence<long long> ll_seq;
+  };
+
+  enum test_enum {
+    zeroth,
+    first,
+    second,
+    third,
+    fourth,
+    fifth
+  };
+
+  struct Enums
+  {
+    test_enum e_1, e_arr[4];
+  };
+
+  struct SeqEnums
+  {
+    sequence<test_enum> e_seq;
+  };
+
+  union U switch (long) {
+    case 0:
+    case 3:
+    case 6: double d;
+    case 1:
+    case 4:
+    case 7: string str;
+    default: short s;
+  };
+
+  struct UnionStr {
+    U u;
+  };
+};
+
+module Keyhash
+{
+  struct NoKey      { unsigned long x; };
+  struct SmallKey   { @key unsigned long k; unsigned long x; };
+  struct LargeKey   { @key unsigned long a[5]; unsigned long x; };
+  struct StringKey  { @key string s; unsigned long x; };
+  struct BStringKey { @key string<11> s; unsigned long x; };
+};

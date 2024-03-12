@@ -1,0 +1,20 @@
+<CycloneDDS xmlns="https://cdds.io/config">
+  <Domain>
+    <General>
+      <!-- Transport>udp6</Transport -->
+      <MaxMessageSize>1400B</MaxMessageSize>
+    </General>
+    <Sizing>
+      <ReceiveBufferSize>40KiB</ReceiveBufferSize>
+      <ReceiveBufferChunkSize>20KiB</ReceiveBufferChunkSize>
+    </Sizing>
+    <Internal>
+      <MultipleReceiveThreads>false</MultipleReceiveThreads>
+    </Internal>
+    <Tracing>
+      <Verbosity>info</Verbosity>
+      <Category>config</Category>
+      <OutputFile>stdout</OutputFile>
+    </Tracing>
+  </Domain>
+</CycloneDDS>
