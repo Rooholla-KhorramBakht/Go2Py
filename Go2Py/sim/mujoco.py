@@ -53,7 +53,7 @@ class Go2Sim:
         self.data.qpos = self.q_nominal
         self.data.qvel = np.zeros(18)
     
-    def resetStanding(self):
+    def standUp(self):
         self.q0 = np.array([ 0.00901526,  0.77832842, -1.56065452,
                             -0.00795561,  0.76754963, -1.56634164,
                             -0.05375515,  0.76681757, -1.53601146,  
@@ -64,7 +64,7 @@ class Go2Sim:
         mujoco.mj_step(self.model, self.data)
         self.viewer.sync()
 
-    def resetSitting(self):
+    def sitDown(self):
         self.q0 = np.array([-0.03479636,  1.26186061, -2.81310153,
                              0.03325212,  1.25883281, -2.78329301,
                             -0.34708387,  1.27193761, -2.8052032 ,  
@@ -81,7 +81,7 @@ class Go2Sim:
     def getPose(self):
         return self.data.qpos[:3], self.data.qpos[3:7]
 
-    def setCommands(self, q_des, dq_des, kp, kd, tau_ff):
+    def setCommands(self, q_des, dq_des, kp, kv, tau_ff):
         q, dq = self.getJointStates()
         tau = np.diag(kp)@(q_des-q).reshape(12,1)+ \
               np.diag(kv)@(dq_des-dq).reshape(12,1)+tau_ff.reshape(12,1)
