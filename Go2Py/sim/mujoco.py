@@ -45,6 +45,10 @@ class Go2Sim:
         self.reset()
         mujoco.mj_step(self.model, self.data)
         self.viewer.sync()
+        self.nv = self.model.nv
+        self.jacp = np.zeros((3, self.nv))
+        self.jacr = np.zeros((3, self.nv))
+        self.M = np.zeros((self.nv, self.nv))
 
     def reset(self):
         self.q_nominal = np.hstack(
@@ -102,6 +106,20 @@ class Go2Sim:
         # Render every render_ds_ratio steps (60Hz GUI update)
         if self.render and (self.step_counter%self.render_ds_ratio)==0:
             self.viewer.sync()
+
+    def getSiteJacobian(self, site_name):
+        id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SITE,site_name)
+        assert id>0, 'The requested site could not be found'
+        mujoco.mj_jacSite(self.model, self.data, self.jacp, self.jacr, id)
+        return self.jacp, self.jacr
+
+    def getDynamicsParams(self):
+        mujoco.mj_fullM(self.model, self.M, self.data.qM)
+        nle = self.data.qfrc_bias.reshape(self.nv,1)
+        return {
+            'M':self.M,
+            'nle':nle
+        }
 
     def close(self):
         self.viewer.close()

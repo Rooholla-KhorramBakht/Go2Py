@@ -103,7 +103,7 @@
             <geom size="0.011 0.0325" pos="0.02 0 -0.148" quat="0.999688 0 0.0249974 0" type="cylinder" class="collision"/>
             <geom pos="0 0 -0.213" mesh="foot" class="visual" material="black"/>
             <geom name="FR" class="foot"/>
-            <site name="FR_foot_contact" pos="0 0 -0.213" size="0.02"/>
+            <site name="FR_foot" pos="0 0 -0.213" size="0.02"/>
           </body>
         </body>
       </body>
@@ -132,7 +132,7 @@
             <geom size="0.011 0.0325" pos="0.02 0 -0.148" quat="0.999688 0 0.0249974 0" type="cylinder" class="collision"/>
             <geom pos="0 0 -0.213" mesh="foot" class="visual" material="black"/>
             <geom name="FL" class="foot"/>
-            <site name="FL_foot_contact" pos="0 0 -0.213" size="0.02"/>
+            <site name="FL_foot" pos="0 0 -0.213" size="0.02"/>
 
           </body>
         </body>
@@ -162,7 +162,7 @@
             <geom size="0.011 0.0325" pos="0.02 0 -0.148" quat="0.999688 0 0.0249974 0" type="cylinder" class="collision"/>
             <geom pos="0 0 -0.213" mesh="foot" class="visual" material="black"/>
             <geom name="RR" class="foot"/>
-            <site name="RR_foot_contact" pos="0 0 -0.213" size="0.02"/>
+            <site name="RR_foot" pos="0 0 -0.213" size="0.02"/>
           </body>
         </body>
       </body>
@@ -191,7 +191,7 @@
             <geom size="0.011 0.0325" pos="0.02 0 -0.148" quat="0.999688 0 0.0249974 0" type="cylinder" class="collision"/>
             <geom pos="0 0 -0.213" mesh="foot" class="visual" material="black"/>
             <geom name="RL" class="foot"/>
-            <site name="RL_foot_contact" pos="0 0 -0.213" size="0.02"/>
+            <site name="RL_foot" pos="0 0 -0.213" size="0.02"/>
 
           </body>
         </body>
@@ -222,10 +222,10 @@
     <accelerometer name="imu_accel" site="imu"/>
     <gyro name="imu_gyro" site="imu"/>
     <!-- Contact sensors for the feet -->
-    <touch name="FR_foot_contact" site="FR_foot_contact"/>
-    <touch name="FL_foot_contact" site="RL_foot_contact"/>
-    <touch name="RR_foot_contact" site="RR_foot_contact"/>
-    <touch name="RL_foot_contact" site="RL_foot_contact"/>
+    <touch name="FR_foot_contact" site="FR_foot"/>
+    <touch name="FL_foot_contact" site="RL_foot"/>
+    <touch name="RR_foot_contact" site="RR_foot"/>
+    <touch name="RL_foot_contact" site="RL_foot"/>
   </sensor>
 
   <keyframe>
