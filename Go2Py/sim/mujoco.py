@@ -81,6 +81,15 @@ class Go2Sim:
     def getPose(self):
         return self.data.qpos[:3], self.data.qpos[3:7]
 
+    def getIMU(self):
+        return {
+                'accel':np.array(self.data.sensordata[0:3]),\
+                'gyro': np.array(self.data.sensordata[3:6])
+               }
+
+    def getFootContact(self):
+        return self.data.sensordata[6:10]
+
     def setCommands(self, q_des, dq_des, kp, kv, tau_ff):
         q, dq = self.getJointStates()
         tau = np.diag(kp)@(q_des-q).reshape(12,1)+ \
