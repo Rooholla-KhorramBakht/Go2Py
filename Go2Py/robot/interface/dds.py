@@ -142,7 +142,7 @@ class GO2Real():
         self.highcmd.twist.angular.z = _ω_z
         self.highcmd_publisher.publish(self.highcmd)
 
-    def setCommandsLow(self, q, dq, kp, kd, tau_ff):
+    def setCommandsLow(self, q_des, dq_des, kp, kd, tau_ff):
         assert q.size == dq.size == kp.size == kd.size == tau_ff.size == 12, "q, dq, kp, kd, tau_ff should have size 12"
         lowcmd = Go2pyLowCmd_(
             q,
