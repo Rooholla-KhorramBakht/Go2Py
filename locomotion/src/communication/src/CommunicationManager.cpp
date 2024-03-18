@@ -120,3 +120,23 @@ void CommunicationManager::getJoystickData(QuadrupedJoystickData& joy_data) {
     }
     joy_data.copy(*m_joystick_data_ptr);
 }
+
+void CommunicationManager::getPlantTime(double& time) {
+    if (m_plant_time_ptr != NULL) {
+        time = *m_plant_time_ptr;
+    } else {
+        std::cout << "Time pointer set to NULL.\n";
+    }
+}
+
+void CommunicationManager::writePlantTime(const double& time) {
+    if (m_mode == DATA_ACCESS_MODE::EXECUTOR) {
+        std::cout << "Access mode executor. Cannot set time.\n";
+        return;
+    }
+    if (m_plant_time_ptr != NULL) {
+        *m_plant_time_ptr = time;
+    } else {
+        std::cout << "Time pointer set to NULL.\n";
+    }
+}

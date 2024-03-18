@@ -94,5 +94,13 @@ private:
 
     sensor_msgs::msg::Joy joystick_data;
 
+    double m_plant_time = 0;
+    
+    std_msgs::msg::Float32 plant_time;
+    rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr m_plant_time_pub;
+    rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr m_plant_time_sub;
+
+    void get_plant_time_cb(const std_msgs::msg::Float32::SharedPtr msg);
+
     std::thread m_thread;
 };

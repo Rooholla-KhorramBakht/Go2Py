@@ -29,6 +29,7 @@ public:
 
     void setGait(Gait& gait) {
         m_gait = gait;
+        // m_gait.updateInitTime(m_t_curr);
     }
 
     void setPlannerDataPtr(QuadrupedPlannerData* pd) {
@@ -71,11 +72,11 @@ protected:
     double m_a_max_x = 0.2;
     double m_a_max_y = 0.2;
     double m_a_max_z = 0.2;
-    double m_a_max_yaw = 1.0;
+    double m_a_max_yaw = 0.2;
     double max_vel_x = 1.0;
     double max_vel_y = 1.0;
     double max_vel_z = 1.0;
-    double max_vel_yaw = 3.0;
+    double max_vel_yaw = 1.0;
     double m_loop_rate = 1000;
     double m_dt = 0.001;
 

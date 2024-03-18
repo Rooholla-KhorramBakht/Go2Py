@@ -78,5 +78,5 @@ private:
     std::chrono::time_point<std::chrono::high_resolution_clock> m_lastTimePoint;
     std::thread m_comm_thread;
 
-    bool use_plant_time = true;
+    bool use_plant_time = false;
 };

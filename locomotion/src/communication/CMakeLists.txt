@@ -28,21 +28,21 @@ elseif($ENV{USE_COMM_TYPE} STREQUAL "ros2")
     # find_package(catkin REQUIRED)
     # find_package(genmsg REQUIRED)
 
-    find_package(rosidl_default_generators REQUIRED)
+    # find_package(rosidl_default_generators REQUIRED)
 
     # Specify that your package belongs to the rosidl_interface_packages group
     # set(ROSIDL_INTERFACE_PACKAGES_GROUP "rosidl_interface_packages" CACHE INTERNAL "")
     # set_property(GLOBAL APPEND PROPERTY ${ROSIDL_INTERFACE_PACKAGES_GROUP} ${PROJECT_NAME})
 
-    rosidl_generate_interfaces(${PROJECT_NAME}
-        "msgs/ros/LowCmd.msg"
-    )
-    rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
+    # rosidl_generate_interfaces(${PROJECT_NAME}
+    #     "msgs/ros/LowCmd.msg"
+    # )
+    # rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
-    add_custom_target(${PROJECT_NAME}_ros_msgs ALL
-        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/rosidl_typesupport_cpp/${PROJECT_NAME}
-    )
-    target_link_libraries(${PROJECT_NAME}_ros_msgs "${cpp_typesupport_target}") 
+    # add_custom_target(${PROJECT_NAME}_ros_msgs ALL
+    #     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/rosidl_typesupport_cpp/${PROJECT_NAME}
+    # )
+    # target_link_libraries(${PROJECT_NAME}_ros_msgs "${cpp_typesupport_target}") 
     # install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/rosidl_typesupport_cpp/${PROJECT_NAME}
     #         DESTINATION ${COMMON_INCLUDE_DIR}
     # )

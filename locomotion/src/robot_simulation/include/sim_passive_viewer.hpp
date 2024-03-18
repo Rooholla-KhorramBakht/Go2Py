@@ -1,5 +1,7 @@
 #pragma once
 
+#include "simulate.h"
+
 #include <chrono>
 #include <cstdint>
 #include <cstdio>
@@ -12,9 +14,13 @@
 #include <string>
 #include <thread>
 
+#include "lodepng.h"
+#include <mujoco/mjdata.h>
+#include <mujoco/mjui.h>
+#include <mujoco/mjvisualize.h>
+#include <mujoco/mjxmacro.h>
 #include <mujoco/mujoco.h>
-#include "glfw_adapter.h"
-#include "simulate.h"
+#include "platform_ui_adapter.h"
 #include "array_safety.h"
 
 #define MUJOCO_PLUGIN_DIR "mujoco_plugin"
@@ -40,13 +46,6 @@ extern "C" {
 #include "SHM.hpp"
 #endif
 
-// Signal handler to gracefully handle Ctrl+C
-void signalHandler(int signum) {
-    // std::cout << "Interrupt signal (" << signum << ") received.\n";
-    // Add cleanup or exit logic as needed
-    exit(signum);
-}
-
 // holders of one step history of time and position to calculate dertivatives
 mjtNum position_history = 0;
 mjtNum previous_time = 0;
@@ -68,6 +67,18 @@ std::shared_ptr<QuadDDSComm> comm_data_ptr;
 #else
 std::shared_ptr<SHM> comm_data_ptr;
 #endif
+
+std::chrono::time_point<std::chrono::high_resolution_clock> m_startTimePoint;
+double t_curr = 0;
+
+double updateTimer() {
+    auto currTimePont = std::chrono::high_resolution_clock::now();
+    auto start = std::chrono::time_point_cast<std::chrono::microseconds>(m_startTimePoint).time_since_epoch().count();
+    auto curr = std::chrono::time_point_cast<std::chrono::microseconds>(currTimePont).time_since_epoch().count();
+    auto duration = curr - start;
+
+    return duration * double(1e-6);
+}
 
 void UpdateSensorData(mjData*);
 void CustomController(const mjModel*, mjData*);
@@ -397,6 +408,7 @@ void PhysicsLoop(mj::Simulate& sim) {
             syncCPU = startCPU;
             syncSim = d->time;
             sim.speed_changed = false;
+
 
             // run single step, let next iteration deal with timing
             mj_step(m, d);

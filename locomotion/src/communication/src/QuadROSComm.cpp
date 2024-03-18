@@ -78,7 +78,16 @@ void QuadROSComm::initClass() {
             m_estimated_fc_pub[i] = this->create_publisher<std_msgs::msg::Float32>("/" + m_name + "/estimation/contact_forces_" + std::to_string(i), 1);
         }
 
+        m_plant_time_sub = this->create_subscription<std_msgs::msg::Float32>(
+            "/" + m_name + "/plant_time",
+            1,
+            std::bind(&QuadROSComm::get_plant_time_cb, this, std::placeholders::_1)
+        );
+
     } else if (m_mode == DATA_ACCESS_MODE::PLANT) {
+
+        m_plant_time_pub = this->create_publisher<std_msgs::msg::Float32>("/" + m_name + "/plant_time", 1);
+
         m_joint_state_pub = this->create_publisher<sensor_msgs::msg::JointState>("/" + m_name + "/joint_state", 1);
         m_imu_pub = this->create_publisher<sensor_msgs::msg::Imu>("/" + m_name + "/imu", 1);
         m_odom_pub = this->create_publisher<nav_msgs::msg::Odometry>("/" + m_name + "/odom", 1);
@@ -139,6 +148,8 @@ void QuadROSComm::initClass() {
     //     js_data.velocity.push_back(0);
     //     js_data.effort.push_back(0);
     // }
+
+    setPlantTimePtr(&m_plant_time);
 }
 
 void QuadROSComm::get_joint_state_cb(const sensor_msgs::msg::JointState::SharedPtr msg) const {
@@ -186,8 +197,13 @@ void QuadROSComm::get_joystick_data_cb(const sensor_msgs::msg::Joy::SharedPtr ms
     m_joystick_data_ptr -> gait = msg -> axes[4];
 }
 
+void QuadROSComm::get_plant_time_cb(const std_msgs::msg::Float32::SharedPtr msg) {
+    m_plant_time =  msg -> data;
+}
+
 void QuadROSComm::timer_cb() {
     if (m_mode == DATA_ACCESS_MODE::EXECUTOR) {
+        js_data.header.stamp = this -> now();
         for (int i = 0; i < 12; ++i) {
             js_data.position[i] = m_joint_command_data_ptr -> q(i);
             js_data.velocity[i] = m_joint_command_data_ptr -> qd(i);
@@ -213,6 +229,10 @@ void QuadROSComm::timer_cb() {
 
         m_joint_state_pub->publish(js_data);
     } else if (m_mode == DATA_ACCESS_MODE::PLANT) {
+        // double time = 0;
+        // getPlantTime(time);
+        plant_time.data = m_plant_time;
+        m_plant_time_pub -> publish(plant_time);
         for (int i = 0; i < 12; ++i) {
             js_data.position[i] = m_sensor_data_ptr -> q(i);
             js_data.velocity[i] = m_sensor_data_ptr -> qd(i);

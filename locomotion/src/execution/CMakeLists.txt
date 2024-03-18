@@ -38,16 +38,6 @@ target_link_libraries(didc
     pd_controller
 )
 
-add_library(robust_didc STATIC
-    src/Controller/RobustDIDC.cpp
-)
-target_compile_options(robust_didc PRIVATE "-fPIC")
-target_link_libraries(robust_didc
-    quad_dynamics
-    pd_controller
-    gp_regressor
-)
-
 add_library(quad_estimator SHARED
     src/Estimator/Estimator.cpp
     src/Estimator/QuadEstimator.cpp
@@ -74,7 +64,7 @@ target_link_libraries(reactive_planner
 install(TARGETS 
     pd_controller
     didc
-    robust_didc
+    # robust_didc
     quad_estimator
     base_planner
     reactive_planner

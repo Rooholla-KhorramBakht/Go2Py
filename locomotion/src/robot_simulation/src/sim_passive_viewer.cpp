@@ -17,6 +17,18 @@
 #include <filesystem>
 #include <csignal>
 
+#include <mujoco/mujoco.h>
+#include "glfw_adapter.h"
+#include "simulate.h"
+#include "array_safety.h"
+
+// Signal handler to gracefully handle Ctrl+C
+void signalHandler(int signum) {
+    // std::cout << "Interrupt signal (" << signum << ") received.\n";
+    // Add cleanup or exit logic as needed
+    exit(signum);
+}
+
 void UpdateSensorData(mjData* data) {
     if (data == NULL) {
         return;
@@ -60,6 +72,10 @@ void UpdateSensorData(mjData* data) {
 }
 
 void CustomController(const mjModel* model, mjData* data) {
+    // t_curr = updateTimer();
+    t_curr = data->time;
+    comm_data_ptr -> writePlantTime(t_curr);
+
     UpdateSensorData(data);
     // get joint command
     comm_data_ptr->getCommandData(joint_command_data);
@@ -69,16 +85,17 @@ void CustomController(const mjModel* model, mjData* data) {
     //     return;
     // }
     // std::cout << "cmd js: " << joint_command_data.q.transpose() << "\n";
+    // std::cout << "kp: " << joint_command_data.kp.transpose() << "\n";
     // float Kp = 20;
     // float Kd = 0.5;
-    // float Kp = 60;
-    // float Kd = 5;
-    float Kp = 0;
-    float Kd = 0;
+    float Kp = 60;
+    float Kd = 5;
+    // float Kp = 0;
+    // float Kd = 0;
     // if (data->time - last_update > 1.0/ctrl_update_freq) {
         for (int i = 0; i < 12; ++i) {
-            Kp = joint_command_data.kp(i);
-            Kd = joint_command_data.kd(i);
+            // Kp = joint_command_data.kp(i);
+            // Kd = joint_command_data.kd(i);
             float dtheta = joint_command_data.q(i) - sensor_data.q(i);
             float dtheta_d = joint_command_data.qd(i) - sensor_data.qd(i);
             // data->ctrl[i] = joint_command_data.tau(i) + joint_command_data.kp(i) * dtheta * joint_command_data.kd(i) * dtheta_d;
@@ -168,6 +185,7 @@ int main(int argc, char** argv) {
     comm_data_ptr->setCommandDataPtr(&joint_command_data);
     comm_data_ptr->setSensorDataPtr(&sensor_data);
     comm_data_ptr->setMeasurementDataPtr(&measurement_data);
+    // comm_data_ptr->setPlantTimePtr(&t_curr);
 #elif defined(USE_DDS_COMM)
     comm_data_ptr = std::make_shared<QuadDDSComm>(m_name, DATA_ACCESS_MODE::PLANT);
     comm_data_ptr->setCommandDataPtr(&joint_command_data);
@@ -184,6 +202,7 @@ int main(int argc, char** argv) {
     comm_data_ptr->start_thread();
 #endif
 
+    m_startTimePoint = std::chrono::high_resolution_clock::now();
     // start physics thread
     std::thread physicsthreadhandle(&PhysicsThread, sim.get(), filename);
     // physicsthreadhandle.detach();

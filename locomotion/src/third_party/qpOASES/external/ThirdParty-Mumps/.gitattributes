@@ -1,0 +1,18 @@
+* text=auto !eol
+/INSTALL.MUMPS -text
+/LICENSE -text
+/ar-lib -text
+/coinmumps.pc.in -text
+/compile -text
+/config.guess -text
+/config.h.in -text
+/config.sub -text
+/configure -text
+/depcomp -text
+/get.Mumps -text
+/install-sh -text
+/ltmain.sh -text
+/missing -text
+/mumps_compat.h.in -text
+/mumps_int_def.h.in -text
+/mumps_mpi.patch -text
