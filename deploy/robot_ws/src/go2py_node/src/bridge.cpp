@@ -55,11 +55,11 @@ class Custom: public rclcpp::Node
             lowcmd_suber = this->create_subscription<unitree_go::msg::Go2pyLowCmd>(
             "/go2/lowcmd", 1, std::bind(&Custom::lowcmd_callback, this, std::placeholders::_1));
 
-            joint_cmd_suber = this->create_subscription<sensor_msgs::msg::JointState>(
-                "/go2/joint_cmd",
-                1,
-                std::bind(&Custom::joint_cmd_callback, this, std::placeholders::_1)
-            );
+            // joint_cmd_suber = this->create_subscription<sensor_msgs::msg::JointState>(
+            //     "/go2/joint_cmd",
+            //     1,
+            //     std::bind(&Custom::joint_cmd_callback, this, std::placeholders::_1)
+            // );
 
             lowcmd_puber = this->create_publisher<unitree_go::msg::LowCmd>("/lowcmd", 10);
 
