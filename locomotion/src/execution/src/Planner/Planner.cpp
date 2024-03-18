@@ -1,10 +1,10 @@
 #include "Planner/Planner.hpp"
 
-Planner::Planner() : m_name("svan_planner"), m_gait(Gait::TROT) {
+Planner::Planner() : m_name("svan_planner") {
     initClass();
 }
 
-Planner::Planner(std::string name) : m_name(name), m_gait(Gait::TROT) {
+Planner::Planner(std::string name) : m_name(name) {
     initClass();
 }
 
@@ -41,7 +41,7 @@ void Planner::startFromSleep(const bool& sleep_start) {
 
 // Use this carefully! Might be a good idea to just remove it.
 void Planner::setStance() {
-    m_gait = Gait::GAIT_TYPE::STANCE;
+    m_gait = Gait(Gait::GAIT_TYPE::STANCE);
     m_sleep_start = false;
     initClass();
     // m_ee_state_ref = m_robot.getStanceStates();
@@ -63,16 +63,16 @@ void Planner::setDesiredVelocity(const float& vx, const float& vy, const float& 
         return;
     }
 
-    Eigen::Vector2d vel_cmd = Eigen::Vector2d(m_v_cmd_x, m_v_cmd_y);
+    Eigen::Vector2d vel_cmd = Eigen::Vector2d(vx, vy);
     mat3x3 Rot_yaw = pinocchio::Rz(m_yaw);
 
     vec4 v_cmd = vec4::Zero();
     v_cmd.block<2,1>(0, 0) = Rot_yaw.block<2,2>(0, 0) * vel_cmd;
     v_cmd(2) = m_v_cmd_z;
-    v_cmd(3) = m_v_cmd_yaw;    
+    v_cmd(3) = vyaw;    
 
-    float kp = 2.0;
-    float kd = 2.83;
+    // float kp = 2.0;
+    float kd = 1.5;
 
     m_ee_acc_ref.block<3,1>(0, 0) = kd * (v_cmd.block<3,1>(0, 0) - m_ee_vel_ref.block<3,1>(0, 0));
     m_ee_acc_ref(5) = kd * (v_cmd(3) - m_ee_vel_ref(5));
@@ -131,7 +131,7 @@ bool Planner::sleepToStance() {
     static float motion_start_time = m_t_curr;
     bool finished = false;
 
-    m_gait = Gait::GAIT_TYPE::STANCE;
+    m_gait = Gait(Gait::GAIT_TYPE::STANCE);
     vec19 ee_stance = m_robot.getStanceStates();
 
     float motion_timer = m_t_curr; // - motion_start_time;
@@ -155,7 +155,7 @@ bool Planner::stanceToSleep() {
     static float motion_start_time = m_t_curr;
     bool finished = false;
 
-    m_gait = Gait::GAIT_TYPE::STANCE;
+    m_gait = Gait(Gait::GAIT_TYPE::STANCE);
     setDesiredVelocity(0, 0, 0);
 
     vec19 ee_sleep = m_robot.getSleepStates();
@@ -168,7 +168,7 @@ bool Planner::stanceToSleep() {
     // if (motion_timer < 4) {
     //     finished = setTargetBasePosition(ee_sleep.block<3,1>(0, 0), m_yaw, vec3(0, 0, 0.2));
     // } else {
-    //     m_gait = Gait::GAIT_TYPE::STANCE;
+            // m_gait = Gait(Gait::GAIT_TYPE::STANCE);
     // }
 
     if (finished == true) {
@@ -416,10 +416,11 @@ double Planner::getTimeSinceStart() {
     return duration * double(1e-6);
 }
 
+// Recheck this function. Behavior has changed after addition of setStance().
 void Planner::reset() {
     m_startTimePoint = std::chrono::high_resolution_clock::now();
 
-    m_gait = Gait::GAIT_TYPE::STANCE;
+    m_gait = Gait(Gait::GAIT_TYPE::STANCE);
     setDesiredVelocity(0, 0, 0);
 
     if (m_planner_data_ptr == NULL) {

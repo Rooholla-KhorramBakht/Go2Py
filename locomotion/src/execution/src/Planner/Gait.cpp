@@ -40,6 +40,10 @@ void Gait::SetParams(float gait_period, float t0, float step_height, Eigen::Vect
     m_step_height = step_height;
 }
 
+void Gait::updateInitTime(const float& t0) {
+    m_t0 = t0;
+}
+
 void Gait::ShowParams()
 {
     std::cout << "Gait Type: " << m_gait_type << "\n";
@@ -143,14 +147,21 @@ void Gait::InitClass()
         m_phi_thresh = Eigen::Vector4d::Ones();
         m_phi_offset = Eigen::Vector4d::Zero();
         m_cs_ref_data = Eigen::Array4i::Ones();
-        m_gait_period = 1;
+        m_gait_period = 10;
+        m_step_height = 0.0;
+    } else if (m_gait_type == STANCE) {
+        m_t0 = 0;
+        m_phi_thresh = Eigen::Vector4d::Ones();
+        m_phi_offset = Eigen::Vector4d::Zero();
+        m_cs_ref_data = Eigen::Array4i::Ones();
+        m_gait_period = 10;
         m_step_height = 0.0;
     } else {
         m_t0 = 0;
         m_phi_thresh = Eigen::Vector4d::Ones();
         m_phi_offset = Eigen::Vector4d::Zero();
         m_cs_ref_data = Eigen::Array4i::Ones();
-        m_gait_period = 1;
-        m_step_height = 0.08;
+        m_gait_period = 10;
+        m_step_height = 0.0;
     }
 }

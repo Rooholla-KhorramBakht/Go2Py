@@ -43,7 +43,8 @@ class Executor:
     def __init__(self, name):
         self.m_name = name
         self.device = "cpu"
-        path_label = "/home/meshin/dev/walk-these-ways/runs/gait-conditioned-agility/2024-02-18/train/211214.073611"
+        # path_label = "/home/meshin/dev/walk-these-ways/runs/gait-conditioned-agility/2024-02-18/train/211214.073611"
+        path_label = "/home/meshin/dev/walk-these-ways/runs/gait-conditioned-agility/2023-10-18/train/003846.138687"
         self.policy = Policy(path_label)
         self.loop_rate = 50.
         self.dt = 1./self.loop_rate
@@ -67,7 +68,7 @@ class Executor:
                       "trotting": [0.5, 0, 0],
                       "bounding": [0, 0.5, 0],
                       "pacing": [0, 0, 0.5]}
-        self.x_vel_cmd, self.y_vel_cmd, self.yaw_vel_cmd = 1.0, 0.0, 0.0
+        self.x_vel_cmd, self.y_vel_cmd, self.yaw_vel_cmd = 1.0, 0.0, 0.6
         self.body_height_cmd = 0.34
         self.step_frequency_cmd = 3.0
         self.gait = self.gaits["trotting"]
@@ -75,7 +76,8 @@ class Executor:
         self.pitch_cmd = 0.0
         self.roll_cmd = 0.0
         self.stance_width_cmd = 0.25
-        self.stance_length_cmd = 0.40
+        self.stance_length_cmd = 0.05
+        self.aux_reward_cmd = 0.0
         self.commands_np = np.array([0.] * self.num_commands)
         self.commands_np[0] = self.x_vel_cmd
         self.commands_np[1] = self.y_vel_cmd
@@ -89,6 +91,7 @@ class Executor:
         self.commands_np[11] = self.roll_cmd
         self.commands_np[12] = self.stance_width_cmd
         self.commands_np[13] = self.stance_length_cmd
+        self.commands_np[14] = self.aux_reward_cmd
         self.default_joint_pos = np.array([0.1, 0.8, -1.5, -0.1, 0.8, -1.5, 0.1, 1., -1.5, -0.1, 1., -1.5], dtype=np.float64)
         self.joint_pos_scale = 1.0
         self.joint_vel_scale = 0.05

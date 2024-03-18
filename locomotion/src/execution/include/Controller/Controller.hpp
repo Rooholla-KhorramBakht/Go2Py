@@ -7,6 +7,16 @@
 #include "memory_types.hpp"
 #include "utils.hpp"
 #include "timer.hpp"
+// #include "Iir.h"
+#include <qpOASES.hpp>
+
+using namespace qpOASES;
+
+#define MU 0.5
+#define GRAVITY 9.8
+
+static const double NEGATIVE_NUMBER = -1000000.0;
+static const double POSITIVE_NUMBER = 1000000.0;
 
 class Controller {
 public:
@@ -16,7 +26,8 @@ public:
 
     ~Controller();
 
-    vec12 GetDesiredContactForcePGD(const vec6 &b);
+    vec12 GetDesiredContactForcePGD(const Eigen::MatrixXd& JabT, const vec6 &b);
+    vec12 getDesiredContactForceqpOASES(const vec6 &b);
 
     virtual vec12 CalculateFeedForwardTorque() {
         return vec12::Zero();
@@ -76,6 +87,24 @@ protected:
     // To read
     QuadrupedEstimationData* m_estimation_data_ptr;
     QuadrupedPlannerData* m_planner_data_ptr;
+
+    void resize_qpOASES_vars();
+
+    void resize_eigen_vars();
+    
+    void update_problem_size();
+
+    void print_real_t(real_t *matrix, int nRows, int nCols);
+
+    void copy_Eigen_to_real_t(real_t *target, Eigen::MatrixXd &source, int nRows, int nCols);
+
+    void copy_real_t_to_Eigen(Eigen::VectorXd &target, real_t *source, int len);
+
+    void print_QPData();
+
+    Eigen::VectorXd clipVector(const Eigen::VectorXd &b, float F);
+
+    void cleanFc(vec12& Fc);
 private:
     std::string m_name;
 
@@ -89,4 +118,35 @@ private:
     bool m_starting_from_sleep = false;
     
     vec12 F_prev;
+
+    // float m_loop_rate = 1000;
+    // Iir::Butterworth::LowPass<2> m_Fc_filter[12];
+    // qpOASES related variables
+    real_t *H_qpOASES;
+
+    real_t *A_qpOASES;
+
+    real_t *g_qpOASES;
+
+    real_t *lbA_qpOASES;
+
+    real_t *ubA_qpOASES;
+
+    real_t *xOpt_qpOASES;
+
+    real_t *xOpt_initialGuess;
+
+    Eigen::MatrixXd H_eigen, A_eigen, g_eigen, lbA_eigen, ubA_eigen;
+
+    Eigen::VectorXd xOpt_eigen;
+
+    uint8_t real_allocated, num_vars_qp, num_constr_qp, c_st;
+
+    double fz_min, fz_max;
+
+    int_t qp_exit_flag;
+
+    int_t nWSR_qpOASES;
+    
+    real_t cpu_time;
 };

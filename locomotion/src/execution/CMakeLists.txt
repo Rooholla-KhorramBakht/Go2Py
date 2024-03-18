@@ -1,9 +1,11 @@
 find_package(iir REQUIRED)
 find_package(Threads REQUIRED)
+find_package(qpOASES REQUIRED)
 
 include_directories(
     include
     ${COMMON_INCLUDE_DIR}
+    ${qpOASES_INCLUDE_DIR}
 )
 
 if(INSTALL_HEADERS_ONLY)
@@ -18,18 +20,32 @@ install(DIRECTORY include/
 )
 else()
 
-add_library(pd_controller SHARED
+add_library(pd_controller STATIC
     src/Controller/Controller.cpp
 )
+target_compile_options(pd_controller PRIVATE "-fPIC")
 target_link_libraries(pd_controller
     quad_dynamics
+    iir::iir
+    ${qpOASES_LIBRARY}
 )
-add_library(didc SHARED
+add_library(didc STATIC
     src/Controller/DistributedIDC.cpp
 )
+target_compile_options(didc PRIVATE "-fPIC")
 target_link_libraries(didc
     quad_dynamics
     pd_controller
+)
+
+add_library(robust_didc STATIC
+    src/Controller/RobustDIDC.cpp
+)
+target_compile_options(robust_didc PRIVATE "-fPIC")
+target_link_libraries(robust_didc
+    quad_dynamics
+    pd_controller
+    gp_regressor
 )
 
 add_library(quad_estimator SHARED
@@ -58,6 +74,7 @@ target_link_libraries(reactive_planner
 install(TARGETS 
     pd_controller
     didc
+    robust_didc
     quad_estimator
     base_planner
     reactive_planner
@@ -77,6 +94,7 @@ add_dependencies(execute
     quad_communication
     # pd_controller
     didc
+    # robust_didc
     quad_dynamics
     quad_estimator
     # base_planner
@@ -85,6 +103,7 @@ add_dependencies(execute
 target_link_libraries(execute
     # pd_controller
     didc
+    # robust_didc
     quad_dynamics
     quad_estimator
     base_planner

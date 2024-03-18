@@ -36,7 +36,7 @@ void DistributedIDC::InitClass() {
 
     // load gains from a param file
     vec6 kpb;
-    kpb << 0.0 * 316.22, 0.0 * 316.22, 26.22,
+    kpb << 1.0 * 316.22, 1.0 * 316.22, 316.22,
         316.22, 316.22, 316.22;
     // kpb << 0, 0, 26.22,
     //     316.22, 316.22, 26.26;
@@ -45,7 +45,7 @@ void DistributedIDC::InitClass() {
     Kpb = kpb.asDiagonal();
 
     vec6 kdb;
-    kdb << 150.40, 150.40, 50.40,
+    kdb << 50.40, 50.40, 50.40,
         50.4, 50.4, 50.40;
     // kdb << 0 * 13.40, 0 * 13.40, 13.40,
     //     50.4, 50.4, 0 * 13.40;
@@ -105,8 +105,8 @@ vec12 DistributedIDC::CalculateFeedForwardTorque() {
             r_B_p_act -= (feet_pos_act.block<3,1>(3 * i, 0));
         }
     }
-    r_B_p_ref /= 1./m_num_contact;
-    r_B_p_act /= 1./m_num_contact;
+    r_B_p_ref /= m_num_contact;
+    r_B_p_act /= m_num_contact;
     base_err.block<3,1>(0, 0) = r_B_p_ref - r_B_p_act;
 
     mat3x3 R_ref = pinocchio::quat2rot(q_r.block<4,1>(3, 0));
@@ -115,11 +115,14 @@ vec12 DistributedIDC::CalculateFeedForwardTorque() {
     base_err.block<3,1>(3, 0) = pinocchio::matrixLogRot(R_ref * R_act.transpose());
     // std::cout << "Orientation error: " << pinocchio::matrixLogRot(R_ref * R_act.transpose()).transpose() << "\n";
     // base_err.block<3,1>(3, 0) = pinocchio::matrixLogRot(R_ref.transpose() * R_act);
-    // std::cout << "base err: " << base_err.transpose() << "\n";
+    // std::cout << "base position err: " << base_err.block<3,1>(0, 0).transpose() << "\n";
+    // std::cout << "base orientation err: " << base_err.block<3,1>(3, 0).transpose() << "\n";
     PD.block<6, 1>(0, 0) = 1 * Kpb * (base_err)
                          + 1 * Kdb * (qd_r.block<6, 1>(0, 0) - qd.block<6, 1>(0, 0));
     PD.block<12, 1>(6, 0) = 1 * Kpa * (q_r.block<12, 1>(7, 0) - q.block<12, 1>(7, 0))
                           + 1 * Kda * (qd_r.block<12, 1>(6, 0) - qd.block<12, 1>(6, 0));    
+    
+    // std::cout << "Position PD: " << PD.block<3,1>(0, 0).transpose() << "\n";
     // err.block<18,1>(0, 0) = q_r - q;
     // err.block<18,1>(18, 0) = qd_r - qd;
 
@@ -145,7 +148,37 @@ vec12 DistributedIDC::CalculateFeedForwardTorque() {
     a_cmd = qdd_r + PD;
     tau_full = M * (a_cmd) + H + G;
 
+    // std::cout << "a_cmd: " << a_cmd.block<3,1>(0, 0).transpose() << "\n";
+    // std::cout << "M * a_cmd: " << ( M * a_cmd ).block<3,1>(0, 0).transpose() << "\n";
+
     // std::cout << "tau_full: " << tau_full.transpose() << "\n";
+
+    std::cout << "Contact state: " << m_contact_flag_for_controller.transpose() << "\n";
+
+    // b.block<3,1>(0, 0) = tau_full.block<3,1>(0, 0);
+    b = tau_full.block<6,1>(0, 0);
+    // Fc = getFeetForces(clipVector(b, 50));
+    // std::cout << "b: " << b.transpose() << "\n";
+    b(0) = std::min(std::max(b(0), -20.), 20.);
+    b(1) = std::min(std::max(b(1), -50.), 50.);
+    b(2) = std::min(std::max(b(2), -200.), 200.);
+    b(3) = std::min(std::max(b(3), -100.), 100.);
+    b(4) = std::min(std::max(b(4), -100.), 100.);
+    b(5) = std::min(std::max(b(5), -100.), 100.);
+    std::cout << "b_clipped: " << b.transpose() << "\n";
+    // Fc = GetDesiredContactForcePGD(J.block<12, 6>(6, 0).transpose(), b);
+    Fc = getDesiredContactForceqpOASES(b);
+    cleanFc(Fc);
+    // std::cout << "cs: " << m_contact_flag_for_controller.transpose() << "\n";
+    // std::cout << "Fc: " << Fc.transpose() << std::endl;
+
+    // Transform Fc in robot reference yaw frame
+    vec3 eul = pinocchio::Rot2EulXYZ(pinocchio::quat2rot(q_r.block<4,1>(3, 0)));
+    mat3x3 R_yaw_ref_T = pinocchio::Rz(eul(2)).transpose();
+
+    // for (int i = 0; i < 4; ++i) {
+    //     Fc.block<3,1>(3 * i, 0) = R_yaw_ref_T * Fc.block<3,1>(3 * i, 0);
+    // }
 
     // distributing the 18x1 generalized force into 12x1 joint space torques
     Eigen::MatrixXd JabT = J.block<12, 6>(6, 0).transpose();
@@ -158,30 +191,12 @@ vec12 DistributedIDC::CalculateFeedForwardTorque() {
     Eigen::MatrixXd J_b2t = -JaaT * JabT_inv;
     Eigen::MatrixXd N_b2t = (Eigen::MatrixXd::Identity(12, 12) - J_b2t * (J_b2t.transpose() * J_b2t).inverse() * J_b2t.transpose());
 
-    b.block<3,1>(0, 0) = tau_full.block<3,1>(0, 0);
-    b.block<3,1>(3, 0) = tau_full.block<3,1>(3, 0);
-    // Fc = getFeetForces(clipVector(b, 50));
-    // std::cout << "b: " << b.transpose() << "\n";
-    b(0) = std::min(std::max(b(0), -20.), 20.);
-    b(1) = std::min(std::max(b(1), -20.), 20.);
-    b(3) = std::min(std::max(b(3), -100.), 100.);
-    b(4) = std::min(std::max(b(4), -100.), 100.);
-    b(5) = std::min(std::max(b(5), -100.), 100.);
-    // std::cout << "b_clipped: " << b.transpose() << "\n";
-    Fc = GetDesiredContactForcePGD(b);
-    // std::cout << "cs: " << m_contact_flag_for_controller.transpose() << "\n";
-    // std::cout << "Fc: " << Fc.transpose() << std::endl;
-
-    // Transform Fc in robot reference yaw frame
-    vec3 eul = pinocchio::Rot2EulXYZ(pinocchio::quat2rot(q.block<4,1>(3, 0)));
-    mat3x3 R_yaw_ref_T = pinocchio::Rz(eul(2)).transpose();
-
-    for (int i = 0; i < 4; ++i) {
-        Fc.block<3,1>(3 * i, 0) = R_yaw_ref_T * Fc.block<3,1>(3 * i, 0);
-    }
-
     tau_ff = -JaaT * Fc + N_b2t * tau_full.block<12,1>(6, 0);
+    // tau_ff = -JaaT * Fc + tau_full.block<12,1>(6, 0);
     // tau_ff = tau_full.block<12,1>(6, 0);
+
+    std::cout << "Realized b: " << (JabT * Fc).transpose() << "\n";
+    std::cout << "Fc: " << Fc.transpose() << std::endl;
 
     #ifdef PRINT_DEBUG
         // std::cout << "Fc: " << Fc.transpose() << std::endl;

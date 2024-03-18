@@ -262,7 +262,7 @@ void QuadEstimator::UpdatePoseEstimate() {
     est_data.jv.block<3,1>(3, 0) = sensor_data.w_W;
 
     est_data.js.block<12,1>(7, 0) = sensor_data.q;
-    est_data.jv.block<12,1>(7, 0) = sensor_data.qd;
+    est_data.jv.block<12,1>(6, 0) = sensor_data.qd;
 
     est_data.ja = (est_data.jv - m_jv_prev) * m_loop_rate;
 

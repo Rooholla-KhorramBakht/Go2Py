@@ -31,7 +31,7 @@ private:
     std::string m_name;
     float m_rate = 1000;
     float m_dt = 0.001;
-    float t_curr = 0;
+    double t_curr = 0;
     float t_last = 0;
     int delay_ms = 1;
     int exec_time_ms = 0;
@@ -64,6 +64,7 @@ private:
 
     Gait stance;
     Gait trot;
+    Gait walk;
 
     QuadrupedSensorData m_sensor_data;
     QuadrupedCommandData m_cmd_data;
@@ -76,4 +77,6 @@ private:
     std::chrono::time_point<std::chrono::high_resolution_clock> m_currentTimePoint;
     std::chrono::time_point<std::chrono::high_resolution_clock> m_lastTimePoint;
     std::thread m_comm_thread;
+
+    bool use_plant_time = true;
 };

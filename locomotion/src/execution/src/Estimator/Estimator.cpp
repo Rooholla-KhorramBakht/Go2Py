@@ -20,8 +20,8 @@ void Estimator::InitClass() {
 
     float sampling_freq = m_loop_rate;
     // std::cout << "Sampling freq: " << sampling_freq << "\n";
-    float cutoff_freq_imu = 2;
-    float cutoff_freq_encoder = 5;
+    float cutoff_freq_imu = 5;
+    float cutoff_freq_encoder = 20;
     for (int i = 0; i < 12; ++i) {
         m_q_filter[i].setup(sampling_freq, cutoff_freq_encoder);
         m_qd_filter[i].setup(sampling_freq, cutoff_freq_encoder);

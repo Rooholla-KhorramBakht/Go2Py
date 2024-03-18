@@ -9,9 +9,10 @@ void signalHandler(int signum) {
     // quad_exec_ptr->~Executor();
     // Add cleanup or exit logic as needed
 
-    if (quad_exec_ptr) {
-        delete quad_exec_ptr;
-    }
+    // if (quad_exec_ptr) {
+    // }
+
+    delete quad_exec_ptr;
 
     exit(signum);
 }

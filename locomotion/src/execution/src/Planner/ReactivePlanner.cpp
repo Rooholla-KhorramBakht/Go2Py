@@ -42,14 +42,16 @@ vec3 ReactivePlanner::getDesiredFootPosition(const uint8_t &leg_id, const float 
     float gravity = 9.81;
 
     Eigen::Vector2d cp_cmd = m_use_capture_point_heuristic * std::sqrt(p_hip_i(2) / gravity) * (v_hip_act - v_hip_ref);
-    for (int i = 0; i < 2; ++i) {
-        float delta_v = std::fabs(v_hip_act(i)) - std::fabs(v_hip_ref(i));
-        if (delta_v < 0) {
-            cp_cmd(i) = 0;
-        }
-    }
+    // for (int i = 0; i < 2; ++i) {
+    //     float delta_v = std::fabs(v_hip_act(i)) - std::fabs(v_hip_ref(i));
+    //     if (delta_v < 0) {
+    //         cp_cmd(i) = 0;
+    //     }
+    // }
 
-    // std::cout << "Capture point command: " << cp_cmd.transpose() << "\n";
+    // std::cout << "Raibert heiristic: " << leg_id << ": " << (getRaibertHeuristic(leg_id, t_stance) - p_hip_i).block<2,1>(0, 0).transpose() << "\n";
+    // std::cout << "Capture point command: " << leg_id << ": " << cp_cmd.transpose() << "\n";
+    // std::cout << "Base vel ref: " << base_vel_ref.transpose() << "\n";
 
     p_step_i.block<2, 1>(0, 0) = getRaibertHeuristic(leg_id, t_stance).block<2,1>(0, 0) + 0.0 * cp_cmd;
 
@@ -59,11 +61,16 @@ vec3 ReactivePlanner::getDesiredFootPosition(const uint8_t &leg_id, const float 
 void ReactivePlanner::setTarget() {
     setFeetTarget();
     setBaseTarget();
+
     if (use_vpsp) {
         Eigen::MatrixXd p_f_VPSP = getVPSPVertices(m_t_curr);
+        // std::cout << "polygon vertices: \n" << p_f_VPSP << "\n";
         Eigen::Vector2d base_pos_from_VPSP = p_f_VPSP.rowwise().mean();
         m_ee_state_ref.block<2,1>(0, 0) = base_pos_from_VPSP;
     }
+
+    // std::cout << "Base velocity: " << m_ee_vel_ref.block<2,1>(0, 0).transpose() << "\n";
+    // std::cout << "Base acceleration: " << m_ee_acc_ref.block<2,1>(0, 0).transpose() << "\n";
 
     // std::cout << "Stability margin: " << getVPSPStabilityMargin() << "\n";
 }
@@ -126,14 +133,15 @@ double ReactivePlanner::getVPSPStabilityMargin() {
 
     vec19 dummy_js = vec19::Zero();
     dummy_js.block<12,1>(7, 0) = m_theta;
-    dummy_js.block<3,1>(3, 0) = m_joint_state_act.block<3,1>(3, 0);
-    vec12 feet_pos = m_robot.forwardKinematics(m_joint_state_act);
+    dummy_js.block<4,1>(3, 0) = m_joint_state_act.block<4,1>(3, 0);
+    vec12 feet_pos = m_robot.forwardKinematics(dummy_js);
     // XY coordinates of the virtual predicitve support polygon for each of the four legs
     Eigen::MatrixXd p_f_VPSP = Eigen::MatrixXd::Zero(2, 4);
 
     // an array for storing the adjacent legs
     Eigen::ArrayXi adj_leg = Eigen::ArrayXi::Zero(6);
-    adj_leg << 3, 0, 1, 2, 3, 0;
+    // adj_leg << 3, 0, 1, 2, 3, 0;
+    adj_leg << 3, 1, 0, 2, 3, 1;
 
     for (int j = 1; j < 5; j++) {
         int i = j - 1;
@@ -172,14 +180,23 @@ Eigen::MatrixXd ReactivePlanner::getVPSPVertices(const float &t) {
     Eigen::MatrixXd p_f_VPSP = Eigen::MatrixXd::Zero(2, 4);
 
     // an array for storing the adjacent legs
-    Eigen::ArrayXi adj_leg = Eigen::ArrayXi::Zero(6);
-    adj_leg << 3, 0, 1, 2, 3, 0;
+    // Eigen::ArrayXi adj_leg = Eigen::ArrayXi::Zero(6);
+    Eigen::MatrixXi adj_leg = Eigen::MatrixXi::Zero(4, 2);
+    // adj_leg << 3, 2, 0, 1, 3, 2;
+    // adj_leg << 3, 0, 1, 2, 3, 0;
+    // adj_leg << 3, 0, 1, 2, 3, 0;
+    adj_leg << 1, 2,
+                3, 0,
+                0, 3,
+                2, 1;
 
     for (int j = 1; j < 5; j++)
     {
         int i = j - 1;
-        int i_prev = adj_leg(j - 1);
-        int i_next = adj_leg(j + 1);
+        // int i_prev = adj_leg(j - 1);
+        // int i_next = adj_leg(j + 1);
+        int i_prev = adj_leg(i, 0);
+        int i_next = adj_leg(i, 1);
 
         Eigen::Vector2d p_i, p_i_prev, p_i_next;
         p_i << m_ee_state_ref(7 + 3 * i), m_ee_state_ref(7 + 3 * i + 1);

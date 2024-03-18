@@ -26,7 +26,7 @@ Executor::~Executor() {
     float shutdown_start = t_curr;
     bool shutdown_complete = false;
     
-    while (shutdown_timer < 5) {
+    while (shutdown_timer < 1) {
         t_last = t_curr;
         t_curr = updateTimer();
         m_dt = t_curr - t_last;
@@ -71,6 +71,7 @@ void Executor::initClass() {
     m_plant_data_ptr->setSensorDataPtr(&m_sensor_data);
     m_plant_data_ptr->setCommandDataPtr(&m_cmd_data);
     m_plant_data_ptr->setEstimationDataPtr(&m_est_data);
+    // m_plant_data_ptr->setPlantTimePtr(&t_curr);
 #elif defined(USE_DDS_COMM)
     m_plant_data_ptr = std::make_shared<QuadDDSComm>(m_name, DATA_ACCESS_MODE::EXECUTOR);
     m_plant_data_ptr->setUpdateRate(1000);
@@ -111,13 +112,13 @@ void Executor::initClass() {
 
     stance = Gait(Gait::STANCE);
 
-    Gait walk(Gait::TROT);
+    walk = Gait(Gait::TROT);
     walk.SetParams(5.0, 0, 0.09, Eigen::Vector4d(0.9, 0.9, 0.9, 0.9), Eigen::Vector4d(0.75, 0.25, 0.5, 0.0));
     // set velocity to ~0.05 to work with gait period of 5
 
     m_planner.reset();
     m_planner.setGait(stance);
-    m_planner.setDesiredVelocity(0.0, 0.0, 0.0);
+    m_planner.setDesiredVelocity(0.00, 0.0, 0.0);
 
     // m_planner_data.x = m_robot.getStanceStates();
     m_planner_data.x = m_robot.getSleepStates();
@@ -137,7 +138,7 @@ double Executor::updateTimer() {
 }
 
 void Executor::step() {
-    // Timer timer("Executor Step");
+    Timer timer("Executor Step");
     {
         // Timer timer1("Reading sensor data");
         m_plant_data_ptr->getSensorData(m_sensor_data);
@@ -151,7 +152,7 @@ void Executor::step() {
         m_estimator.Step(m_dt);
     }
     {
-        // Timer timer1("Controller step");
+        Timer timer1("Controller step");
         m_controller.Step();
     }
     {
@@ -170,8 +171,14 @@ void Executor::run() {
 
     while (true) {
         t_last = t_curr;
-        t_curr = updateTimer();
+        if (use_plant_time) {
+            m_plant_data_ptr -> getPlantTime(t_curr);
+        } else {
+            t_curr = updateTimer();
+        }
         m_dt = t_curr - t_last;
+
+        // std::cout << "t_curr: " << t_curr << "\n";
 
         // if (t_curr < 5) {
         //     m_planner.setGait(trot);
@@ -185,21 +192,19 @@ void Executor::run() {
         // if (t_curr < 50) {
         
         // if (t_curr < 15) {
-        if(t_curr < 5) {  
-        // if(!m_planner.setTargetBasePosition(vec3(0, 0, 0.34), 0, vec3(0, 0, 0.2))) {
-            // std::cout << "Reached\n";
+        if(t_curr < 5) {
             m_planner.sleepToStance();
-        } else if (t_curr < 8) {
-            // m_planner.setGait(trot);
-            m_planner.setGait(trot);
-            m_planner.setDesiredVelocity(0.2, 0, 0.0);
-            // m_planner.setTargetBasePosition(vec3(5.0, 0, 0.34), 0.0);
-            // std::cout << "Reaching\n";
-        } else if (t_curr < 9) {
-            m_planner.setGait(stance);
         } else {
-            break;
+            m_planner.setGait(trot);
+            m_planner.setDesiredVelocity(0.0, 0.5, 0.0);
+            // m_planner.setDesiredVelocity(0.5, 0.0, 0.5);
+            // m_planner.setTargetBasePosition(vec3(5, 5, 0.34), 0);
         }
+        // if (t_curr < 1) {
+        //     m_planner.setGait(stance);
+        // } else {
+        //     m_planner.setGait(trot);
+        //     m_planner.setDesiredVelocity(0.2, 0, 0.0);
         // }
 
         // if(m_joystick_data.mode == 0) {
@@ -230,12 +235,20 @@ void Executor::run() {
         //     m_planner.setDesiredVelocity(0, 0, 0);
         // }
 
-        step();
+        if (std::fabs(t_curr - t_last) > 1e-6) {
+            step();
+        }
+
 
         // Sleep for specified time to maintain update rate
         // std::cout << "time: " << t_curr << "\n";
         // std::this_thread::sleep_for(std::chrono::milliseconds(delay_ms));
-        float t_end = updateTimer();
+        double t_end = 0;
+        if (use_plant_time) {
+            m_plant_data_ptr -> getPlantTime(t_end);
+        } else {
+            t_end = updateTimer();
+        }
         int delay_time = delay_ms - (t_end - t_curr) * 1e3;
         if (delay_time > 0) {
             std::this_thread::sleep_for(std::chrono::milliseconds(delay_time));

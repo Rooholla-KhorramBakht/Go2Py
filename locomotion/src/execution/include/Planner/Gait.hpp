@@ -28,6 +28,8 @@ public:
 
     void ShowParams();
 
+    void updateInitTime(const float& t0); 
+
     Eigen::Array4i GetScheduledContact(const float& t);
 
     float GetStridePhase(const float& t, const int& leg_id);
