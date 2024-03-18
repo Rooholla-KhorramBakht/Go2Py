@@ -29,7 +29,7 @@ class GO2Real():
         self.mode = mode
         if self.mode == 'highlevel':
             raise NotImplementedError('DDS interface for the highlevel commands is not implemented yet. Please use our ROS2 interface.')
-
+        self.simulated = False
         self.highcmd_topic_name = "rt/go2/twist_cmd"
         self.lowcmd_topic_name = "rt/go2/lowcmd"
         self.lowstate_topic_name = "rt/lowstate"

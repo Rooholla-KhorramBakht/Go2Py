@@ -66,6 +66,7 @@ class GO2Real(Node):
         ωz_max=0.5,
     ):
         assert mode in ['highlevel', 'lowlevel'], "mode should be either 'highlevel' or 'lowlevel'"
+        self.simulated = False
         self.mode = mode
         self.node_name = "go2py_highlevel_subscriber"
         self.highcmd_topic = "/go2/twist_cmd"

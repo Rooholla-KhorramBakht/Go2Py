@@ -15,6 +15,7 @@ class Go2Sim:
         self.model = mujoco.MjModel.from_xml_path(
             os.path.join(ASSETS_PATH, 'mujoco/go2.xml')
         )
+        self.simulated = True
         self.data = mujoco.MjData(self.model)
         self.dt = dt
         _render_dt = 1/60
