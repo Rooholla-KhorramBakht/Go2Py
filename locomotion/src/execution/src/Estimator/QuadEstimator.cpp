@@ -14,13 +14,13 @@ void QuadEstimator::InitClass() {
     m_forces_estimated = vec12::Zero();
 
     // m_sigma_pz = 0.841 * Eigen::Matrix4d::Identity(); // value from contact event detection paper MIT
-    m_sigma_pz = 10.0 * mat4x4::Identity(); // value from contact event detection paper MIT
+    m_sigma_pz = 100.0 * mat4x4::Identity();
     // m_sigma_fz = 0.930 * Eigen::Matrix4d::Identity(); // value from contact event detection paper MIT
     m_sigma_fz = 0.3 * mat4x4::Identity(); //
     m_sigma_measurement = mat8x8::Zero();
     m_sigma_measurement.block<4,4>(0, 0) = m_sigma_pz;
     m_sigma_measurement.block<4,4>(4, 4) = m_sigma_fz;
-    m_sigma_process = 0.2 * Eigen::Matrix4d::Identity();
+    m_sigma_process = 100.2 * Eigen::Matrix4d::Identity();
     m_jv_prev = vec18::Zero();
 
     InitEstimatorVars();
