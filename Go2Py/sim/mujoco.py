@@ -36,10 +36,17 @@ class Go2Sim:
         self.render = render
         self.step_counter = 0
         
-        self.q0 = np.array([-0.03479636,  1.26186061, -2.81310153,
-                             0.03325212,  1.25883281, -2.78329301,
-                            -0.34708387,  1.27193761, -2.8052032 ,  
-                             0.32040933,  1.27148342, -2.81436563])
+        self.sitting_q = np.array([ 0.0,  1.26186061, -2.81310153,
+                                    0.0,  1.25883281, -2.78329301,
+                                    0.0,  1.27193761, -2.8052032 ,  
+                                    0.0,  1.27148342, -2.81436563])
+
+        self.standing_q = np.array([ 0.0,  0.77832842, -1.56065452,
+                                     0.0,  0.76754963, -1.56634164,
+                                     0.0,  0.76681757, -1.53601146,  
+                                     0.0,  0.75422204, -1.53229916])
+
+        self.q0 = self.sitting_q
         self.pos0 = np.array([0., 0., 0.1])
         self.rot0 = np.array([1., 0., 0., 0.])
         self.reset()
@@ -50,6 +57,13 @@ class Go2Sim:
         self.jacr = np.zeros((3, self.nv))
         self.M = np.zeros((self.nv, self.nv))
 
+        self.q_des = np.zeros(12)
+        self.dq_des = np.zeros(12)
+        self.tau_ff = np.zeros(12)
+        self.kp = np.zeros(12)
+        self.kv = np.zeros(12)
+        self.latest_command_stamp = time.time()
+
     def reset(self):
         self.q_nominal = np.hstack(
             [self.pos0.squeeze(), self.rot0.squeeze(), self.q0.squeeze()]
@@ -57,22 +71,16 @@ class Go2Sim:
         self.data.qpos = self.q_nominal
         self.data.qvel = np.zeros(18)
     
-    def standUp(self):
-        self.q0 = np.array([ 0.00901526,  0.77832842, -1.56065452,
-                            -0.00795561,  0.76754963, -1.56634164,
-                            -0.05375515,  0.76681757, -1.53601146,  
-                             0.06183922,  0.75422204, -1.53229916])
+    def standUpReset(self):
+        self.q0 = self.standing_q
         self.pos0 = np.array([0., 0., 0.33])
         self.rot0 = np.array([1., 0., 0., 0.])
         self.reset()
         mujoco.mj_step(self.model, self.data)
         self.viewer.sync()
 
-    def sitDown(self):
-        self.q0 = np.array([-0.03479636,  1.26186061, -2.81310153,
-                             0.03325212,  1.25883281, -2.78329301,
-                            -0.34708387,  1.27193761, -2.8052032 ,  
-                             0.32040933,  1.27148342, -2.81436563])
+    def sitDownReset(self):
+        self.q0 = self.sitting_q
         self.pos0 = np.array([0., 0., 0.1])
         self.rot0 = np.array([1., 0., 0., 0.])
         self.reset()
@@ -95,12 +103,19 @@ class Go2Sim:
         return self.data.sensordata[6:10]
 
     def setCommands(self, q_des, dq_des, kp, kv, tau_ff):
-        q, dq = self.getJointStates()
-        tau = np.diag(kp)@(q_des-q).reshape(12,1)+ \
-              np.diag(kv)@(dq_des-dq).reshape(12,1)+tau_ff.reshape(12,1)
-        self.data.ctrl[:] = tau.squeeze()
+        self.q_des = q_des
+        self.dq_des = dq_des
+        self.kp = kp
+        self.kv = kv
+        self.tau_ff = tau_ff
+        self.latest_command_stamp = time.time()
         
     def step(self):
+        q, dq = self.getJointStates()
+        tau = np.diag(self.kp)@(self.q_des-q).reshape(12,1)+ \
+              np.diag(self.kv)@(self.dq_des-dq).reshape(12,1)+self.tau_ff.reshape(12,1)
+        self.data.ctrl[:] = tau.squeeze()
+
         self.step_counter += 1
         mujoco.mj_step(self.model, self.data)
         # Render every render_ds_ratio steps (60Hz GUI update)
@@ -120,6 +135,9 @@ class Go2Sim:
             'M':self.M,
             'nle':nle
         }
+
+    def overheat(self):
+        return False
 
     def close(self):
         self.viewer.close()
