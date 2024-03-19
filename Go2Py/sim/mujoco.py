@@ -8,7 +8,7 @@ import pinocchio as pin
 from pinocchio.robot_wrapper import RobotWrapper
 from Go2Py import ASSETS_PATH
 import os
-
+from scipy.spatial.transform import Rotation
 class Go2Sim:
     def __init__(self, render=True, dt=0.002):
         
@@ -143,6 +143,12 @@ class Go2Sim:
             'M':self.M,
             'nle':nle
         }
+
+    def getGravityInBody(self):
+        _, q = self.getPose()
+        R = Rotation.from_quat([q[1], q[2], q[3], q[0]]).as_matrix()
+        g_in_body = R.T@np.array([0.0, 0.0, -1.0]).reshape(3, 1)
+        return g_in_body
 
     def overheat(self):
         return False
