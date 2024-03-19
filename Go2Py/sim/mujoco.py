@@ -37,10 +37,15 @@ class Go2Sim:
         self.render = render
         self.step_counter = 0
         
-        self.sitting_q = np.array([ 0.0,  1.26186061, -2.81310153,
-                                    0.0,  1.25883281, -2.78329301,
-                                    0.0,  1.27193761, -2.8052032 ,  
-                                    0.0,  1.27148342, -2.81436563])
+        self.prestanding_q = np.array([ 0.0,  1.26186061, -2.5,
+                                    0.0,  1.25883281, -2.5,
+                                    0.0,  1.27193761, -2.6,  
+                                    0.0,  1.27148342, -2.6])
+
+        self.sitting_q = np.array([-0.02495611,  1.26249647, -2.82826662,
+                                    0.04563564,  1.2505368 , -2.7933557 ,
+                                   -0.30623949,  1.28283751, -2.82314873,  
+                                    0.26400229,  1.29355574, -2.84276843])
 
         self.standing_q = np.array([ 0.0,  0.77832842, -1.56065452,
                                      0.0,  0.76754963, -1.56634164,
@@ -89,7 +94,8 @@ class Go2Sim:
         self.viewer.sync()
 
     def getJointStates(self):
-        return self.data.qpos[7:], self.data.qvel[6:]
+        return {"q":self.data.qpos[7:], 
+               "dq":self.data.qvel[6:]}
 
     def getPose(self):
         return self.data.qpos[:3], self.data.qpos[3:7]
@@ -112,7 +118,8 @@ class Go2Sim:
         self.latest_command_stamp = time.time()
         
     def step(self):
-        q, dq = self.getJointStates()
+        state = self.getJointStates()
+        q, dq = state['q'], state['dq']
         tau = np.diag(self.kp)@(self.q_des-q).reshape(12,1)+ \
               np.diag(self.kv)@(self.dq_des-dq).reshape(12,1)+self.tau_ff.reshape(12,1)
         self.data.ctrl[:] = tau.squeeze()

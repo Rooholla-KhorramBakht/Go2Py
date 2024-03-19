@@ -67,6 +67,21 @@ class GO2Real(Node):
     ):
         assert mode in ['highlevel', 'lowlevel'], "mode should be either 'highlevel' or 'lowlevel'"
         self.simulated = False
+        self.prestanding_q = np.array([ 0.0,  1.26186061, -2.5,
+                                    0.0,  1.25883281, -2.5,
+                                    0.0,  1.27193761, -2.6,  
+                                    0.0,  1.27148342, -2.6])
+
+        self.sitting_q = np.array([-0.02495611,  1.26249647, -2.82826662,
+                                    0.04563564,  1.2505368 , -2.7933557 ,
+                                   -0.30623949,  1.28283751, -2.82314873,  
+                                    0.26400229,  1.29355574, -2.84276843])
+
+        self.standing_q = np.array([ 0.0,  0.77832842, -1.56065452,
+                                     0.0,  0.76754963, -1.56634164,
+                                     0.0,  0.76681757, -1.53601146,  
+                                     0.0,  0.75422204, -1.53229916])
+        self.latest_command_stamp = time.time()
         self.mode = mode
         self.node_name = "go2py_highlevel_subscriber"
         self.highcmd_topic = "/go2/twist_cmd"
@@ -204,15 +219,17 @@ class GO2Real(Node):
         self.highcmd.twist.angular.z = _ω_z
         self.highcmd_publisher.publish(self.highcmd)
 
-    def setCommandsLow(self, q, dq, kp, kd, tau_ff):
-        assert q.size == dq.size == kp.size == kd.size == tau_ff.size == 12, "q, dq, kp, kd, tau_ff should have size 12"
+    def setCommandsLow(self, q_des, dq_des, kp, kd, tau_ff):
+        assert q_des.size == dq_des.size == kp.size == kd.size == tau_ff.size == 12, "q, dq, kp, kd, tau_ff should have size 12"
         lowcmd = Go2pyLowCmd()
-        lowcmd.q = q.tolist()
-        lowcmd.dq = dq.tolist()
+        lowcmd.q = q_des.tolist()
+        lowcmd.dq = dq_des.tolist()
         lowcmd.kp = kp.tolist()
         lowcmd.kd = kd.tolist()
         lowcmd.tau = tau_ff.tolist()
         self.lowcmd_publisher.publish(lowcmd)
+        self.latest_command_stamp = time.time()
+
 
     def close(self):
         self.running = False
@@ -234,3 +251,6 @@ class GO2Real(Node):
             scale = 1.0
 
         return scale * v_x, scale * v_y, np.clip(ω_z, self.ωz_min, self.ωz_max)
+
+    def overheat(self):
+        return False
