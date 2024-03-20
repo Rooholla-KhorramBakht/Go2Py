@@ -17,6 +17,8 @@ from cyclonedds.util import duration
 from Go2Py.unitree_go.msg.dds_ import LowState_
 from threading import Thread
 from scipy.spatial.transform import Rotation
+from Go2Py.joy import xKeySwitch, xRockerBtn
+
 
 
 class GO2Real():
