@@ -14,6 +14,7 @@ from Go2Py.joy import xKeySwitch, xRockerBtn
 from geometry_msgs.msg import TwistStamped
 from Go2Py.msgs.unitree_go.msg import LowState, Go2pyLowCmd
 from nav_msgs.msg import Odometry   
+from scipy.spatial.transform import Rotation
 
 
 
@@ -254,3 +255,9 @@ class GO2Real(Node):
 
     def overheat(self):
         return False
+
+    def getGravityInBody(self):
+        q = self.getIMU()['quat']
+        R = Rotation.from_quat([q[1], q[2], q[3], q[0]]).as_matrix()
+        g_in_body = R.T@np.array([0.0, 0.0, -1.0]).reshape(3, 1)
+        return g_in_body

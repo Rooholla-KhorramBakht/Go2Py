@@ -16,6 +16,8 @@ from cyclonedds.sub import DataReader
 from cyclonedds.util import duration
 from Go2Py.unitree_go.msg.dds_ import LowState_
 from threading import Thread
+from scipy.spatial.transform import Rotation
+
 
 class GO2Real():
     def __init__(
@@ -191,3 +193,9 @@ class GO2Real():
 
     def overheat(self):
         return False
+
+    def getGravityInBody(self):
+        q = self.getIMU()['quat']
+        R = Rotation.from_quat([q[1], q[2], q[3], q[0]]).as_matrix()
+        g_in_body = R.T@np.array([0.0, 0.0, -1.0]).reshape(3, 1)
+        return g_in_body
