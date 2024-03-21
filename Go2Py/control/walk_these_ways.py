@@ -114,7 +114,7 @@ class HistoryWrapper:
 class CommandInterface:
     def __init__(self, limits=None):
         self.limits = limits
-        gaits = {
+        self.gaits = {
             "pronking": [0, 0, 0],
             "trotting": [0.5, 0, 0],
             "bounding": [0, 0.5, 0],
@@ -123,11 +123,15 @@ class CommandInterface:
         self.x_vel_cmd, self.y_vel_cmd, self.yaw_vel_cmd = 0.0, 0.0, 0.0
         self.body_height_cmd = 0.0
         self.step_frequency_cmd = 3.0
-        self.gait = torch.tensor(gaits["trotting"])
-        self.footswing_height_cmd = 0.03
+        self.gait = torch.tensor(self.gaits["trotting"])
+        self.footswing_height_cmd = 0.08
         self.pitch_cmd = 0.0
         self.roll_cmd = 0.0
-        self.stance_width_cmd = 0.0
+        self.stance_width_cmd = 0.25
+
+    def setGaitType(self, gait_type):
+        assert gait_type in [key for key in self.gaits.keys()], f'The gain type should be in {[key for key in self.gaits.keys()]}'
+        self.gait = torch.tensor(self.gaits[gait_type])
 
     def get_command(self):
         command = np.zeros((19,))
