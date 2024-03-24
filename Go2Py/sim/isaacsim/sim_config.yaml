@@ -13,16 +13,17 @@ robots:
     usd_file: "assets/usd/go2.usd"
     position: [0.0, 0.0, 0.8]
     orientation: [0.0, 0.0, 0.0, 1.0]
+    lidar: False
 
 cameras:
-  - prim_path: "/World/Env/GO2/imu_link"
-    name: "test_camera"
-    type: ["rgb", "distance_to_camera"]
-    resolution: [1280, 720]
-    interstice_parameters:
-      K: [1000, 1000, 500, 500]
-      D: [0.1, 0.2, 0.1, 0.0]
-    translation: [0.0, 0.0, 0.0] # x, y, z
-    orientation: [0.0, 0.0, 0.0, 1.0] # qx, qy, qz, qw
+  # - prim_path: "/World/Env/GO2/Go2/base/base"
+  #   name: "test_camera"
+  #   type: ["rgb", "distance_to_camera"]
+  #   resolution: [1280, 720]
+  #   interstice_parameters:
+  #     K: [1000, 1000, 500, 500]
+  #     D: [0.1, 0.2, 0.1, 0.0]
+  #   translation: [0.0, 0.0, 0.0] # x, y, z
+  #   orientation: [0.0, 0.0, 0.0, 1.0] # qx, qy, qz, qw
 
   
