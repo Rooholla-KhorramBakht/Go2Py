@@ -34,15 +34,15 @@ class UnitreeGo2(Articulation):
         """
         self._prim_path = prim_path
         prim = define_prim(self._prim_path, "Xform")
-        prim.GetReferences().AddReference(Go2Py.GO2_USD_PATH)
         self.usd_path = usd_path
+        # breakpoint()
         if self.usd_path is None:
             prim.GetReferences().AddReference(Go2Py.GO2_USD_PATH)
         else:
             prim.GetReferences().AddReference(self.usd_path)
-
+        breakpoint()
         super().__init__(
-            prim_path=self._prim_path,
+            prim_path=self._prim_path+'/Go2/base',
             name=name,
             position=position,
             orientation=orientation,
@@ -51,10 +51,10 @@ class UnitreeGo2(Articulation):
         # contact sensor setup
         self.feet_order = ["FL", "RL", "FR", "RR"]
         self.feet_path = [
-            self._prim_path + "/FL_foot",
-            self._prim_path + "/FR_foot",
-            self._prim_path + "/RL_foot",
-            self._prim_path + "/RR_foot",
+            self._prim_path + "/Go2/base/FL_calf",
+            self._prim_path + "/Go2/base/FR_calf",
+            self._prim_path + "/Go2/base/RL_calf",
+            self._prim_path + "/Go2/base/RR_calf",
         ]
 
         self.color = [(1, 0, 0, 1), (0, 1, 0, 1), (0, 0, 1, 1), (1, 1, 0, 1)]
@@ -73,7 +73,7 @@ class UnitreeGo2(Articulation):
         self._FILTER_WINDOW_SIZE = 20
         self._foot_filters = [deque(), deque(), deque(), deque()]
         # imu sensor setup
-        self.imu_path = self._prim_path + "/imu_link"
+        self.imu_path = self._prim_path + "/Go2/base/base"
         self._imu_sensor = IMUSensor(
             prim_path=self.imu_path + "/imu_sensor",
             name="imu",

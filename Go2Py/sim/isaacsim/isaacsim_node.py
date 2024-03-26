@@ -3,12 +3,8 @@
 import pickle
 import sys
 import time
-
 import numpy as np
 from omni.isaac.kit import SimulationApp
-
-# sys.path.append("/home/vr-station/projects/lcm/build/python")
-
 
 simulation_app = SimulationApp({"headless": False})  # we can also run as headless.
 
@@ -30,7 +26,11 @@ from Go2Py.sim.utils import (
 
 cfg = load_config(Go2Py.GO2_ISAACSIM_CFG_PATH)
 robots = cfg["robots"]
-cameras = cfg["cameras"]
+if cfg["cameras"] is None:
+    cameras = []
+else:
+    cameras = cfg["cameras"]
+
 env_cfg = cfg["environment"]
 
 PHYSICS_DT = 1 / 200
@@ -47,6 +47,8 @@ if assets_root_path is None:
     print("Could not find Isaac Sim assets folder")
 
 prim = get_prim_at_path(env_cfg["prim_path"])
+
+print("Adding the environment")
 if not prim.IsValid():
     prim = define_prim(env_cfg["prim_path"], "Xform")
     asset_path = (
@@ -56,7 +58,7 @@ if not prim.IsValid():
     )
     prim.GetReferences().AddReference(asset_path)
 
-breakpoint()
+print("Adding the robot")
 go2 = world.scene.add(
     UnitreeGo2(
         prim_path=robots[0]["prim_path"],
@@ -67,32 +69,30 @@ go2 = world.scene.add(
     )
 )
 
-# # Add Lidar
-# lidar = world.scene.add(
-#     RotatingLidarPhysX(
-#         prim_path="/World/Env/GO2/imu_link/lidar",
-#         name="lidar",
-#         translation=[0.16, 0.0, 0.14],
-#         orientation=[0.0, 0.0, 0.0, 1.0],
-#     )
-# )
+# Add Lidar if required
+if robots[0]["lidar"]:
+    lidar = world.scene.add(
+        RotatingLidarPhysX(
+            prim_path="/World/Env/GO2/Go2/base/base/lidar",
+            name="lidar",
+            translation=[0.16, 0.0, 0.14],
+            orientation=[0.0, 0.0, 0.0, 1.0],
+        )
+    )
 
-# lidar.add_depth_data_to_frame()
-# lidar.add_point_cloud_data_to_frame()
-# lidar.set_rotation_frequency(0)
-# lidar.set_resolution([0.4, 2])
-# # lidar.enable_visualization()
-# lidar.prim.GetAttribute("highLod").Set(True)
-# lidar.prim.GetAttribute("highLod").Set(True)
+    lidar.add_depth_data_to_frame()
+    lidar.add_point_cloud_data_to_frame()
+    lidar.set_rotation_frequency(0)
+    lidar.set_resolution([0.4, 2])
+    # lidar.enable_visualization()
+    lidar.prim.GetAttribute("highLod").Set(True)
+    lidar.prim.GetAttribute("highLod").Set(True)
 
-# lidar_data_pipe = NumpyMemMapDataPipe(
-#     "lidar_data_pipe", force=True, dtype="float32", shape=(900, 16, 3)
-# )
+    lidar_data_pipe = NumpyMemMapDataPipe(
+        "lidar_data_pipe", force=True, dtype="float32", shape=(900, 16, 3)
+    )
 
-world.reset()
-go2.initialize()
-breakpoint()
-# Add cameras
+# Add cameras if required
 print("Adding cameras")
 ann = AnnotatorManager(world)
 
@@ -140,24 +140,7 @@ for camera in cameras:
             )
             camera_pipes[camera["name"] + "_" + type] = pipe
 
-# Store simulation hyperparamters in shared memory
-print("Storing simulation hyperparamters in shared memory")
-
-meta_data = {
-    "camera_names": [camera["name"] for camera in cameras],
-    "camera_types": [camera["type"] for camera in cameras],
-    "camera_resolutions": [camera["resolution"] for camera in cameras],
-    "camera_intrinsics": [
-        ann.getCameraIntrinsics(camera["name"]) for camera in cameras
-    ],
-    "camera_extrinsics": [
-        ann.getCameraExtrinsics(camera["name"]) for camera in cameras
-    ],
-}
-with open("/dev/shm/fr3_sim_meta_data.pkl", "wb") as f:
-    pickle.dump(meta_data, f)
-
-lcm_server = LCMBridgeServer(robot_name="b1")
+# lcm_server = LCMBridgeServer(robot_name="b1")
 cmd_stamp = time.time()
 cmd_stamp_old = cmd_stamp
 
@@ -165,7 +148,14 @@ cmd = UnitreeLowCommand()
 cmd.kd = 12 * [2.5]
 cmd.kp = 12 * [100]
 cmd.dq_des = 12 * [0]
-cmd.q_des = b1.init_joint_pos
+cmd.q_des = go2.init_joint_pos
+
+world.reset()
+go2.initialize()
+# while simulation_app.is_running():
+#     world.step(render=True)
+    
+# breakpoint()
 
 # sim_manager = simulationManager(
 #     robot=go2,
@@ -181,8 +171,10 @@ while simulation_app.is_running():
     # sim_manager.step(counter * PHYSICS_DT)
     if counter % 4 == 0:
         world.step(render=True)
-        pc = lidar.get_current_frame()["point_cloud"]
-        lidar_data_pipe.write(pc, match_length=True)
+
+        if robots[0]["lidar"]:
+            pc = lidar.get_current_frame()["point_cloud"]
+            lidar_data_pipe.write(pc, match_length=True)
 
         # Push the sensor data to the shared memory pipes
         for camera in cameras:

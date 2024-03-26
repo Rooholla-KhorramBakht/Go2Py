@@ -7,7 +7,7 @@
 Stephen Brawner (brawner@gmail.com) 
      Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
-<robot name="go2_description">
+<robot name="go2">
   <link name="base_link">
     <inertial>
       <origin rpy="0 0 0" xyz="0.021112 0 -0.005366"/>
