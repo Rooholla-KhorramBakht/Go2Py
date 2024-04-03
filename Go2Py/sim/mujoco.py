@@ -69,6 +69,7 @@ class Go2Sim:
         self.kp = np.zeros(12)
         self.kv = np.zeros(12)
         self.latest_command_stamp = time.time()
+        self.actuator_tau = np.zeros(12)
 
     def reset(self):
         self.q_nominal = np.hstack(
@@ -95,7 +96,8 @@ class Go2Sim:
 
     def getJointStates(self):
         return {"q":self.data.qpos[7:], 
-               "dq":self.data.qvel[6:]}
+               "dq":self.data.qvel[6:],
+               'tau_est':self.actuator_tau}
 
     def getPose(self):
         return self.data.qpos[:3], self.data.qpos[3:7]
@@ -122,6 +124,7 @@ class Go2Sim:
         q, dq = state['q'], state['dq']
         tau = np.diag(self.kp)@(self.q_des-q).reshape(12,1)+ \
               np.diag(self.kv)@(self.dq_des-dq).reshape(12,1)+self.tau_ff.reshape(12,1)
+        self.actuator_tau = tau
         self.data.ctrl[:] = tau.squeeze()
 
         self.step_counter += 1

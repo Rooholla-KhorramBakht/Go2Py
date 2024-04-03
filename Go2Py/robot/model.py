@@ -56,11 +56,11 @@ class Go2Model:
 
         print(self.robot.data.oMf[ID_FR_HAA].translation - self.robot.data.oMf[ID_RR_HAA].translation)
 
-        print(self.h)
-        print(self.b)
-        print(self.l1)
-        print(self.l2)
-        print(self.l3)
+        # print(self.h)
+        # print(self.b)
+        # print(self.l1)
+        # print(self.l2)
+        # print(self.l3)
     
     def inverseKinematics(self, T, feet_pos):
         """
@@ -156,6 +156,7 @@ class Go2Model:
         self.Minv_ = pin.computeMinverse(self.robot.model, self.robot.data, q_)[self.dq_reordering_idx,:]
         self.Minv_ = self.Minv_[:,self.dq_reordering_idx]
         for ef_frame in self.ef_frames:
+            # J = self.robot.getFrameJacobian(self.robot.model.getFrameId(ef_frame), pin.ReferenceFrame.LOCAL_WORLD_ALIGNED)
             J = self.robot.getFrameJacobian(self.robot.model.getFrameId(ef_frame), pin.ReferenceFrame.LOCAL)
             self.ef_J_[ef_frame]=J[:, self.dq_reordering_idx]
 
