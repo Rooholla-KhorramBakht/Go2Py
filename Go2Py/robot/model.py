@@ -156,8 +156,8 @@ class Go2Model:
         self.Minv_ = pin.computeMinverse(self.robot.model, self.robot.data, q_)[self.dq_reordering_idx,:]
         self.Minv_ = self.Minv_[:,self.dq_reordering_idx]
         for ef_frame in self.ef_frames:
-            # J = self.robot.getFrameJacobian(self.robot.model.getFrameId(ef_frame), pin.ReferenceFrame.LOCAL_WORLD_ALIGNED)
-            J = self.robot.getFrameJacobian(self.robot.model.getFrameId(ef_frame), pin.ReferenceFrame.LOCAL)
+            J = self.robot.getFrameJacobian(self.robot.model.getFrameId(ef_frame), pin.ReferenceFrame.LOCAL_WORLD_ALIGNED)
+            # J = self.robot.getFrameJacobian(self.robot.model.getFrameId(ef_frame), pin.ReferenceFrame.LOCAL)
             self.ef_J_[ef_frame]=J[:, self.dq_reordering_idx]
 
     def getInfo(self):
@@ -174,3 +174,10 @@ class Go2Model:
             'g':self.g_,
             'J':self.ef_J_,
         }
+    
+    def getGroundReactionForce(self, tau_est, body_acceleration=None):
+        if body_acceleration is None:   
+            grf = {key:np.linalg.pinv(self.ef_J_[key][:3,6:].T)@(tau_est.squeeze() - self.nle_[6:]) for key in self.ef_J_.keys()}
+        else:
+            raise NotImplementedError("Ground reaction force with body dynamics is not implemented")
+        return grf
