@@ -12,7 +12,7 @@ from rclpy.executors import MultiThreadedExecutor
 from geometry_msgs.msg import TransformStamped
 from Go2Py.joy import xKeySwitch, xRockerBtn
 from geometry_msgs.msg import TwistStamped
-from Go2Py.msgs.unitree_go.msg import LowState, Go2pyLowCmd
+from unitree_go.msg import LowState, Go2pyLowCmd
 from nav_msgs.msg import Odometry   
 from scipy.spatial.transform import Rotation
 
@@ -114,6 +114,7 @@ class GO2Real(Node):
         self.running = True
         self.setCommands = {'lowlevel':self.setCommandsLow,
                             'highlevel':self.setCommandsHigh}[self.mode]
+        self.state = None
 
     def lowstate_callback(self, msg):
         """
@@ -150,6 +151,8 @@ class GO2Real(Node):
 
     def getJointStates(self):
         """Returns the joint angles (q) and velocities (dq) of the robot"""
+        if self.state is None:
+            return None
         motorStates = self.state.motor_state
         _q, _dq = zip(
             *[(motorState.q, motorState.dq) for motorState in motorStates[:12]]

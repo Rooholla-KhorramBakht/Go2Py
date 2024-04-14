@@ -61,3 +61,29 @@ class KeyboardRemote(BaseRemote):
     def flushStates(self):
         self.stand_up_down_seq_flag = False
         self.start_seq_flag = False
+
+class UnitreeRemote(BaseRemote):
+    def __init__(self, robot):
+        self.robot = robot
+
+    def startSeq(self):
+        remote = self.robot.getRemoteState()
+        if remote.btn.start:
+            return True
+        else:
+            return False
+
+    def standUpDownSeq(self):
+        remote = self.robot.getRemoteState()
+        if remote.btn.L2 and remote.btn.A:
+            return True
+        else:
+            return False
+
+    def getEstop(self):
+        remote = self.robot.getRemoteState()
+        if remote.btn.L2 and remote.btn.R2:
+            return True
+        else:
+            return False
+        

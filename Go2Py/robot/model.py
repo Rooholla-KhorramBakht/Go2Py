@@ -29,7 +29,8 @@ class Go2Model:
         self.dq_reordering_idx = np.array([0, 1, 2, 3, 4, 5,\
                                            9, 10, 11, 6, 7, 8, 15, 16, 17, 12, 13, 14])
         self.q_reordering_idx = np.array([9, 10, 11, 6, 7, 8, 15, 16, 17, 12, 13, 14])-6
-        self.ef_J_ = {}
+        self.ef_Jb_ = {}
+        self.ef_Jw_ = {}
 
         ID_FL_HAA = self.robot.model.getFrameId('FL_hip_joint')
         ID_FR_HAA = self.robot.model.getFrameId('FR_hip_joint')
@@ -53,9 +54,11 @@ class Go2Model:
         self.l1 = np.linalg.norm(self.robot.data.oMf[ID_FR_HAA].translation - self.robot.data.oMf[ID_FR_HFE].translation)
         self.l2 = np.linalg.norm(self.robot.data.oMf[ID_FR_HFE].translation - self.robot.data.oMf[ID_FR_KFE].translation)
         self.l3 = np.linalg.norm(self.robot.data.oMf[ID_FR_KFE].translation - self.robot.data.oMf[ID_FR_FOOT].translation)
-
-        print(self.robot.data.oMf[ID_FR_HAA].translation - self.robot.data.oMf[ID_RR_HAA].translation)
-
+        self.M_ = None
+        self.Minv_ = None
+        self.nle_ = None
+        self.g_ = None
+        # print(self.robot.data.oMf[ID_FR_HAA].translation - self.robot.data.oMf[ID_RR_HAA].translation)
         # print(self.h)
         # print(self.b)
         # print(self.l1)
@@ -133,8 +136,69 @@ class Go2Model:
         return {frame:self.robot.data.oMf[self.robot.model.getFrameId(frame)].homogeneous \
             for frame in ef_frames}
 
+    def updateKinematics(self, q):
+        """
+        Updates the kinematic states. 
+
+        Args:
+            q (np.ndarray): A numpy array of size 19 representing the [x, y, z, qx, qy, qz, qw] and joint configurations in FR, FL, RR, RL order.
+        """
+        self.robot.computeJointJacobians(q)
+        self.robot.framesForwardKinematics(q)\
+
+        for ef_frame in self.ef_frames:
+            Jw = self.robot.getFrameJacobian(self.robot.model.getFrameId(ef_frame), pin.ReferenceFrame.LOCAL_WORLD_ALIGNED)
+            Jb = self.robot.getFrameJacobian(self.robot.model.getFrameId(ef_frame), pin.ReferenceFrame.LOCAL)
+            self.ef_Jw_[ef_frame]=Jw[:, self.dq_reordering_idx]
+            self.ef_Jb_[ef_frame]=Jb[:, self.dq_reordering_idx]
     
-    def update(self, q, dq, T, v):
+    def updateKinematicsPose(self, q, T):
+        """
+        Updates the kinematic states. 
+
+        Args:
+            q (np.ndarray): A numpy array of size 12 representing the joint configurations in FR, FL, RR, RL order.
+            T (np.ndarray): 4x4 Transformation matrix representing the base pose of the robot.
+        """
+        q_ = np.hstack([pin.SE3ToXYZQUATtuple(pin.SE3(T)), q[self.q_reordering_idx]])
+        self.robot.computeJointJacobians(q_)
+        self.robot.framesForwardKinematics(q_)\
+
+        for ef_frame in self.ef_frames:
+            Jw = self.robot.getFrameJacobian(self.robot.model.getFrameId(ef_frame), pin.ReferenceFrame.LOCAL_WORLD_ALIGNED)
+            Jb = self.robot.getFrameJacobian(self.robot.model.getFrameId(ef_frame), pin.ReferenceFrame.LOCAL)
+            self.ef_Jw_[ef_frame]=Jw[:, self.dq_reordering_idx]
+            self.ef_Jb_[ef_frame]=Jb[:, self.dq_reordering_idx]
+
+    def updateDynamics(self, q, dq):
+        """
+        Updates the dynamical states. 
+
+        Args:
+            q (np.ndarray): A numpy array of size 19 representing the [x, y, z, qx, qy, qz, qw] and joint configurations in FR, FL, RR, RL order.
+            dq (np.ndarray): A numpy array of size 18 representing the [vx, vy, vz, wx, wy, wz] and joint configurations in FR, FL, RR, RL order.
+        """
+        self.robot.centroidalMomentum(q_,dq_)
+        self.nle_ = self.robot.nle(q_, dq_)[self.dq_reordering_idx]
+        self.g_ = self.robot.gravity(q_)[self.dq_reordering_idx]
+        self.M_ = self.robot.mass(q_)[self.dq_reordering_idx,:]
+        self.M_ = self.M_[:,self.dq_reordering_idx]
+        self.Minv_ = pin.computeMinverse(self.robot.model, self.robot.data, q_)[self.dq_reordering_idx,:]
+        self.Minv_ = self.Minv_[:,self.dq_reordering_idx]
+        
+
+    def updateAll(q, dq):
+        """
+        Updates the dynamic and kinematic parameters based on the given joint configurations and velocities.
+
+        Args:
+            q (np.ndarray): A numpy array of size 19 representing the [x, y, z, qx, qy, qz, qw] and joint configurations in FR, FL, RR, RL order.
+            dq (np.ndarray): A numpy array of size 18 representing the [vx, vy, vz, wx, wy, wz] and joint configurations in FR, FL, RR, RL order.
+        """
+        self.updateKinematics(q)
+        self.updateDynamics(q, dq)
+
+    def updateAllPose(self, q, dq, T, v):
         """
         Updates the dynamic and kinematic parameters based on the given joint configurations and velocities.
 
@@ -146,20 +210,9 @@ class Go2Model:
         """
         q_ = np.hstack([pin.SE3ToXYZQUATtuple(pin.SE3(T)), q[self.q_reordering_idx]])
         dq_ = np.hstack([v, dq[self.q_reordering_idx]])
-        self.robot.computeJointJacobians(q_)
-        self.robot.framesForwardKinematics(q_)
-        self.robot.centroidalMomentum(q_,dq_)
-        self.nle_ = self.robot.nle(q_, dq_)[self.dq_reordering_idx]
-        self.g_ = self.robot.gravity(q_)[self.dq_reordering_idx]
-        self.M_ = self.robot.mass(q_)[self.dq_reordering_idx,:]
-        self.M_ = self.M_[:,self.dq_reordering_idx]
-        self.Minv_ = pin.computeMinverse(self.robot.model, self.robot.data, q_)[self.dq_reordering_idx,:]
-        self.Minv_ = self.Minv_[:,self.dq_reordering_idx]
-        for ef_frame in self.ef_frames:
-            J = self.robot.getFrameJacobian(self.robot.model.getFrameId(ef_frame), pin.ReferenceFrame.LOCAL_WORLD_ALIGNED)
-            # J = self.robot.getFrameJacobian(self.robot.model.getFrameId(ef_frame), pin.ReferenceFrame.LOCAL)
-            self.ef_J_[ef_frame]=J[:, self.dq_reordering_idx]
-
+        self.updateKinematics(q_)
+        self.updateDynamics(q_, dq_)
+        
     def getInfo(self):
         """
         Retrieves the current dynamics and kinematic information of the robot.
@@ -172,7 +225,8 @@ class Go2Model:
             'Minv':self.Minv_,
             'nle':self.nle_,
             'g':self.g_,
-            'J':self.ef_J_,
+            'J_w':self.ef_Jw_,
+            'J_b':self.ef_Jb_,
         }
     
     def getGroundReactionForce(self, tau_est, body_acceleration=None):
