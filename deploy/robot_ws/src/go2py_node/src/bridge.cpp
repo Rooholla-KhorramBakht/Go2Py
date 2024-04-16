@@ -1,6 +1,7 @@
 #include "unitree_go/msg/low_state.hpp"
 #include "unitree_go/msg/imu_state.hpp"
 #include "unitree_go/msg/motor_state.hpp"
+#include "unitree_go/msg/go2py_status.hpp"
 #include "unitree_go/msg/go2py_low_cmd.hpp"
 
 #include "unitree_go/msg/low_cmd.hpp"
@@ -54,6 +55,7 @@ class Custom: public rclcpp::Node
 
             lowcmd_puber = this->create_publisher<unitree_go::msg::LowCmd>("/lowcmd", 10);
             api_publisher = this->create_publisher<unitree_api::msg::Request>("/api/robot_state/request", 10);
+            status_publisher = this->create_publisher<unitree_go::msg::Go2pyStatus>("/go2py/status", 10);
 
         }
     private:
@@ -91,6 +93,7 @@ class Custom: public rclcpp::Node
         uint64_t last_lowcmd_stamp = 0;
         xRockerBtnDataStruct _keyData;
         rclcpp::Publisher<unitree_api::msg::Request>::SharedPtr api_publisher;
+        rclcpp::Publisher<unitree_go::msg::Go2pyStatus>::SharedPtr status_publisher;
 
         void init_lowcmd()
         {
@@ -125,6 +128,7 @@ class Custom: public rclcpp::Node
             float foot_force[4];
         }highstate;     
         int Estop = 0;
+        int sport_mode = 1;
 };
 
 void Custom::lowstate_callback(unitree_go::msg::LowState::SharedPtr data)
@@ -204,6 +208,7 @@ void Custom::lowstate_callback(unitree_go::msg::LowState::SharedPtr data)
         msg->header.identity.api_id = 1001;
         msg->parameter = "{\"name\":\"sport_mode\",\"switch\":0}";
         api_publisher->publish(*msg);
+        sport_mode = 0;
     }
     if ((_keyData.btn.components.R2 == 1 && _keyData.btn.components.R1 == 1))
     {
@@ -213,6 +218,7 @@ void Custom::lowstate_callback(unitree_go::msg::LowState::SharedPtr data)
         msg->header.identity.api_id = 1001;
         msg->parameter = "{\"name\":\"sport_mode\",\"switch\":1}";
         api_publisher->publish(*msg);
+        sport_mode = 1;
     }
     // std::cout << "Estop: " << Estop << std::endl;
 }
@@ -340,6 +346,10 @@ void Custom::watchdog()
         }
         lowcmd_puber->publish(lowcmd_msg);
     }
+    auto msg = std::make_shared<unitree_go::msg::Go2pyStatus>();
+    msg->estop = Estop;
+    msg->sport_mode = sport_mode;
+    status_publisher->publish(*msg);
 }
 
 int main(int argc, char **argv)
