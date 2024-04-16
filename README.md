@@ -1,6 +1,6 @@
 # Go2Py
 
-Go2Py is a Pythonic interface and driver for low-level and high-level control of Unitree Go2 quadruped robots. The motivation of this project is to ease the burden of initial interface development, safety systems of Go2 quadruped by providing a modular pipeline for real-time communication with the robot in both simulated and real world with a unified interface. 
+Go2Py is a Pythonic interface and driver for low-level and high-level control of Unitree Go2 quadruped robots. The motivation of this project is to remove the burden of developing interface, safety systems, and basic components required for starting locomotion reserach using the Go2 quadruped robot. It provides a modular pipeline for real-time communication with the robot in both simulated and real world environment with a unified interface. 
 
 <p align="center">
   <img src="docs/assets/openfig.png" alt="image" width="60%" height="auto"/>
