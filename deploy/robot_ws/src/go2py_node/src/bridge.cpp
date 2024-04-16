@@ -24,7 +24,7 @@
 #include "unitree_api/msg/request.hpp"
 #include "common/ros2_sport_client.h"
 #include "joystick.h"
-
+#include "unitree_api/msg/request.hpp"
 class Custom: public rclcpp::Node
 {
     public:
@@ -53,6 +53,7 @@ class Custom: public rclcpp::Node
             "/go2/lowcmd", 1, std::bind(&Custom::lowcmd_callback, this, std::placeholders::_1));
 
             lowcmd_puber = this->create_publisher<unitree_go::msg::LowCmd>("/lowcmd", 10);
+            api_publisher = this->create_publisher<unitree_api::msg::Request>("/api/robot_state/request", 10);
 
         }
     private:
@@ -89,6 +90,7 @@ class Custom: public rclcpp::Node
         unitree_go::msg::LowCmd lowcmd_msg;
         uint64_t last_lowcmd_stamp = 0;
         xRockerBtnDataStruct _keyData;
+        rclcpp::Publisher<unitree_api::msg::Request>::SharedPtr api_publisher;
 
         void init_lowcmd()
         {
@@ -190,10 +192,27 @@ void Custom::lowstate_callback(unitree_go::msg::LowState::SharedPtr data)
     {
         Estop = 1;
     }
-    if ((_keyData.btn.components.R1 == 1 && _keyData.btn.components.L1 == 1)||
-        (_keyData.btn.components.L2 == 1 && _keyData.btn.components.A == 1))
+    if ((_keyData.btn.components.L2 == 1 && _keyData.btn.components.A == 1))
     {
         Estop = 0;
+    }
+    if ((_keyData.btn.components.L2 == 1 && _keyData.btn.components.L1 == 1))
+    {
+        auto msg = std::make_shared<unitree_api::msg::Request>();
+        // Populate the message fields
+        msg->header.identity.id = 80005;
+        msg->header.identity.api_id = 1001;
+        msg->parameter = "{\"name\":\"sport_mode\",\"switch\":0}";
+        api_publisher->publish(*msg);
+    }
+    if ((_keyData.btn.components.R2 == 1 && _keyData.btn.components.R1 == 1))
+    {
+        auto msg = std::make_shared<unitree_api::msg::Request>();
+        // Populate the message fields
+        msg->header.identity.id = 80005;
+        msg->header.identity.api_id = 1001;
+        msg->parameter = "{\"name\":\"sport_mode\",\"switch\":1}";
+        api_publisher->publish(*msg);
     }
     // std::cout << "Estop: " << Estop << std::endl;
 }
