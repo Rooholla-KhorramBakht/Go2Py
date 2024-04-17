@@ -1,50 +1,68 @@
 # Go2Py
-Python interface, example controllers, and calibration tools for the Unitree Go2 robot. 
 
-## System Setup
+Go2Py is a Pythonic interface and driver for low-level and high-level control of Unitree Go2 quadruped robots. The motivation of this project is to remove the burden of developing interface, safety systems, and basic components required for starting locomotion reserach using the Go2 quadruped robot. It provides a modular pipeline for real-time communication with the robot in both simulated and real world environment with a unified interface. 
 
-The GO2 EDU comes with an onbard Jetson Orin NX, a Hessai LX-16 LiDAR sensor, and an intel Realsense D435i camera. This setup procedure targets the onboard Jetson Orin with IP `192.168.123.18` and presents the installation proceudures of nodes for reading the sensors and robot states and publisheing them as ROS2 topics plus some basic configurations for setting up the autostart services and sharing internet. The architecture of the GO2 system is illustrated in the following image:
-TODO: add image
+<p align="center">
+  <img src="docs/assets/openfig.png" alt="image" width="60%" height="auto"/>
+</p>
 
-### Internet Sharing
+This project is comprised of the following components:
+- **C++ Bridge:** A dockerized ROS2 bridge built upon the [unitree_ros2](https://github.com/unitreerobotics/unitree_ros2) that implements a remote controlled emergency stop and publishes the robot states as standard ROS2 topics usable by upstream systems such as NAV2. 
+- **Robot Interface:** A simple Python class that represents the robot and communicates with the C++ bridge through either DDS (ROS independent) or ROS2 interfaces. 
+- **Robot Management FSM:** A finite state machine for controlling the behavior of the robot up to the point of handover to the user low-level controller (sitting down, standing up) with safety monitors (motor temperatures, emergency stops).
+- **Robot Model:** A simple to use [Pinocchio](https://github.com/stack-of-tasks/pinocchio) wrapper for computing the kinematics and dynamics parameters of the robot. 
+- **Simulation Interface:** Simulation environments based on Mujoco and Nvidia Orbit (To be added) with a Python interface identical to the real robot. 
 
-In order to access internet on the Jetson computer, we hook the robot to a host development computer with internet access and configure it to share its connection with the robot. To cofigure the host computer, the follwoing steps should be taken:
-#### Host Computer
-The following steps configures the host computer to share its intentrent with the robot.
-##### Enable IP forwarding:
+## How Does Using it Look Like?
+Communication with the robot will be as simple as importing a Python class:
+```python
+from Go2Py.robot.interface.dds import GO2Real
+from Go2Py.robot.model import Go2Model
+robot = GO2Real(mode='lowlevel')
+model = Go2Model()
+robot.standDownReset()
+while running:
+    joint_state = robot.getJointStates()
+    imu = robot.getIMU()
+    remote = robot.getRemoteState()
+    model.update(state['q'], state['dq'],T,vel) # T and vel from the EKF
+    info = model.getInfo()
+    
+    #User control computations ...
 
-```bash
-sudo sysctl -w net.ipv4.ip_forward=1
+    robot.setCommands(q_des, dq_des, kp, kd, tau_ff)
 ```
-##### Configure the iptables:
+An identical workflow is can be followed for simulation:
+```python
+from Go2Py.sim.mujoco import Go2Sim
+from Go2Py.robot.model import Go2Model
+robot = Go2Sim()
+model = Go2Model()
+robot.standDownReset()
+while running:
+    joint_state = robot.getJointStates()
+    imu = robot.getIMU()
+    remote = robot.getRemoteState()
+    model.update(state['q'], state['dq'],T,vel) # T and vel from the EKF
+    info = model.getInfo()
 
-```bash
-sudo iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
-sudo iptables -A FORWARD -i wlan0 -o eth0 -m state --state RELATED,ESTABLISHED -j ACCEPT
-sudo iptables -A FORWARD -i eth0 -o wlan0 -j ACCEPT
+    #User control computations ...
+
+    robot.setCommands(q_des, dq_des, kp, kd, tau_ff)
+    robot.step()
 ```
-Note that `wlan0` should be replaced with the actual name of the network interface over which the internet is provided to the host computer, and eth0 should be replaced with the name of the Ethernet interface connected to the robot and having a local IP address in robot's network range. 
+## Installation
+Follow through the steps in here to [setup](docs/setup.md) the robot and Go2Py. 
 
-##### Storing the Settings
-Make the iptables rules persistent by installing the `iptables-persistent`:
+## Further Examples 
+A set of sorted examples are provided in the [examples](examples) directory to get you up and running quickly:
 
-```bash
-sudo apt-get install iptables-persistent
-sudo iptables-save > /etc/iptables/rules.v4
-sudo ip6tables-save > /etc/iptables/rules.v6
-```
-#### Robot
-Now tell the computer on the robot to use the internet shared by the host computer. SSH into the robot's computer with IP address `192.168.123.18`, username `unitree` and password `123`. Note that the host computer's IP reange should have already been set to static mode with an IP in `192.168.123.*` range.
-
-```bash
-sudo ip route add default via <host computer IP address>
-```
-
-Finally, configure the DNS server by adding the following to the `/etc/resolv.conf` file:
-```bash
-nameserver 8.8.8.8
-```
-**Note:** Similarly to the host computer, you can make save this configuration using the `iptables-persistent` tool.
-
-If everything has been successful, you should be able to access the internet on the robot. Run `ping www.google.com` to verify this. 
-
+- High-level body velocity interface (ROS2)
+- High-level body velocity interface (DDS)
+- Low-level joint interface (ROS2)
+- Low-level joint interface (DDS)
+- Low-level simulation interface
+- Contact Force Estimation 
+- Foot Contact Estimation
+- Extended Kalman Filter Legged Inertial State Estimator
+- Walk These Ways RL Controller
