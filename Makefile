@@ -5,7 +5,8 @@ docker_robot:
 	@docker build --no-cache --tag go2py_robot_hw:latest -f Dockerfile.robot .
 
 docker_nav:
-	@docker build --no-cache --tag go2py_nav:latest -f Dockerfile.nav2 .
+	# @docker build --no-cache --tag go2py_nav:latest -f Dockerfile.nav2 .
+	@docker build --tag go2py_nav:latest -f Dockerfile.nav2 .
 
 docker_dock_install:
 	@cp deploy/scripts/go2py-dock-hw-nodes.service /etc/systemd/system/

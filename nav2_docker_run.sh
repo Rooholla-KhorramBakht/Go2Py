@@ -1,0 +1,1 @@
+docker run --rm -it --privileged --network host -v $(pwd)/deploy/nav2_ws:/home/ -v /dev/*:/dev/* -v /etc/localtime:/etc/localtime:ro --runtime nvidia go2py_nav:latest
