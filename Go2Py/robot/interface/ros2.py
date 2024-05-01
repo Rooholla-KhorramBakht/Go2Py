@@ -15,6 +15,9 @@ from geometry_msgs.msg import TwistStamped
 from unitree_go.msg import LowState, Go2pyLowCmd
 from nav_msgs.msg import Odometry   
 from scipy.spatial.transform import Rotation
+import tf2_ros
+import numpy as np
+from scipy.spatial.transform import Rotation as R
 
 
 
@@ -142,6 +145,7 @@ class GO2Real(Node):
         quat = self.state.imu_state.quaternion
         rpy = self.state.imu_state.rpy
         temp = self.state.imu_state.temperature
+        # return accel, gyro, quat, temp
         return {'accel':accel, 'gyro':gyro, 'quat':quat, "rpy":rpy, 'temp':temp}
 
     def getFootContacts(self):
@@ -153,13 +157,16 @@ class GO2Real(Node):
         """Returns the joint angles (q) and velocities (dq) of the robot"""
         if self.state is None:
             return None
-        motorStates = self.state.motor_state
-        _q, _dq = zip(
-            *[(motorState.q, motorState.dq) for motorState in motorStates[:12]]
-        )
-        q, dq = np.array(_q), np.array(_dq)
-
-        return {'q':q, 'dq':dq}
+        motor_state = np.array([[self.state.motor_state[i].q,
+                                 self.state.motor_state[i].dq,
+                                 self.state.motor_state[i].ddq,
+                                 self.state.motor_state[i].tau_est,
+                                 self.state.motor_state[i].temperature] for i in range(12)])
+        return {'q':motor_state[:,0], 
+                'dq':motor_state[:,1],
+                'ddq':motor_state[:,2],
+                'tau_est':motor_state[:,3],
+                'temperature':motor_state[:,4]}
 
     def getRemoteState(self):
         """A method to get the state of the wireless remote control. 
@@ -224,13 +231,13 @@ class GO2Real(Node):
         self.highcmd_publisher.publish(self.highcmd)
 
     def setCommandsLow(self, q_des, dq_des, kp, kd, tau_ff):
-        assert q_des.size == dq_des.size == kp.size == kd.size == tau_ff.size == 12, "q, dq, kp, kd, tau_ff should have size 12"
+        # assert q_des.size == dq_des.size == kp.size == kd.size == tau_ff.size == 12, "q, dq, kp, kd, tau_ff should have size 12"
         lowcmd = Go2pyLowCmd()
-        lowcmd.q = q_des.tolist()
-        lowcmd.dq = dq_des.tolist()
-        lowcmd.kp = kp.tolist()
-        lowcmd.kd = kd.tolist()
-        lowcmd.tau = tau_ff.tolist()
+        lowcmd.q = q_des
+        lowcmd.dq = dq_des
+        lowcmd.kp = kp
+        lowcmd.kd = kd
+        lowcmd.tau = tau_ff
         self.lowcmd_publisher.publish(lowcmd)
         self.latest_command_stamp = time.time()
 
@@ -264,3 +271,43 @@ class GO2Real(Node):
         R = Rotation.from_quat([q[1], q[2], q[3], q[0]]).as_matrix()
         g_in_body = R.T@np.array([0.0, 0.0, -1.0]).reshape(3, 1)
         return g_in_body
+
+class ROS2TFInterface(Node):
+
+    def __init__(self, parent_name, child_name, node_name):
+        super().__init__(f'{node_name}_tf2_listener')
+        self.parent_name = parent_name
+        self.child_name = child_name
+        self.tfBuffer = tf2_ros.Buffer()
+        self.listener = tf2_ros.TransformListener(self.tfBuffer, self)
+        self.T = None
+        self.stamp = None
+        self.running = True
+        self.thread = threading.Thread(target=self.update_loop)
+        self.thread.start()
+        self.trans = None
+
+    def update_loop(self):
+        while self.running:
+            try:
+                self.trans = self.tfBuffer.lookup_transform(self.parent_name, self.child_name, rclpy.time.Time(), rclpy.time.Duration(seconds=0.1))
+            except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
+                pass
+            time.sleep(0.01)    
+
+    def get_pose(self):
+        if self.trans is None:
+            return None
+        else:
+            translation = [self.trans.transform.translation.x, self.trans.transform.translation.y, self.trans.transform.translation.z]
+            rotation = [self.trans.transform.rotation.x, self.trans.transform.rotation.y, self.trans.transform.rotation.z, self.trans.transform.rotation.w]
+            self.T = np.eye(4)
+            self.T[0:3, 0:3] = R.from_quat(rotation).as_matrix()
+            self.T[:3, 3] = translation
+            self.stamp = self.trans.header.stamp.nanosec * 1e-9 + self.trans.header.stamp.sec
+            return self.T
+
+    def close(self):
+        self.running = False
+        self.thread.join()  
+        self.destroy_node()

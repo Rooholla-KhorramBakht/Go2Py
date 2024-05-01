@@ -40,22 +40,22 @@ class Custom: public rclcpp::Node
             
             // Go2 highlevel subscriber and publishers
             // the state_suber is set to subscribe "sportmodestate" topic
-            highstate_suber = this->create_subscription<unitree_go::msg::SportModeState>(
-                "sportmodestate", 10, std::bind(&Custom::highstate_callback, this, std::placeholders::_1));
+            // highstate_suber = this->create_subscription<unitree_go::msg::SportModeState>(
+            //     "sportmodestate", 10, std::bind(&Custom::highstate_callback, this, std::placeholders::_1));
             // the req_puber is set to subscribe "/api/sport/request" topic with dt
-            highreq_puber = this->create_publisher<unitree_api::msg::Request>("/api/sport/request", 10);
+            highreq_puber = this->create_publisher<unitree_api::msg::Request>("/api/sport/request", 1);
             
             //Go2 lowlevel interface
             init_lowcmd();
-            lowstate_suber = this->create_subscription<unitree_go::msg::LowState>(
-            "lowstate", 1, std::bind(&Custom::lowstate_callback, this, std::placeholders::_1));
+            // lowstate_suber = this->create_subscription<unitree_go::msg::LowState>(
+            // "lowstate", 1, std::bind(&Custom::lowstate_callback, this, std::placeholders::_1));
             
             lowcmd_suber = this->create_subscription<unitree_go::msg::Go2pyLowCmd>(
             "/go2/lowcmd", 1, std::bind(&Custom::lowcmd_callback, this, std::placeholders::_1));
 
-            lowcmd_puber = this->create_publisher<unitree_go::msg::LowCmd>("/lowcmd", 10);
-            api_publisher = this->create_publisher<unitree_api::msg::Request>("/api/robot_state/request", 10);
-            status_publisher = this->create_publisher<unitree_go::msg::Go2pyStatus>("/go2py/status", 10);
+            lowcmd_puber = this->create_publisher<unitree_go::msg::LowCmd>("/lowcmd", 1);
+            api_publisher = this->create_publisher<unitree_api::msg::Request>("/api/robot_state/request", 1);
+            status_publisher = this->create_publisher<unitree_go::msg::Go2pyStatus>("/go2py/status", 1);
 
         }
     private:
@@ -311,7 +311,6 @@ void Custom::lowcmd_callback(unitree_go::msg::Go2pyLowCmd::SharedPtr data)
             lowcmd_msg.motor_cmd[i].kd =  data->kd[i];  // Poinstion(rad) control kd gain
             lowcmd_msg.motor_cmd[i].tau = data->tau[i]; // Feedforward toque 1N.m
             get_crc(lowcmd_msg); //Compute the CRC and load it into the message
-            lowcmd_puber->publish(lowcmd_msg); //Publish lowcmd message
         }
     }else
     {
@@ -323,9 +322,9 @@ void Custom::lowcmd_callback(unitree_go::msg::Go2pyLowCmd::SharedPtr data)
             lowcmd_msg.motor_cmd[i].kd =  0;  // Poinstion(rad) control kd gain
             lowcmd_msg.motor_cmd[i].tau = 0.; // Feedforward toque 1N.m
             get_crc(lowcmd_msg); //Compute the CRC and load it into the message
-            lowcmd_puber->publish(lowcmd_msg); //Publish lowcmd message
         }
     }
+    lowcmd_puber->publish(lowcmd_msg); //Publish lowcmd message
 }
 
 void Custom::watchdog()

@@ -178,12 +178,12 @@ class Go2Model:
             q (np.ndarray): A numpy array of size 19 representing the [x, y, z, qx, qy, qz, qw] and joint configurations in FR, FL, RR, RL order.
             dq (np.ndarray): A numpy array of size 18 representing the [vx, vy, vz, wx, wy, wz] and joint configurations in FR, FL, RR, RL order.
         """
-        self.robot.centroidalMomentum(q_,dq_)
-        self.nle_ = self.robot.nle(q_, dq_)[self.dq_reordering_idx]
-        self.g_ = self.robot.gravity(q_)[self.dq_reordering_idx]
-        self.M_ = self.robot.mass(q_)[self.dq_reordering_idx,:]
+        self.robot.centroidalMomentum(q,dq)
+        self.nle_ = self.robot.nle(q, dq)[self.dq_reordering_idx]
+        self.g_ = self.robot.gravity(q)[self.dq_reordering_idx]
+        self.M_ = self.robot.mass(q)[self.dq_reordering_idx,:]
         self.M_ = self.M_[:,self.dq_reordering_idx]
-        self.Minv_ = pin.computeMinverse(self.robot.model, self.robot.data, q_)[self.dq_reordering_idx,:]
+        self.Minv_ = pin.computeMinverse(self.robot.model, self.robot.data, q)[self.dq_reordering_idx,:]
         self.Minv_ = self.Minv_[:,self.dq_reordering_idx]
         
 

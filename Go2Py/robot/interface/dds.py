@@ -72,7 +72,7 @@ class GO2Real():
         Retrieve the state of the robot
         """
         while self.running:
-            for msg in self.lowstate_reader.take_iter(timeout=duration(milliseconds=100.)):
+            for msg in self.lowstate_reader.take_iter(timeout=duration(milliseconds=1.)):
                 self.state = msg
 
     def getIMU(self):
