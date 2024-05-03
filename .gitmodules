@@ -1,0 +1,3 @@
+[submodule "deploy/isaac_ws/src/isaac_ros_common"]
+	path = deploy/isaac_ws/src/isaac_ros_common
+	url = https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_common.git
