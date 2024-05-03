@@ -30,9 +30,9 @@ COPY deploy/robot_ws/src /robot_ws/src
 RUN cd /robot_ws && source /opt/ros/humble/setup.bash && colcon build --symlink-install
 
 # Compile the C++ hypervisor bridge
-COPY deploy/dds_bridge /dds_bridge
-WORKDIR /dds_bridge
-RUN ./install.sh && mkdir build && cd build && cmake .. && make
+#COPY deploy/dds_bridge /dds_bridge
+#WORKDIR /dds_bridge
+#RUN ./install.sh && mkdir build && cd build && cmake .. && make
 
 # Copy the script to start the nodes
 COPY deploy/scripts /root/scripts

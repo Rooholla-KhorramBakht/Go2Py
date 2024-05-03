@@ -30,10 +30,10 @@ cd .. && colcon build --packages-select cyclonedds && source /opt/ros/humble/set
 COPY deploy/dock_ws/src /dock_ws/src
 RUN cd /dock_ws && source /opt/ros/humble/setup.bash && colcon build --symlink-install
 
-# Compile the C++ hypervisor bridge
-COPY deploy/dds_bridge /dds_bridge
-WORKDIR /dds_bridge
-RUN ./install.sh && mkdir build && cd build && cmake .. && make
+# # Compile the C++ hypervisor bridge
+# COPY deploy/dds_bridge /dds_bridge
+# WORKDIR /dds_bridge
+# RUN ./install.sh && mkdir build && cd build && cmake .. && make
 
 # Copy the script to start the nodes
 COPY deploy/scripts /root/scripts

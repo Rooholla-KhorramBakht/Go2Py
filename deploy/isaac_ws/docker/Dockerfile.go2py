@@ -1,0 +1,6 @@
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+RUN apt update && sudo apt-get install -y ros-humble-isaac-ros-visual-slam \
+                                          ros-humble-isaac-ros-h264-decoder \
+                                          ros-humble-isaac-ros-h264-encoder
