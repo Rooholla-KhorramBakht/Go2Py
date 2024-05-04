@@ -1,13 +1,65 @@
-// https://containers.dev/implementors/json_reference/
 {
-  "name": "go2py", 
-  "dockerComposeFile": "docker-compose.yaml",
-  "workspaceFolder": "/home/Go2Py",
-  "service": "go2py-dev",
-  "remoteUser": "root", 
-  "customizations": {
-    "vscode": {
-      "extensions": ["dbaeumer.vscode-eslint"]
+    "name": "go2-devcontainer",
+    "build": {
+        "context": "..",
+        "dockerfile": "../docker/build.sh"
+    },
+    "containerEnv": {
+        "DISPLAY": "unix:0",
+        "ROS_LOCALHOST_ONLY": "0",
+        "ROS_AUTOMATIC_DISCOVERY_RANGE": "SUBNET",
+        "ROS_DOMAIN_ID": "0",
+        "SHELL": "/bin/bash"
+    },
+    "runArgs": [
+        "--privileged",
+        "--gpus",
+        "all",
+        "-v",
+        "/dev:/dev",
+        "--net=host",
+        "-e",
+        "DISPLAY=${env:DISPLAY}",
+        "--ulimit=core=-1"
+    ],
+    "mounts": [
+        "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
+        "source=/dev/dri,target=/dev/dri,type=bind,consistency=cached",
+        "source=${localEnv:HOME}/go2-devcontainer/logging/,target=/workspace/logging,type=bind,consistency=cached",
+        "source=${localEnv:HOME}/go2-devcontainer/.bash_history,target=/home/dev/.bash_history,type=bind,consistency=cached",
+    ],
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace/go2-devcontainer/src/go2-devcontainer,type=bind",
+    "workspaceFolder": "/workspace/go2-devcontainer/src",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "extensions.verifySignature": false
+            },
+            "extensions": [
+                "cheshirekow.cmake-format",
+                "llvm-vs-code-extensions.vscode-clangd",
+                "ms-azuretools.vscode-docker",
+                "ms-iot.vscode-ros",
+                "ms-python.black-formatter",
+                "ms-python.flake8",
+                "ms-python.isort",
+                "ms-python.pylint",
+                "ms-python.python",
+                "ms-toolsai.jupyter",
+                "ms-vscode.cmake-tools",
+                "mutantdino.resourcemonitor",
+                "vadimcn.vscode-lldb",
+                "xaver.clang-format"
+            ]
+        }
+    },
+    "forwardPorts": [
+        3000
+    ],
+    "portsAttributes": {
+        "3000": {
+            "label": "Application",
+            "onAutoForward": "notify"
+        }
     }
-  }
 }
