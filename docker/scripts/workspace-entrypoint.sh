@@ -12,10 +12,11 @@
 echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
 source /opt/ros/${ROS_DISTRO}/setup.bash
 
-sudo apt-get update
-rosdep update
+# sudo apt-get update
+# rosdep update
 
 # Restart udev daemon
 sudo service udev restart
+export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp 
 
 $@

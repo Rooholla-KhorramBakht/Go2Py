@@ -8,9 +8,9 @@ set -e
 mkdir -p /workspace/thirdparty
 cd /workspace/thirdparty
 
-export CC=clang
-export CXX=clang++
-apt-get update
+# export CC=clang
+# export CXX=clang++
+# apt-get update
 
 # ============================================
 # Install magic_enum v0.9.5
@@ -58,12 +58,6 @@ cmake -S . -B build -G "Unix Makefiles"
 cmake --build build
 cmake --build build --target install
 cd /workspace/thirdparty && rm -rf glog
-
-# ============================================
-# Install librealsense2
-apt-get install -y --no-install-recommends \
-    ros-humble-librealsense2* \
-    ros-humble-realsense2-*
 
 # ============================================
 # Install unitree_sdk2
