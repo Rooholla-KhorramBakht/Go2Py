@@ -19,14 +19,14 @@ git clone https://github.com/ros2/rmw_cyclonedds -b humble && git clone https://
 cd .. && colcon build --packages-select cyclonedds && source /opt/ros/humble/setup.bash && colcon build
 
 # copy the go2py ros2 nodes
-COPY ros2_nodes/go2py_bridge /bridge_ws/src
-COPY ros2_nodes/go2py_common /bridge_ws/src
-RUN cd /bridge_ws && source /opt/ros/humble/setup.bash && colcon build --symlink-install
+COPY ros2_nodes/go2py_bridge /bridge_ws/src/go2py_bridge
+COPY ros2_nodes/go2py_common /bridge_ws/src/go2py_common
+RUN cd /bridge_ws && source /opt/ros/humble/setup.bash && source /unitree_ros2/cyclonedds_ws/install/setup.bash && colcon build --symlink-install
 
 # Copy the script to start the nodes
 COPY docker/scripts /root/scripts
 COPY launch_files /root/launch
 
 # set the entrypoint to bash
-# ENTRYPOINT ["/bin/bash"]
+#ENTRYPOINT ["/bin/bash"]
 ENTRYPOINT ["/bin/bash", "/root/scripts/bridge_start.sh"]
