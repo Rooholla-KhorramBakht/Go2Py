@@ -55,14 +55,11 @@ while running:
 Follow through the steps in here to [setup](docs/setup.md) the robot and Go2Py. 
 
 ## Further Examples 
-A set of sorted examples are provided in the [examples](examples) directory to get you up and running quickly:
+A set examples and tutorials are provided to get you up and running quickly:
 
-- High-level body velocity interface (ROS2)
-- High-level body velocity interface (DDS)
-- Low-level joint interface (ROS2)
-- Low-level joint interface (DDS)
-- Low-level simulation interface
-- Contact Force Estimation 
-- Foot Contact Estimation
-- Extended Kalman Filter Legged Inertial State Estimator
-- Walk These Ways RL Controller
+- [Communicating with the robot](examples/00-robot-interface.ipynb) 
+- [Interracting with ROS2](examples/01-ros2-tools.ipynb) 
+- [Simulating with MuJoCo](examples/02-MuJoCo-sim.ipynb)
+- [Robot dynamics and kinematics](examples/03-robot-dynamic-model.ipynb)
+- [Finite state machine in low-level control](examples/04-FSM.ipynb) 
+- [Walk These Ways RL Controller](examples/05-walk-these-ways-RL-controller.ipynb)
