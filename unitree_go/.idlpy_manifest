@@ -1,19 +1,15 @@
 BmsState_
-dds_
-
-
-Go2pyLowCmd
-dds_
+msg
 
 
 IMUState_
-dds_
+msg
 
 
 LowState_
-dds_
+msg
 
 
 MotorState_
-dds_
+msg
 

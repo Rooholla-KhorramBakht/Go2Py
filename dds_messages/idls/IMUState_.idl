@@ -4,8 +4,6 @@
 
 #ifndef __unitree_go__msg__imu_state__idl__
 #define __unitree_go__msg__imu_state__idl__
-module Go2Py {
-
 module unitree_go {
 
 module msg {
@@ -32,5 +30,4 @@ octet temperature;      //IMU 温度信息（摄氏度）。
 };  // module msg
 
 };  // module unitree_go
-};
 #endif  // __unitree_go__msg__imu_state__idl__

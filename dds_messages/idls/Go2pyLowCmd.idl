@@ -1,4 +1,4 @@
-module unitree_go {
+module go2py_common {
   module msg {
     module dds_{
       @final struct Go2pyLowCmd_ {

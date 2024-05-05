@@ -7,9 +7,6 @@
 
 #ifndef __unitree_go__msg__low_state__idl__
 #define __unitree_go__msg__low_state__idl__
-
-module Go2Py {
-
 module unitree_go {
 
 module msg {
@@ -70,5 +67,4 @@ unsigned long crc;       //数据CRC校验用。
 };  // module msg
 
 };  // module unitree_go
-};
 #endif  // __unitree_go__msg__low_state__idl__

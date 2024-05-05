@@ -6,7 +6,8 @@ import numpy.linalg as LA
 from scipy.spatial.transform import Rotation as R
 
 from cyclonedds.domain import DomainParticipant
-from Go2Py.unitree_go.msg.dds_ import Go2pyLowCmd_
+from go2py_common.msg.dds_ import Go2pyLowCmd_
+from unitree_go.msg.dds_ import LowState_
 from cyclonedds.topic import Topic
 from cyclonedds.pub import DataWriter
 
@@ -14,7 +15,6 @@ from cyclonedds.domain import DomainParticipant
 from cyclonedds.topic import Topic
 from cyclonedds.sub import DataReader
 from cyclonedds.util import duration
-from Go2Py.unitree_go.msg.dds_ import LowState_
 from threading import Thread
 from scipy.spatial.transform import Rotation
 from Go2Py.joy import xKeySwitch, xRockerBtn

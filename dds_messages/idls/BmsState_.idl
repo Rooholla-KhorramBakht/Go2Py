@@ -4,7 +4,6 @@
 
 #ifndef __unitree_go__msg__bms_state__idl__
 #define __unitree_go__msg__bms_state__idl__
-module Go2Py {
 module unitree_go {
 
 module msg {
@@ -47,5 +46,4 @@ unsigned short cell_vol[15];      //电池内部15节电池的电压。
 };  // module msg
 
 };  // module unitree_go
-};
 #endif  // __unitree_go__msg__bms_state__idl__

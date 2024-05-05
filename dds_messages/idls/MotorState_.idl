@@ -4,8 +4,6 @@
 
 #ifndef __unitree_go__msg__motor_state__idl__
 #define __unitree_go__msg__motor_state__idl__
-module Go2Py {
-
 module unitree_go {
 
 module msg {
@@ -36,5 +34,4 @@ unsigned long reserve[2];   //当前电机通信频率+电机错误标志位：�
 };  // module msg
 
 };  // module unitree_go
-};
 #endif  // __unitree_go__msg__motor_state__idl__
