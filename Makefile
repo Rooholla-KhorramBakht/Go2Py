@@ -1,3 +1,6 @@
+realsense:
+	@cd deploy/docker && docker build --tag go2py_realsense:latest -f Dockerfile.realsense .
+
 hesai:
 	@cd deploy && docker build --no-cache --tag go2py_hesai:latest -f docker/Dockerfile.hesai .
 

@@ -231,7 +231,7 @@ class Go2Model:
     
     def getGroundReactionForce(self, tau_est, body_acceleration=None):
         if body_acceleration is None:   
-            grf = {key:np.linalg.pinv(self.ef_J_[key][:3,6:].T)@(tau_est.squeeze() - self.nle_[6:]) for key in self.ef_J_.keys()}
+            grf = {key:np.linalg.pinv(self.ef_Jw_[key][:3,6:].T)@(tau_est.squeeze() - self.nle_[6:]) for key in self.ef_Jw_.keys()}
         else:
             raise NotImplementedError("Ground reaction force with body dynamics is not implemented")
         return grf
