@@ -20,7 +20,6 @@ from Go2Py.robot.interface.dds import GO2Real
 from Go2Py.robot.model import Go2Model
 robot = GO2Real(mode='lowlevel')
 model = Go2Model()
-robot.standDownReset()
 while running:
     joint_state = robot.getJointStates()
     imu = robot.getIMU()
