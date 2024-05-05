@@ -21,7 +21,7 @@ link_directories(src)
 
 set (
   DEPENDENCY_LIST
-  go2py_common
+  go2py_messages
   unitree_go
   unitree_api
   rclcpp
@@ -39,7 +39,7 @@ set (
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(unitree_go REQUIRED)
-find_package(go2py_common REQUIRED)
+find_package(go2py_messages REQUIRED)
 find_package(unitree_api REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)

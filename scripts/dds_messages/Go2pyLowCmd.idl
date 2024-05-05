@@ -1,0 +1,13 @@
+module go2py_messages {
+  module msg {
+    module dds_{
+      @final struct Go2pyLowCmd_ {
+        float q[12];
+        float dq[12];
+        float kp[12];
+        float kd[12];
+        float tau[12];
+      };
+    };
+  };
+};

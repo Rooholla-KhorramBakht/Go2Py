@@ -1,0 +1,13 @@
+uint64      time_sec
+uint64      time_nsec
+float32[12] q
+float32[12] dq   
+float32[12] tau
+float32[4]  contact
+float32[3]  accel    
+float32[3]  gyro    
+float32[4]  quat
+float32     imu_temp    
+float32[12] motor_temp
+uint8[40] wireless_remote
+uint8 soc

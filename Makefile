@@ -1,3 +1,6 @@
+messages:
+	@cd scripts && ./make_msgs.sh 
+
 realsense:
 	@cd deploy/docker && docker build --tag go2py_realsense:latest -f Dockerfile.realsense .
 
