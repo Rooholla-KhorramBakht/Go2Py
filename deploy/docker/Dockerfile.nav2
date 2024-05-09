@@ -6,11 +6,11 @@ SHELL ["/bin/bash", "-c"]
 RUN apt-get update && apt-get install -y \
     ros-humble-rmw-cyclonedds-cpp ros-humble-rosidl-generator-dds-idl \
     libyaml-cpp-dev \
-    ros-humble-xacro \
     libboost-all-dev\
     build-essential \
     cmake \
     git \
+    ros-humble-nav2-* ros-humble-navigation2 \
     && rm -rf /var/lib/apt/lists/*
 
 # Cheange the ROS2 RMW to CycloneDDS as instructed by Unitree
@@ -19,14 +19,12 @@ git clone https://github.com/ros2/rmw_cyclonedds -b humble && git clone https://
 cd .. && colcon build --packages-select cyclonedds && source /opt/ros/humble/setup.bash && colcon build
 
 # copy the go2py ros2 nodes
-COPY ros2_nodes/go2py_bridge /bridge_ws/src/go2py_bridge
-COPY ros2_nodes/go2py_messages /bridge_ws/src/go2py_messages
-RUN cd /bridge_ws && source /opt/ros/humble/setup.bash && source /unitree_ros2/cyclonedds_ws/install/setup.bash && colcon build --symlink-install
+#COPY ros2_nodes/lidar_node /hesai_ws/src/lidar_node
+#RUN cd /hesai_ws && source /opt/ros/humble/setup.bash && colcon build --symlink-install
 
 # Copy the script to start the nodes
-COPY docker/scripts /root/scripts
-COPY launch_files /root/launch
-
+#COPY docker/scripts /root/scripts
+#COPY launch_files /root/launch
 # set the entrypoint to bash
-#ENTRYPOINT ["/bin/bash"]
-ENTRYPOINT ["/bin/bash", "/root/scripts/bridge_start.sh"]
+ENTRYPOINT ["/bin/bash"]
+#ENTRYPOINT ["/bin/bash", "/root/scripts/hesai_start.sh"]
