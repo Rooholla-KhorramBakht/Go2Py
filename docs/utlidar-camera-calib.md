@@ -1,5 +1,13 @@
 
 # Lidar to Camera Extrinsic Calibration
+
+The goal of this procedure is to find the extrinsic transformation between the Lidar coordinate frame and that of the camera in front of the robot:
+
+
+<p align="center">
+  <img src="assets/lidar-camera-extrinsics.drawio.png" alt="image" width="60%" height="auto"/>
+</p>
+
 First pull the docker image:
 ```bash
 docker pull koide3/direct_visual_lidar_calibration:humble
