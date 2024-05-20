@@ -1,11 +1,7 @@
 import time
-from copy import deepcopy
-import matplotlib.pyplot as plt
 import mujoco
 import mujoco.viewer
 import numpy as np
-import pinocchio as pin
-from pinocchio.robot_wrapper import RobotWrapper
 from Go2Py import ASSETS_PATH
 import os
 from scipy.spatial.transform import Rotation

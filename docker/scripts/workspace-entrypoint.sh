@@ -17,5 +17,7 @@ rosdep update
 
 # Restart udev daemon
 sudo service udev restart
+python3 -m pip install --upgrade pip
+cd /workspaces/Go2Py/ && python3 -m pip install .
 
 $@
