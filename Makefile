@@ -1,3 +1,6 @@
+isaac_ros:
+	@./scripts/run_dev.sh 
+
 messages:
 	@cd scripts && ./make_msgs.sh 
 
