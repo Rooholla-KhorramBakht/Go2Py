@@ -1,13 +1,13 @@
 # Go2Py
 
-Go2Py is a Pythonic interface and driver for low-level and high-level control of Unitree Go2 quadruped robots. The motivation of this project is to remove the burden of developing interface, safety systems, and basic components required for starting locomotion reserach using the Go2 quadruped robot. It provides a modular pipeline for real-time communication with the robot in both simulated and real world environment with a unified interface. 
+Go2Py is a Pythonic interface and driver for low-level and high-level control of Unitree Go2 quadruped robots. The motivation of this project is to remove the burden of developing interface, safety systems, and basic components required for starting locomotion research using the Go2 quadruped robot. It provides a modular pipeline for real-time communication with the robot in both simulated and real-world environments with a unified interface. 
 
 <p align="center">
   <img src="docs/assets/openfig.png" alt="image" width="60%" height="auto"/>
 </p>
 
 This project is comprised of the following components:
-- **C++ Bridge:** A dockerized ROS2 bridge built upon the [unitree_ros2](https://github.com/unitreerobotics/unitree_ros2) that implements a remote controlled emergency stop and publishes the robot states as standard ROS2 topics usable by upstream systems such as NAV2. 
+- **C++ Bridge:** A dockerized ROS2 bridge built upon the [unitree_ros2](https://github.com/unitreerobotics/unitree_ros2) that implements a remote-controlled emergency stop and publishes the robot states as standard ROS2 topics usable by upstream systems such as NAV2. 
 - **Robot Interface:** A simple Python class that represents the robot and communicates with the C++ bridge through either DDS (ROS independent) or ROS2 interfaces. 
 - **Robot Management FSM:** A finite state machine for controlling the behavior of the robot up to the point of handover to the user low-level controller (sitting down, standing up) with safety monitors (motor temperatures, emergency stops).
 - **Robot Model:** A simple to use [Pinocchio](https://github.com/stack-of-tasks/pinocchio) wrapper for computing the kinematics and dynamics parameters of the robot. 
@@ -31,7 +31,7 @@ while running:
 
     robot.setCommands(q_des, dq_des, kp, kd, tau_ff)
 ```
-An identical workflow is can be followed for simulation:
+An identical workflow can be followed for simulation:
 ```python
 from Go2Py.sim.mujoco import Go2Sim
 from Go2Py.robot.model import Go2Model
@@ -51,10 +51,10 @@ while running:
     robot.step()
 ```
 ## Installation
-Follow through the steps in here to [setup](docs/setup.md) the robot and Go2Py. 
+Follow through the steps here to [setup](docs/setup.md) the robot and Go2Py. 
 
 ## Further Examples 
-A set examples and tutorials are provided to get you up and running quickly:
+A set of examples and tutorials are provided to get you up and running quickly:
 
 - [Communicating with the robot](examples/00-robot-interface.ipynb) 
 - [Interracting with ROS2](examples/01-ros2-tools.ipynb) 
