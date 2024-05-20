@@ -1,16 +1,16 @@
 # System Setup
 
-The GO2 EDU comes with an onbard Jetson Orin NX, a Hessai LX-16 LiDAR sensor, and an intel Realsense D435i camera. This setup procedure targets the onboard Jetson Orin with IP `192.168.123.18` and presents the instructions for installing the Go2Py. We use the Linux systemd infrastructure to automatically run the components of the Go2Py as the robot is turned on. Each service runs its particular docker image so the installation of these services involves two steps; first building the required images and then installing the service files that launch them. Before installing these services though, you would need to perform the following steps to get an internet connection on the robot and install docker on it. 
+The GO2 EDU comes with an onboard Jetson Orin NX, a Hessai LX-16 LiDAR sensor, and an intel Realsense D435i camera. This setup procedure targets the onboard Jetson Orin with IP `192.168.123.18` and presents the instructions for installing the Go2Py. We use the Linux systemd infrastructure to automatically run the components of the Go2Py as the robot is turned on. Each service runs its particular docker image so the installation of these services involves two steps; first building the required images and then installing the service files that launch them. Before installing these services though, you would need to perform the following steps to get an internet connection on the robot and install docker on it. 
 
 ## Internet Sharing
 
-In order to access internet on the Jetson computer, we hook the robot to a host development computer with internet access and configure it to share its connection with the robot. To cofigure the host computer, the follwoing steps should be taken:
+In order to access the internet on the Jetson computer, we hook the robot to a host development computer with internet access and configure it to share its connection with the robot. To configure the host computer, the following steps should be taken:
 ### Host Computer
-The following steps configures the host computer to share its intentrent with the robot.
+The following steps configure the host computer to share its internet with the robot.
 #### Enable IP forwarding:
 
 ```bash
-sudo sysctl -w net.ipv4.ip_forward=1
+sudo systemctl -w net.ipv4.ip_forward=1
 ```
 ##### Configure the iptables:
 
@@ -30,7 +30,7 @@ sudo iptables-save > /etc/iptables/rules.v4
 sudo ip6tables-save > /etc/iptables/rules.v6
 ```
 ### Robot
-Now tell the computer on the robot to use the internet shared by the host computer. SSH into the robot's computer with IP address `192.168.123.18`, username `unitree` and password `123`. Note that the host computer's IP reange should have already been set to static mode with an IP in `192.168.123.x` range where x is anything except IPs already used by the others (e.g. `.18`).
+Now tell the computer on the robot to use the internet shared by the host computer. SSH into the robot's computer with IP address `192.168.123.18`, username `unitree`, and password `123`. Note that the host computer's IP range should have already been set to static mode with an IP in the `192.168.123.x` range where x is anything except IPs already used by the others (e.g. `.18`).
 
 ```bash
 sudo ip route add default via <host computer IP address>
@@ -57,24 +57,24 @@ SSH into the robot and clone the Go2Py repository:
 git clone https://github.com/Rooholla-KhorramBakht/Go2Py.git
 cd Go2Py
 ```
-Go2Py is coprised of the following main services:
+Go2Py is comprised of the following main services:
 - **go2py-bridge.service:** A service that runs the Go2py C++ bridge.
-- **go2py-robot-description.service:** A service that subscribes to the `\go\joint_states` published by the bridge and publishes the robot description and TF2 messages for the sensors and and links of the robot. Note that you should add the currect extrinsics of the installed sensors into the robot's xacro file located [here](../deploy/ros2_nodes/go2_description/xacro/robot.xacro) before installing this service. 
-- **go2py-hesai.service:** This service runs a cutomized Lidar driver for the robots that come with the hesai xt16 Lidars. This customized driver publishes laser_scan messages in addition to the pointcloud data. If your robot does not come with this LiDAR, you don't need to install this service.
+- **go2py-robot-description.service:** A service that subscribes to the `\go\joint_states` published by the bridge and publishes the robot description and TF2 messages for the sensors and links of the robot. Note that you should add the correct extrinsic parameters of the installed sensors into the robot's xacro file located [here](../deploy/ros2_nodes/go2_description/xacro/robot.xacro) before installing this service. 
+- **go2py-hesai.service:** This service runs a customized Lidar driver for the robots that come with the Hesai xt16 Lidars. This customized driver publishes laser_scan messages in addition to the pointcloud data. If your robot does not come with this LiDAR, you don't need to install this service.
 
-The installation for each services is comprised of two commands:
+The installation for each service is comprised of two commands:
 ```bash
 # For the bridge
 make bridge
 sudo make bridge_install
-# For the robot description serive
+# For the robot description service
 make robot_description
 sudo make robot_description_install
 # For the LiDAR driver
 make hesai
 sudo make hesai_install
 ```
-The first command for each service makes the corresponding docker image and the second command, copies the serives file that runs those images into the appropriate locations of the system and enables them as autorun services. You can check for the success of this installations by checking the output of the `systemctl status service_name.service` command where the `service_name` is replace with the name of the serive you want to check. 
+The first command for each service makes the corresponding docker image and the second command, copies the service file that runs those images into the appropriate locations of the system and enables them as autorun services. You can check for the success of this installation by checking the output of the `systemctl status service_name.service` command where the `service_name` is replaced with the name of the service you want to check. 
 
 ### Installing the GoPy 
 
@@ -82,4 +82,4 @@ Finally, we need to install the Go2Py Python library on a computer located on th
 ```bash
 pip install -e .
 ```
-To check the installtion, run the interface example [here](../examples/00-robot-interface.ipynb) to make sure you can read the state of the robot.
+To check the installation, run the interface example [here](../examples/00-robot-interface.ipynb) to make sure you can read the state of the robot. In addition to local installation, you can also the provided docker support. To do so, run `make docker_start` in the root directory of the repository. With this, a docker container with all the required dependencies runs and the Go2Py repository will be mounted into it. Then you can install the repository in editable mode inside this container. 
