@@ -82,4 +82,4 @@ Finally, we need to install the Go2Py Python library on a computer located on th
 ```bash
 pip install -e .
 ```
-
+To check the installtion, run the interface example [here](examples/00-robot-interface.ipynb) to make sure you can read the state of the robot.
