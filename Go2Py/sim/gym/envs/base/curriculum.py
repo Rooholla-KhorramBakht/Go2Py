@@ -21,7 +21,7 @@ class Curriculum:
             self.grid <= high[:, None]
         ).all(axis=0)
 
-        assert len(inds) != 0, "You are intializing your distribution with an empty domain!"
+        assert len(inds) != 0, "You are initializing your distribution with an empty domain!"
 
         self.weights[inds] = value
 

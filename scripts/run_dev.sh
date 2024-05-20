@@ -85,7 +85,7 @@ fi
 # Check if git-lfs is installed.
 git lfs &>/dev/null
 if [[ $? -ne 0 ]] ; then
-    print_error "git-lfs is not insalled. Please make sure git-lfs is installed before you clone the repo."
+    print_error "git-lfs is not installed. Please make sure git-lfs is installed before you clone the repo."
     exit 1
 fi
 
@@ -115,7 +115,7 @@ if [ "$(docker ps -a --quiet --filter status=exited --filter name=$CONTAINER_NAM
     docker rm $CONTAINER_NAME > /dev/null
 fi
 
-# Re-use existing container.
+# Reuse existing container.
 if [ "$(docker ps -a --quiet --filter status=running --filter name=$CONTAINER_NAME)" ]; then
     print_info "Attaching to running container: $CONTAINER_NAME"
     docker exec -i -t -u admin --workdir /workspaces/Go2Py $CONTAINER_NAME /bin/bash $@

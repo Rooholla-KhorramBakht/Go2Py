@@ -57,7 +57,7 @@ Follow through the steps here to [setup](docs/setup.md) the robot and Go2Py.
 A set of examples and tutorials are provided to get you up and running quickly:
 
 - [Communicating with the robot](examples/00-robot-interface.ipynb) 
-- [Interracting with ROS2](examples/01-ros2-tools.ipynb) 
+- [Interacting with ROS2](examples/01-ros2-tools.ipynb) 
 - [Simulating with MuJoCo](examples/02-MuJoCo-sim.ipynb)
 - [Robot dynamics and kinematics](examples/03-robot-dynamic-model.ipynb)
 - [Finite state machine in low-level control](examples/04-FSM.ipynb) 

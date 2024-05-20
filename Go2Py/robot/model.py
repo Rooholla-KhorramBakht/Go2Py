@@ -82,7 +82,7 @@ class Go2Model:
         Calculates the inverse kinematics for the robot given a desired state.
 
         Args:
-            T (np.ndarray): The 4x4 homogenous transformation representing the pose of the base_link in the world frame
+            T (np.ndarray): The 4x4 homogeneous transformation representing the pose of the base_link in the world frame
             x (np.ndarray): A numpy array of size 12 representing foot positions in world frame in FR, FL, RR, RL order.
 
         Returns:

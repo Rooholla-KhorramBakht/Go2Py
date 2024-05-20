@@ -9,7 +9,7 @@ class Cfg(PrefixProto, cli=False):
         num_observations = 235
         num_scalar_observations = 42
         # if not None a privilige_obs_buf will be returned by step() (critic obs
-        # for assymetric training). None is returned otherwise
+        # for asymmetric training). None is returned otherwise
         num_privileged_obs = 18
         privileged_future_horizon = 1
         num_actions = 12
@@ -228,7 +228,7 @@ class Cfg(PrefixProto, cli=False):
         # merge bodies connected by fixed joints. Specific fixed joints can be
         # kept by adding " <... dont_collapse="true">
         collapse_fixed_joints = True
-        fix_base_link = False  # fixe the base of the robot
+        fix_base_link = False  # fix the base of the robot
         # see GymDofDriveModeFlags (0 is none, 1 is pos tgt, 2 is vel tgt, 3 effort)
         default_dof_drive_mode = 3
         self_collisions = 0  # 1 to disable, 0 to enable...bitwise filter

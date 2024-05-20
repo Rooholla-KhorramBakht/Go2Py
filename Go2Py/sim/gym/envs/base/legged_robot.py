@@ -20,7 +20,7 @@ class LeggedRobot(BaseTask):
                  initial_dynamics_dict=None):
         """ Parses the provided config file,
             calls create_sim() (which creates, simulation, terrain and environments),
-            initilizes pytorch buffers used during training
+            initializes pytorch buffers used during training
 
         Args:
             cfg (Dict): Environment config file
@@ -513,7 +513,7 @@ class LeggedRobot(BaseTask):
             self.privileged_obs_buf.shape[1]}), you will discard data from the student!"
 
     def create_sim(self):
-        """ Creates simulation, terrain and evironments
+        """ Creates simulation, terrain and environments
         """
         self.up_axis_idx = 2  # 2 for z, 1 for y -> adapt gravity accordingly
         self.sim = self.gym.create_sim(
@@ -1123,7 +1123,7 @@ class LeggedRobot(BaseTask):
         Velocities are set to zero.
 
         Args:
-            env_ids (List[int]): Environemnt ids
+            env_ids (List[int]): Environment ids
         """
         self.dof_pos[env_ids] = self.default_dof_pos * \
             torch_rand_float(0.5, 1.5, (len(env_ids), self.num_dof), device=self.device)
@@ -1142,7 +1142,7 @@ class LeggedRobot(BaseTask):
             Sets base position based on the curriculum
             Selects randomized base velocities within -0.5:0.5 [m/s, rad/s]
         Args:
-            env_ids (List[int]): Environemnt ids
+            env_ids (List[int]): Environment ids
         """
         # base position
         if self.custom_origins:
@@ -1725,7 +1725,7 @@ class LeggedRobot(BaseTask):
             curriculum.set_to(low=low, high=high)
 
     def _prepare_reward_function(self):
-        """ Prepares a list of reward functions, whcih will be called to compute the total reward.
+        """ Prepares a list of reward functions, which will be called to compute the total reward.
             Looks for self._reward_<REWARD_NAME>, where <REWARD_NAME> are names of all non zero reward scales in the cfg.
         """
         # reward containers
@@ -2187,7 +2187,7 @@ class LeggedRobot(BaseTask):
                 gymutil.draw_lines(sphere_geom, self.gym, self.viewer, self.envs[i], sphere_pose)
 
     def _init_height_points(self, env_ids, cfg):
-        """ Returns points at which the height measurments are sampled (in base frame)
+        """ Returns points at which the height measurements are sampled (in base frame)
 
         Returns:
             [torch.Tensor]: Tensor of shape (num_envs, self.num_height_points, 3)

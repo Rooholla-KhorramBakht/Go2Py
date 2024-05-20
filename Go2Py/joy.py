@@ -49,7 +49,7 @@ class xRockerBtn:
 
 class PyGameJoyManager:
     def __init__(self, user_callback=None):
-        self.dt = 0.01  # Sampling frequence of the joystick
+        self.dt = 0.01  # Sampling frequency of the joystick
         self.running = False
         self.joy_thread_handle = threading.Thread(target=self.joy_thread)
         # an optional callback that can be used to send the reading values to a
