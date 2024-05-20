@@ -21,11 +21,10 @@ from scipy.spatial.transform import Rotation
 from Go2Py.joy import xKeySwitch, xRockerBtn
 
 
-
 class GO2Real():
     def __init__(
         self,
-        mode = 'lowlevel', # 'highlevel' or 'lowlevel'
+        mode='lowlevel',  # 'highlevel' or 'lowlevel'
         vx_max=0.5,
         vy_max=0.4,
         ωz_max=0.5,
@@ -33,20 +32,20 @@ class GO2Real():
         assert mode in ['highlevel', 'lowlevel'], "mode should be either 'highlevel' or 'lowlevel'"
         self.mode = mode
         self.simulated = False
-        self.prestanding_q = np.array([ 0.0,  1.26186061, -2.5,
-                                    0.0,  1.25883281, -2.5,
-                                    0.0,  1.27193761, -2.6,  
-                                    0.0,  1.27148342, -2.6])
+        self.prestanding_q = np.array([0.0, 1.26186061, -2.5,
+                                       0.0, 1.25883281, -2.5,
+                                       0.0, 1.27193761, -2.6,
+                                       0.0, 1.27148342, -2.6])
 
-        self.sitting_q = np.array([-0.02495611,  1.26249647, -2.82826662,
-                                    0.04563564,  1.2505368 , -2.7933557 ,
-                                   -0.30623949,  1.28283751, -2.82314873,  
-                                    0.26400229,  1.29355574, -2.84276843])
+        self.sitting_q = np.array([-0.02495611, 1.26249647, -2.82826662,
+                                   0.04563564, 1.2505368, -2.7933557,
+                                   -0.30623949, 1.28283751, -2.82314873,
+                                   0.26400229, 1.29355574, -2.84276843])
 
-        self.standing_q = np.array([ 0.0,  0.77832842, -1.56065452,
-                                     0.0,  0.76754963, -1.56634164,
-                                     0.0,  0.76681757, -1.53601146,  
-                                     0.0,  0.75422204, -1.53229916])
+        self.standing_q = np.array([0.0, 0.77832842, -1.56065452,
+                                    0.0, 0.76754963, -1.56634164,
+                                    0.0, 0.76681757, -1.53601146,
+                                    0.0, 0.75422204, -1.53229916])
         self.latest_command_stamp = time.time()
         self.highcmd_topic_name = "rt/go2/twist_cmd"
         self.lowcmd_topic_name = "rt/go2py/low_cmd"
@@ -56,7 +55,7 @@ class GO2Real():
         self.participant = DomainParticipant()
         self.lowstate_topic = Topic(self.participant, self.lowstate_topic_name, Go2pyState_)
         self.state_reader = DataReader(self.participant, self.lowstate_topic)
-        
+
         self.lowcmd_topic = Topic(self.participant, self.lowcmd_topic_name, Go2pyLowCmd_)
         self.lowcmd_writer = DataWriter(self.participant, self.lowcmd_topic)
 
@@ -67,11 +66,11 @@ class GO2Real():
         self.P_v_max = np.diag([1 / self.vx_max**2, 1 / self.vy_max**2])
         self.ωz_max = ωz_max
         self.ωz_min = -ωz_max
-        
+
         self.state = None
-        self.setCommands = {'lowlevel':self.setCommandsLow,
-                            'highlevel':self.setCommandsHigh}[self.mode]
-        self.state_thread = Thread(target = self.state_update)
+        self.setCommands = {'lowlevel': self.setCommandsLow,
+                            'highlevel': self.setCommandsHigh}[self.mode]
+        self.state_thread = Thread(target=self.state_update)
         self.running = True
         self.state_thread.start()
 
@@ -88,23 +87,23 @@ class GO2Real():
         gyro = self.state.gyro
         quat = self.state.quat
         temp = self.state.imu_temp
-        return {'accel':accel, 'gyro':gyro, 'quat':quat, 'temp':temp}
+        return {'accel': accel, 'gyro': gyro, 'quat': quat, 'temp': temp}
 
     def getFootContacts(self):
         """Returns the raw foot contact forces"""
-        footContacts = self.state.contact 
+        footContacts = self.state.contact
         return footContacts
 
     def getJointStates(self):
         """Returns the joint angles (q) and velocities (dq) of the robot"""
-        return {'q':self.state.q, 
-                'dq':self.state.dq,
-                'tau_est':self.state.tau,
-                'temperature':self.state.motor_temp}
+        return {'q': self.state.q,
+                'dq': self.state.dq,
+                'tau_est': self.state.tau,
+                'temperature': self.state.motor_temp}
 
     def getRemoteState(self):
-        """A method to get the state of the wireless remote control. 
-        Returns a xRockerBtn object: 
+        """A method to get the state of the wireless remote control.
+        Returns a xRockerBtn object:
         - head: [head1, head2]
         - keySwitch: xKeySwitch object
         - lx: float
@@ -145,7 +144,7 @@ class GO2Real():
         v_x = ly * self.vx_max
         v_y = lx * self.vy_max
         ω = rx * self.ωz_max
-        
+
         return v_x, v_y, ω
 
     def getBatteryState(self):
@@ -166,7 +165,7 @@ class GO2Real():
         assert q_des.size == dq_des.size == kp.size == kd.size == tau_ff.size == 12, "q, dq, kp, kd, tau_ff should have size 12"
         lowcmd = Go2pyLowCmd_(
             q_des,
-            dq_des, 
+            dq_des,
             kp,
             kd,
             tau_ff
@@ -194,5 +193,5 @@ class GO2Real():
     def getGravityInBody(self):
         q = self.getIMU()['quat']
         R = Rotation.from_quat(q).as_matrix()
-        g_in_body = R.T@np.array([0.0, 0.0, -1.0]).reshape(3, 1)
+        g_in_body = R.T @ np.array([0.0, 0.0, -1.0]).reshape(3, 1)
         return g_in_body

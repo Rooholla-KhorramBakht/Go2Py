@@ -35,5 +35,3 @@ class Go2pyState_(idl.IdlStruct, typename="go2py_messages.msg.dds_.Go2pyState_")
     motor_temp: types.array[types.float32, 12]
     wireless_remote: types.array[types.uint8, 40]
     soc: types.uint8
-
-

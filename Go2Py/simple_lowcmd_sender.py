@@ -15,12 +15,12 @@ dp = DomainParticipant(0)
 tp = Topic(dp, "go2py/lowcmd", LowCmd)
 dw = DataWriter(dp, tp)
 cmd = LowCmd(
-    q = 12*[0.],
-    dq = 12*[0.],
-    tau_ff = 12*[0.],
-    kp = 12*[0.],
-    kv = 12*[0.],
-    e_stop = 0
+    q=12 * [0.],
+    dq=12 * [0.],
+    tau_ff=12 * [0.],
+    kp=12 * [0.],
+    kv=12 * [0.],
+    e_stop=0
 )
 while True:
     dw.write(cmd)

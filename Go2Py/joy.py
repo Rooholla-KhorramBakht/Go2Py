@@ -15,6 +15,7 @@ from pygame.locals import (
     K_q,
 )
 
+
 @dataclass
 class xKeySwitch:
     R1: int
@@ -45,12 +46,14 @@ class xRockerBtn:
     L2: float
     ly: float
 
+
 class PyGameJoyManager:
     def __init__(self, user_callback=None):
         self.dt = 0.01  # Sampling frequence of the joystick
         self.running = False
         self.joy_thread_handle = threading.Thread(target=self.joy_thread)
-        # an optional callback that can be used to send the reading values to a user provided function
+        # an optional callback that can be used to send the reading values to a
+        # user provided function
         self.user_callback = user_callback
         pygame.init()
         self.offset = None

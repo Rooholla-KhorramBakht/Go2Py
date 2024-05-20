@@ -25,5 +25,3 @@ class Go2pyHighCmd_(idl.IdlStruct, typename="go2py_messages.msg.dds_.Go2pyHighCm
     vx: types.float32
     vy: types.float32
     vz: types.float32
-
-

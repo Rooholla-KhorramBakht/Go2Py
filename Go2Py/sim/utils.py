@@ -10,6 +10,7 @@ def load_config(file_path):
         config = yaml.safe_load(file)
     return config
 
+
 class NumpyMemMapDataPipe:
     def __init__(self, channel_name, force=False, dtype="uint8", shape=(640, 480, 3)):
         self.channel_name = channel_name

@@ -14,5 +14,5 @@ setup(
     author_email='rk4342@nyu.edu',
     description='Toolkit for deployment using Unitree Go2.',
     install_requires=[
-                      ]
+    ]
 )

@@ -25,7 +25,8 @@ class BaseTask(gym.Env):
         sim_device_type, self.sim_device_id = gymutil.parse_device_str(self.sim_device)
         self.headless = headless
 
-        # env device is GPU only if sim is on GPU and use_gpu_pipeline=True, otherwise returned tensors are copied to CPU by physX.
+        # env device is GPU only if sim is on GPU and use_gpu_pipeline=True,
+        # otherwise returned tensors are copied to CPU by physX.
         if sim_device_type == 'cuda' and sim_params.use_gpu_pipeline:
             self.device = self.sim_device
         else:
@@ -33,7 +34,7 @@ class BaseTask(gym.Env):
 
         # graphics device for rendering, -1 for no rendering
         self.graphics_device_id = self.sim_device_id
-        if self.headless == True:
+        if self.headless:
             self.graphics_device_id = self.sim_device_id
 
         self.num_obs = cfg.env.num_observations
@@ -54,15 +55,22 @@ class BaseTask(gym.Env):
         torch._C._jit_set_profiling_executor(False)
 
         # allocate buffers
-        self.obs_buf = torch.zeros(self.num_envs, self.num_obs, device=self.device, dtype=torch.float)
+        self.obs_buf = torch.zeros(
+            self.num_envs,
+            self.num_obs,
+            device=self.device,
+            dtype=torch.float)
         self.rew_buf = torch.zeros(self.num_envs, device=self.device, dtype=torch.float)
         self.rew_buf_pos = torch.zeros(self.num_envs, device=self.device, dtype=torch.float)
         self.rew_buf_neg = torch.zeros(self.num_envs, device=self.device, dtype=torch.float)
         self.reset_buf = torch.ones(self.num_envs, device=self.device, dtype=torch.long)
         self.episode_length_buf = torch.zeros(self.num_envs, device=self.device, dtype=torch.long)
         self.time_out_buf = torch.zeros(self.num_envs, device=self.device, dtype=torch.bool)
-        self.privileged_obs_buf = torch.zeros(self.num_envs, self.num_privileged_obs, device=self.device,
-                                              dtype=torch.float)
+        self.privileged_obs_buf = torch.zeros(
+            self.num_envs,
+            self.num_privileged_obs,
+            device=self.device,
+            dtype=torch.float)
         # self.num_privileged_obs = self.num_obs
 
         self.extras = {}
@@ -76,7 +84,7 @@ class BaseTask(gym.Env):
         self.viewer = None
 
         # if running with a viewer, set up keyboard shortcuts and camera
-        if self.headless == False:
+        if not self.headless:
             # subscribe to keyboard shortcuts
             self.viewer = self.gym.create_viewer(
                 self.sim, gymapi.CameraProperties())
@@ -132,6 +140,6 @@ class BaseTask(gym.Env):
                 self.gym.poll_viewer_events(self.viewer)
 
     def close(self):
-        if self.headless == False:
+        if not self.headless:
             self.gym.destroy_viewer(self.viewer)
         self.gym.destroy_sim(self.sim)

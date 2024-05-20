@@ -34,15 +34,15 @@ def generate_launch_description():
     actual_params_file = PythonExpression(['"', params_file, '" if ', has_node_params,
                                            ' else "', default_params_file, '"'])
 
-    log_param_change = LogInfo(msg=['provided params_file ',  params_file,
+    log_param_change = LogInfo(msg=['provided params_file ', params_file,
                                     ' does not contain slam_toolbox parameters. Using default: ',
                                     default_params_file],
                                condition=UnlessCondition(has_node_params))
 
     start_async_slam_toolbox_node = Node(
         parameters=[
-          actual_params_file,
-          {'use_sim_time': use_sim_time}
+            actual_params_file,
+            {'use_sim_time': use_sim_time}
         ],
         package='slam_toolbox',
         executable='async_slam_toolbox_node',

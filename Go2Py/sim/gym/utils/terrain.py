@@ -30,10 +30,8 @@ class Terrain:
 
         self.heightsamples = self.height_field_raw
         if self.type == "trimesh":
-            self.vertices, self.triangles = terrain_utils.convert_heightfield_to_trimesh(self.height_field_raw,
-                                                                                         self.cfg.horizontal_scale,
-                                                                                         self.cfg.vertical_scale,
-                                                                                         self.cfg.slope_treshold)
+            self.vertices, self.triangles = terrain_utils.convert_heightfield_to_trimesh(
+                self.height_field_raw, self.cfg.horizontal_scale, self.cfg.vertical_scale, self.cfg.slope_treshold)
 
     def load_cfgs(self):
         self._load_cfg(self.cfg)
@@ -45,14 +43,16 @@ class Terrain:
             return self.cfg.row_indices, self.cfg.col_indices, [], []
         else:
             self._load_cfg(self.eval_cfg)
-            self.eval_cfg.row_indices = np.arange(self.cfg.tot_rows, self.cfg.tot_rows + self.eval_cfg.tot_rows)
+            self.eval_cfg.row_indices = np.arange(
+                self.cfg.tot_rows, self.cfg.tot_rows + self.eval_cfg.tot_rows)
             self.eval_cfg.col_indices = np.arange(0, self.eval_cfg.tot_cols)
             self.eval_cfg.x_offset = self.cfg.tot_rows
             self.eval_cfg.rows_offset = self.cfg.num_rows
             return self.cfg.row_indices, self.cfg.col_indices, self.eval_cfg.row_indices, self.eval_cfg.col_indices
 
     def _load_cfg(self, cfg):
-        cfg.proportions = [np.sum(cfg.terrain_proportions[:i + 1]) for i in range(len(cfg.terrain_proportions))]
+        cfg.proportions = [np.sum(cfg.terrain_proportions[:i + 1])
+                           for i in range(len(cfg.terrain_proportions))]
 
         cfg.num_sub_terrains = cfg.num_rows * cfg.num_cols
         cfg.env_origins = np.zeros((cfg.num_rows, cfg.num_cols, 3))
@@ -128,32 +128,54 @@ class Terrain:
             terrain_utils.pyramid_sloped_terrain(terrain, slope=slope, platform_size=3.)
         elif choice < proportions[1]:
             terrain_utils.pyramid_sloped_terrain(terrain, slope=slope, platform_size=3.)
-            terrain_utils.random_uniform_terrain(terrain, min_height=-0.05, max_height=0.05,
-                                                 step=self.cfg.terrain_smoothness, downsampled_scale=0.2)
+            terrain_utils.random_uniform_terrain(
+                terrain,
+                min_height=-0.05,
+                max_height=0.05,
+                step=self.cfg.terrain_smoothness,
+                downsampled_scale=0.2)
         elif choice < proportions[3]:
             if choice < proportions[2]:
                 step_height *= -1
-            terrain_utils.pyramid_stairs_terrain(terrain, step_width=0.31, step_height=step_height, platform_size=3.)
+            terrain_utils.pyramid_stairs_terrain(
+                terrain, step_width=0.31, step_height=step_height, platform_size=3.)
         elif choice < proportions[4]:
             num_rectangles = 20
             rectangle_min_size = 1.
             rectangle_max_size = 2.
-            terrain_utils.discrete_obstacles_terrain(terrain, discrete_obstacles_height, rectangle_min_size,
-                                                     rectangle_max_size, num_rectangles, platform_size=3.)
+            terrain_utils.discrete_obstacles_terrain(
+                terrain,
+                discrete_obstacles_height,
+                rectangle_min_size,
+                rectangle_max_size,
+                num_rectangles,
+                platform_size=3.)
         elif choice < proportions[5]:
-            terrain_utils.stepping_stones_terrain(terrain, stone_size=stepping_stones_size,
-                                                  stone_distance=stone_distance, max_height=0., platform_size=4.)
+            terrain_utils.stepping_stones_terrain(
+                terrain,
+                stone_size=stepping_stones_size,
+                stone_distance=stone_distance,
+                max_height=0.,
+                platform_size=4.)
         elif choice < proportions[6]:
             pass
         elif choice < proportions[7]:
             pass
         elif choice < proportions[8]:
-            terrain_utils.random_uniform_terrain(terrain, min_height=-cfg.terrain_noise_magnitude,
-                                                 max_height=cfg.terrain_noise_magnitude, step=0.005,
-                                                 downsampled_scale=0.2)
+            terrain_utils.random_uniform_terrain(
+                terrain,
+                min_height=-
+                cfg.terrain_noise_magnitude,
+                max_height=cfg.terrain_noise_magnitude,
+                step=0.005,
+                downsampled_scale=0.2)
         elif choice < proportions[9]:
-            terrain_utils.random_uniform_terrain(terrain, min_height=-0.05, max_height=0.05,
-                                                 step=self.cfg.terrain_smoothness, downsampled_scale=0.2)
+            terrain_utils.random_uniform_terrain(
+                terrain,
+                min_height=-0.05,
+                max_height=0.05,
+                step=self.cfg.terrain_smoothness,
+                downsampled_scale=0.2)
             terrain.height_field_raw[0:terrain.length // 2, :] = 0
 
         return terrain
@@ -174,7 +196,7 @@ class Terrain:
         x2 = int((cfg.terrain_length / 2. + 1) / terrain.horizontal_scale) + cfg.x_offset
         y1 = int((cfg.terrain_width / 2. - 1) / terrain.horizontal_scale)
         y2 = int((cfg.terrain_width / 2. + 1) / terrain.horizontal_scale)
-        env_origin_z = np.max(self.height_field_raw[start_x: end_x, start_y:end_y]) * terrain.vertical_scale
+        env_origin_z = np.max(
+            self.height_field_raw[start_x: end_x, start_y:end_y]) * terrain.vertical_scale
 
         cfg.env_origins[i, j] = [env_origin_x, env_origin_y, env_origin_z]
-

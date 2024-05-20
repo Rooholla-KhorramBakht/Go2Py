@@ -5,6 +5,7 @@ import time
 import numpy as np
 import torch
 
+
 def loadParameters(path):
     with open(path + "/parameters.pkl", "rb") as file:
         pkl_cfg = pkl.load(file)
@@ -53,7 +54,7 @@ class HistoryWrapper:
         privileged_obs = info["privileged_obs"]
 
         self.obs_history = torch.cat(
-            (self.obs_history[:, self.env.num_obs :], obs), dim=-1
+            (self.obs_history[:, self.env.num_obs:], obs), dim=-1
         )
         return (
             {
@@ -70,7 +71,7 @@ class HistoryWrapper:
         obs = self.env.get_observations()
         privileged_obs = self.env.get_privileged_observations()
         self.obs_history = torch.cat(
-            (self.obs_history[:, self.env.num_obs :], obs), dim=-1
+            (self.obs_history[:, self.env.num_obs:], obs), dim=-1
         )
         return {
             "obs": obs,
@@ -82,7 +83,7 @@ class HistoryWrapper:
         obs = self.env.get_obs()
         privileged_obs = self.env.get_privileged_observations()
         self.obs_history = torch.cat(
-            (self.obs_history[:, self.env.num_obs :], obs), dim=-1
+            (self.obs_history[:, self.env.num_obs:], obs), dim=-1
         )
         return {
             "obs": obs,
@@ -130,7 +131,8 @@ class CommandInterface:
         self.stance_width_cmd = 0.25
 
     def setGaitType(self, gait_type):
-        assert gait_type in [key for key in self.gaits.keys()], f'The gain type should be in {[key for key in self.gaits.keys()]}'
+        assert gait_type in [key for key in self.gaits.keys()], f'The gain type should be in {
+            [key for key in self.gaits.keys()]}'
         self.gait = torch.tensor(self.gaits[gait_type])
 
     def get_command(self):
@@ -249,18 +251,18 @@ class WalkTheseWaysAgent:
             "RL_calf_joint",
         ]
 
-        policy_to_unitree_map=[]
-        unitree_to_policy_map=[]
-        for i,policy_joint_name in enumerate(policy_joint_names):
-            id = np.where([name==policy_joint_name for name in unitree_joint_names])[0][0]
-            policy_to_unitree_map.append((i,id))
-        self.policy_to_unitree_map=np.array(policy_to_unitree_map)
+        policy_to_unitree_map = []
+        unitree_to_policy_map = []
+        for i, policy_joint_name in enumerate(policy_joint_names):
+            id = np.where([name == policy_joint_name for name in unitree_joint_names])[0][0]
+            policy_to_unitree_map.append((i, id))
+        self.policy_to_unitree_map = np.array(policy_to_unitree_map)
 
-        for i,unitree_joint_name in enumerate(unitree_joint_names):
-            id = np.where([name==unitree_joint_name for name in policy_joint_names])[0][0]
-            unitree_to_policy_map.append((i,id))
-        self.unitree_to_policy_map=np.array(unitree_to_policy_map)
-        
+        for i, unitree_joint_name in enumerate(unitree_joint_names):
+            id = np.where([name == unitree_joint_name for name in policy_joint_names])[0][0]
+            unitree_to_policy_map.append((i, id))
+        self.unitree_to_policy_map = np.array(unitree_to_policy_map)
+
         self.default_dof_pos = np.array(
             [
                 self.cfg["init_state"]["default_joint_angles"][name]
@@ -342,8 +344,8 @@ class WalkTheseWaysAgent:
         joint_state = self.robot.getJointStates()
         if joint_state is not None:
             self.gravity_vector = self.robot.getGravityInBody()
-            self.dof_pos = joint_state['q'][self.unitree_to_policy_map[:,1]]
-            self.dof_vel = joint_state['dq'][self.unitree_to_policy_map[:,1]]
+            self.dof_pos = joint_state['q'][self.unitree_to_policy_map[:, 1]]
+            self.dof_vel = joint_state['dq'][self.unitree_to_policy_map[:, 1]]
 
         if reset_timer:
             self.reset_gait_indices()
@@ -403,10 +405,10 @@ class WalkTheseWaysAgent:
             self.joint_vel_target - self.dof_vel
         ) * self.d_gains
         # self.lcm_bridge.sendCommands(command_for_robot)
-        self.robot.setCommands(self.joint_pos_target[self.policy_to_unitree_map[:,1]],\
-                               self.joint_vel_target[self.policy_to_unitree_map[:,1]],\
-                               self.p_gains[self.policy_to_unitree_map[:,1]],\
-                               self.d_gains[self.policy_to_unitree_map[:,1]],
+        self.robot.setCommands(self.joint_pos_target[self.policy_to_unitree_map[:, 1]],
+                               self.joint_vel_target[self.policy_to_unitree_map[:, 1]],
+                               self.p_gains[self.policy_to_unitree_map[:, 1]],
+                               self.d_gains[self.policy_to_unitree_map[:, 1]],
                                np.zeros(12))
 
     def reset(self):

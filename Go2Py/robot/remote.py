@@ -1,18 +1,23 @@
 import threading
 from pynput import keyboard
 
+
 class BaseRemote:
     def __init__(self):
         pass
+
     def startSeq(self):
         return False
+
     def standUpDownSeq(self):
         return False
 
     def flushStates(self):
         pass
 
+
 remote = BaseRemote()
+
 
 class KeyboardRemote(BaseRemote):
     def __init__(self):
@@ -32,7 +37,6 @@ class KeyboardRemote(BaseRemote):
         except AttributeError:
             pass  # Special keys (like space) will be handled here
 
-    
     def _on_release(self, key):
         try:
             if key.char == 's':  # Start sequence
@@ -62,6 +66,7 @@ class KeyboardRemote(BaseRemote):
         self.stand_up_down_seq_flag = False
         self.start_seq_flag = False
 
+
 class UnitreeRemote(BaseRemote):
     def __init__(self, robot):
         self.robot = robot
@@ -86,4 +91,3 @@ class UnitreeRemote(BaseRemote):
             return True
         else:
             return False
-        

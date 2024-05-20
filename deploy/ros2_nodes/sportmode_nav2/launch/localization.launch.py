@@ -9,19 +9,19 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
-   
+
     robot_localization = IncludeLaunchDescription(
-      PythonLaunchDescriptionSource([os.path.join(
-         get_package_share_directory('sportmode_nav2'), 'launch'),
-         '/ros_ekf.launch.py'])
-      )
+        PythonLaunchDescriptionSource([os.path.join(
+            get_package_share_directory('sportmode_nav2'), 'launch'),
+            '/ros_ekf.launch.py'])
+    )
     async_mapping = IncludeLaunchDescription(
-      PythonLaunchDescriptionSource([os.path.join(
-         get_package_share_directory('sportmode_nav2'), 'launch'),
-         '/localization_async.launch.py'])
-      )
+        PythonLaunchDescriptionSource([os.path.join(
+            get_package_share_directory('sportmode_nav2'), 'launch'),
+            '/localization_async.launch.py'])
+    )
 
     return LaunchDescription([
         robot_localization,
         async_mapping,
-   ])
+    ])

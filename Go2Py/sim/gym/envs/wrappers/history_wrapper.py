@@ -1,7 +1,8 @@
+import gym
+import torch
 import isaacgym
 assert isaacgym
-import torch
-import gym
+
 
 class HistoryWrapper(gym.Wrapper):
     def __init__(self, env):
@@ -21,7 +22,8 @@ class HistoryWrapper(gym.Wrapper):
         privileged_obs = info["privileged_obs"]
 
         self.obs_history = torch.cat((self.obs_history[:, self.env.num_obs:], obs), dim=-1)
-        return {'obs': obs, 'privileged_obs': privileged_obs, 'obs_history': self.obs_history}, rew, done, info
+        return {'obs': obs, 'privileged_obs': privileged_obs,
+                'obs_history': self.obs_history}, rew, done, info
 
     def get_observations(self):
         obs = self.env.get_observations()

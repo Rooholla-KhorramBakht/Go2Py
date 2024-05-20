@@ -42,7 +42,7 @@ class UnitreeGo2(Articulation):
             prim.GetReferences().AddReference(self.usd_path)
         breakpoint()
         super().__init__(
-            prim_path=self._prim_path+'/Go2/base',
+            prim_path=self._prim_path + '/Go2/base',
             name=name,
             position=position,
             orientation=orientation,

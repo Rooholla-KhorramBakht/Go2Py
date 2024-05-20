@@ -13,25 +13,29 @@ class FSM:
         self.user_controller_callback = user_controller_callback
 
         self.state = "damping"
-        self.tracking_kp = np.array(4*[150, 150, 150.]).reshape(12)
-        self.tracking_kv = np.array(12*[3.])
-        self.damping_kv = np.array(12*[2.])
-
+        self.tracking_kp = np.array(4 * [150, 150, 150.]).reshape(12)
+        self.tracking_kv = np.array(12 * [3.])
+        self.damping_kv = np.array(12 * [2.])
 
         self.tracking_complete = True
-        self.robot.setCommands(np.zeros(12), np.zeros(12), np.zeros(12), self.damping_kv, np.zeros(12))
-        self.fsm_dT = 1./50.
-        self.control_dT = 1./50.
+        self.robot.setCommands(
+            np.zeros(12),
+            np.zeros(12),
+            np.zeros(12),
+            self.damping_kv,
+            np.zeros(12))
+        self.fsm_dT = 1. / 50.
+        self.control_dT = 1. / 50.
         self.dT = self.fsm_dT
 
-        self.modes = {"tracking":self.trackingControlUpdate,
-                      "damping" :self.dampingControlUpdate,
+        self.modes = {"tracking": self.trackingControlUpdate,
+                      "damping": self.dampingControlUpdate,
                       "user": self.userControlUpdate,
-                     }
+                      }
         self.setMode("damping")
 
         self.running = True
-        self.fsm_thread = threading.Thread(target = self.update)
+        self.fsm_thread = threading.Thread(target=self.update)
         self.fsm_thread.start()
         # if the robot is a simulation, create a thread for stepping it
         if self.robot.simulated:
@@ -42,26 +46,40 @@ class FSM:
         assert mode in self.modes.keys(), 'the requested control update mode is not implemented'
         self.updateCommands = self.modes[mode]
         # print(f'setting mode to {mode}')
-        
+
     def moveTo(self, target, duration=0.5):
         # assert self.tracking_complete, 'The previous moveTo command is not completed yet!'
         self.q_start = self.robot.getJointStates()['q']
         self.q_target = target
         self.time = 0.0
         self.move_duration = duration
-        self.q_des = lambda t: [self.q_start + np.clip((t)/self.move_duration,0, 1)*(self.q_target - self.q_start), \
-            True if np.clip((t)/self.move_duration,0, 1)==1 else False]  # q_des(t), Movement finished
+        self.q_des = lambda t: [self.q_start +
+                                np.clip((t) /
+                                        self.move_duration, 0, 1) *
+                                (self.q_target -
+                                 self.q_start), True if np.clip((t) /
+                                                                self.move_duration, 0, 1) == 1 else False]  # q_des(t), Movement finished
         self.tracking_complete = False
         self.setMode("tracking")
 
     def trackingControlUpdate(self):
-        self.time +=self.dT
+        self.time += self.dT
         q_des, done = self.q_des(self.time)
-        self.robot.setCommands(q_des, np.zeros(12), self.tracking_kp, self.tracking_kv, np.zeros(12))
+        self.robot.setCommands(
+            q_des,
+            np.zeros(12),
+            self.tracking_kp,
+            self.tracking_kv,
+            np.zeros(12))
         self.tracking_complete = done
 
     def dampingControlUpdate(self):
-        self.robot.setCommands(np.zeros(12), np.zeros(12), np.zeros(12), self.damping_kv, np.zeros(12))
+        self.robot.setCommands(
+            np.zeros(12),
+            np.zeros(12),
+            np.zeros(12),
+            self.damping_kv,
+            np.zeros(12))
 
     def userControlUpdate(self):
         if self.user_controller_callback is not None:
@@ -71,13 +89,13 @@ class FSM:
         while self.running:
             self.robot.step()
             time.sleep(self.robot.dt)
-    
+
     def update(self):
         while self.running:
             getattr(self, self.state)()
             time.sleep(self.dT)
             self.updateCommands()
-    
+
     def close(self):
         self.running = False
 
@@ -98,7 +116,7 @@ class FSM:
             self.state = 'standing'
         else:
             self.state = "pre_standing"
-            
+
     def standing(self):
         # print("standing")
         if self.tracking_complete:
@@ -113,9 +131,14 @@ class FSM:
             self.setMode("user")
             self.dT = self.control_dT
             self.state = "user_loop"
-            self.robot.setCommands(np.zeros(12), np.zeros(12), np.zeros(12), np.zeros(12), np.zeros(12))
+            self.robot.setCommands(
+                np.zeros(12),
+                np.zeros(12),
+                np.zeros(12),
+                np.zeros(12),
+                np.zeros(12))
         elif self.remote.standUpDownSeq() or self.robot.overheat():
-            self.moveTo(self.robot.sitting_q, duration = 1.5)
+            self.moveTo(self.robot.sitting_q, duration=1.5)
             self.state = "sitting"
 
     def user_loop(self):
@@ -125,7 +148,7 @@ class FSM:
             self.setMode("damping")
         elif self.remote.standUpDownSeq() or self.safety.controlTimeout():
             self.dT = self.fsm_dT
-            self.moveTo(self.robot.standing_q, duration = 1)
+            self.moveTo(self.robot.standing_q, duration=1)
             self.timer = time.time()
             self.state = "switch_back_to_locked_stance"
         else:
@@ -140,6 +163,6 @@ class FSM:
             self.state = "sitting"
 
     def switch_back_to_locked_stance(self):
-        if time.time()-self.timer > 0.5:
+        if time.time() - self.timer > 0.5:
             # print("going back to locked stance")
             self.state = "locked_stance"

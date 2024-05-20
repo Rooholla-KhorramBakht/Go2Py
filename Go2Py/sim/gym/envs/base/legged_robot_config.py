@@ -8,7 +8,8 @@ class Cfg(PrefixProto, cli=False):
         num_envs = 4096
         num_observations = 235
         num_scalar_observations = 42
-        # if not None a privilige_obs_buf will be returned by step() (critic obs for assymetric training). None is returned otherwise
+        # if not None a privilige_obs_buf will be returned by step() (critic obs
+        # for assymetric training). None is returned otherwise
         num_privileged_obs = 18
         privileged_future_horizon = 1
         num_actions = 12
@@ -75,7 +76,8 @@ class Cfg(PrefixProto, cli=False):
         terrain_smoothness = 0.005
         measure_heights = True
         # 1mx1.6m rectangle (without center line)
-        measured_points_x = [-0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0., 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]
+        measured_points_x = [-0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -
+                             0.2, -0.1, 0., 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]
         measured_points_y = [-0.5, -0.4, -0.3, -0.2, -0.1, 0., 0.1, 0.2, 0.3, 0.4, 0.5]
         selected = False  # select a unique terrain type and pass all arguments
         terrain_kwargs = None  # Dict of arguments for selected terrain
@@ -207,7 +209,7 @@ class Cfg(PrefixProto, cli=False):
         default_joint_angles = {"joint_a": 0., "joint_b": 0.}
 
     class control(PrefixProto, cli=False):
-        control_type = 'actuator_net' #'P'  # P: position, V: velocity, T: torques
+        control_type = 'actuator_net'  # 'P'  # P: position, V: velocity, T: torques
         # PD Drive parameters:
         stiffness = {'joint_a': 10.0, 'joint_b': 15.}  # [N*m/rad]
         damping = {'joint_a': 1.0, 'joint_b': 1.5}  # [N*m*s/rad]
@@ -223,10 +225,12 @@ class Cfg(PrefixProto, cli=False):
         penalize_contacts_on = []
         terminate_after_contacts_on = []
         disable_gravity = False
-        # merge bodies connected by fixed joints. Specific fixed joints can be kept by adding " <... dont_collapse="true">
+        # merge bodies connected by fixed joints. Specific fixed joints can be
+        # kept by adding " <... dont_collapse="true">
         collapse_fixed_joints = True
         fix_base_link = False  # fixe the base of the robot
-        default_dof_drive_mode = 3  # see GymDofDriveModeFlags (0 is none, 1 is pos tgt, 2 is vel tgt, 3 effort)
+        # see GymDofDriveModeFlags (0 is none, 1 is pos tgt, 2 is vel tgt, 3 effort)
+        default_dof_drive_mode = 3
         self_collisions = 0  # 1 to disable, 0 to enable...bitwise filter
         # replace collision cylinders with capsules, leads to faster/more stable simulation
         replace_cylinder_with_capsule = True
@@ -270,7 +274,8 @@ class Cfg(PrefixProto, cli=False):
         lag_timesteps = 6
 
     class rewards(PrefixProto, cli=False):
-        only_positive_rewards = True  # if true negative total rewards are clipped at zero (avoids early termination problems)
+        # if true negative total rewards are clipped at zero (avoids early termination problems)
+        only_positive_rewards = True
         only_positive_rewards_ji22_style = False
         sigma_rew_neg = 5
         reward_container_name = "CoRLRewards"

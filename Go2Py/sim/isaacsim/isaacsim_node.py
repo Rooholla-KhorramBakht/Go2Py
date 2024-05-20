@@ -1,5 +1,18 @@
 # launch Isaac Sim before any other imports
 # default first two lines in any standalone application
+from Go2Py.sim.utils import (
+    NumpyMemMapDataPipe,
+    load_config,
+    simulationManager,
+)
+from Go2Py.sim.isaacsim.utils import AnnotatorManager
+from Go2Py.sim.isaacsim.go2 import UnitreeGo2
+from Go2Py.sim.isaacsim.lcm_types.unitree_lowlevel import UnitreeLowCommand
+import Go2Py
+from omni.isaac.sensor import RotatingLidarPhysX
+from omni.isaac.core.utils.prims import define_prim, get_prim_at_path
+from omni.isaac.core.utils.nucleus import get_assets_root_path
+from omni.isaac.core import World
 import pickle
 import sys
 import time
@@ -9,20 +22,7 @@ from omni.isaac.kit import SimulationApp
 simulation_app = SimulationApp({"headless": False})  # we can also run as headless.
 
 # import cv2
-from omni.isaac.core import World
-from omni.isaac.core.utils.nucleus import get_assets_root_path
-from omni.isaac.core.utils.prims import define_prim, get_prim_at_path
-from omni.isaac.sensor import RotatingLidarPhysX
 
-import Go2Py
-from Go2Py.sim.isaacsim.lcm_types.unitree_lowlevel import UnitreeLowCommand
-from Go2Py.sim.isaacsim.go2 import UnitreeGo2
-from Go2Py.sim.isaacsim.utils import AnnotatorManager
-from Go2Py.sim.utils import (
-    NumpyMemMapDataPipe,
-    load_config,
-    simulationManager,
-)
 
 cfg = load_config(Go2Py.GO2_ISAACSIM_CFG_PATH)
 robots = cfg["robots"]
@@ -154,7 +154,7 @@ world.reset()
 go2.initialize()
 # while simulation_app.is_running():
 #     world.step(render=True)
-    
+
 # breakpoint()
 
 # sim_manager = simulationManager(

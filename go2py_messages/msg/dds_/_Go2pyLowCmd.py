@@ -27,5 +27,3 @@ class Go2pyLowCmd_(idl.IdlStruct, typename="go2py_messages.msg.dds_.Go2pyLowCmd_
     kp: types.array[types.float32, 12]
     kd: types.array[types.float32, 12]
     tau: types.array[types.float32, 12]
-
-
