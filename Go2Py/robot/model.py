@@ -178,12 +178,12 @@ class Go2Model:
             q (np.ndarray): A numpy array of size 19 representing the [x, y, z, qx, qy, qz, qw] and joint configurations in FR, FL, RR, RL order.
             dq (np.ndarray): A numpy array of size 18 representing the [vx, vy, vz, wx, wy, wz] and joint configurations in FR, FL, RR, RL order.
         """
-        self.robot.centroidalMomentum(q_,dq_)
-        self.nle_ = self.robot.nle(q_, dq_)[self.dq_reordering_idx]
-        self.g_ = self.robot.gravity(q_)[self.dq_reordering_idx]
-        self.M_ = self.robot.mass(q_)[self.dq_reordering_idx,:]
+        self.robot.centroidalMomentum(q,dq)
+        self.nle_ = self.robot.nle(q, dq)[self.dq_reordering_idx]
+        self.g_ = self.robot.gravity(q)[self.dq_reordering_idx]
+        self.M_ = self.robot.mass(q)[self.dq_reordering_idx,:]
         self.M_ = self.M_[:,self.dq_reordering_idx]
-        self.Minv_ = pin.computeMinverse(self.robot.model, self.robot.data, q_)[self.dq_reordering_idx,:]
+        self.Minv_ = pin.computeMinverse(self.robot.model, self.robot.data, q)[self.dq_reordering_idx,:]
         self.Minv_ = self.Minv_[:,self.dq_reordering_idx]
         
 
@@ -231,7 +231,7 @@ class Go2Model:
     
     def getGroundReactionForce(self, tau_est, body_acceleration=None):
         if body_acceleration is None:   
-            grf = {key:np.linalg.pinv(self.ef_J_[key][:3,6:].T)@(tau_est.squeeze() - self.nle_[6:]) for key in self.ef_J_.keys()}
+            grf = {key:np.linalg.pinv(self.ef_Jw_[key][:3,6:].T)@(tau_est.squeeze() - self.nle_[6:]) for key in self.ef_Jw_.keys()}
         else:
             raise NotImplementedError("Ground reaction force with body dynamics is not implemented")
         return grf

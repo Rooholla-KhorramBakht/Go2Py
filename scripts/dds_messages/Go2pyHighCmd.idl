@@ -1,0 +1,11 @@
+module go2py_messages {
+  module msg {
+    module dds_{
+      @final struct Go2pyHighCmd_ {
+        float vx;
+        float vy;
+        float vz;
+      };
+    };
+  };
+};

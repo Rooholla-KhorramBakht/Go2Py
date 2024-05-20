@@ -1,0 +1,21 @@
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+# Install dependencies
+RUN --mount=type=cache,target=/var/cache/apt \
+    --mount=type=bind,source=scripts/install-tools.sh,target=/tmp/install-tools.sh \
+    bash /tmp/install-tools.sh
+    
+RUN --mount=type=cache,target=/root/.cache/pip \
+    --mount=type=bind,source=scripts/install-python-requirements.sh,target=/tmp/install-python-requirements.sh \
+    bash /tmp/install-python-requirements.sh
+RUN --mount=type=cache,target=/var/cache/apt \
+    --mount=type=bind,source=scripts/install-3rdparty.sh,target=/tmp/install-3rdparty.sh \
+    bash /tmp/install-3rdparty.sh
+
+# Install unitree_ros2
+RUN --mount=type=cache,target=/var/cache/apt \
+    --mount=type=bind,source=scripts/install-unitree-ros2.sh,target=/tmp/install-unitree-ros2.sh \
+    bash /tmp/install-unitree-ros2.sh
+
+USER $USERNAME

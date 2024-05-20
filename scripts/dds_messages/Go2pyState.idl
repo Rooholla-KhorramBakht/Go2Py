@@ -1,0 +1,21 @@
+module go2py_messages {
+  module msg {
+    module dds_{
+      @final struct Go2pyState_ {
+      Unsigned long long time_sec;
+      Unsigned long long time_nsec;
+      float q[12];
+      float dq[12];   
+      float tau[12];
+      float contact[4];
+      float accel[3];    
+      float gyro[3];    
+      float quat[4];
+      float imu_temp;    
+      float motor_temp[12];
+      octet wireless_remote[40];
+      octet soc;
+      };
+    };
+  };
+};

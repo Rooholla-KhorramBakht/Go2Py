@@ -1,0 +1,1 @@
+docker run --rm -it --privileged --network host -v $(pwd)/deploy/ros2_nodes/sportmode_nav2:/home/nav2_ws/src/sportmode_nav2 -v /dev/*:/dev/* -v /etc/localtime:/etc/localtime:ro --runtime nvidia go2py_nav2:latest
