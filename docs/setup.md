@@ -59,7 +59,7 @@ cd Go2Py
 ```
 Go2Py is coprised of the following main services:
 - **go2py-bridge.service:** A service that runs the Go2py C++ bridge.
-- **go2py-robot-description.service:** A service that subscribes to the `\go\joint_states` published by the bridge and publishes the robot description and TF2 messages for the sensors and and links of the robot. Note that you should add the currect extrinsics of the installed sensors into the robot's xacro file located [here](deploy/ros2_nodes/go2_description/xacro/robot.xacro) before installing this service. 
+- **go2py-robot-description.service:** A service that subscribes to the `\go\joint_states` published by the bridge and publishes the robot description and TF2 messages for the sensors and and links of the robot. Note that you should add the currect extrinsics of the installed sensors into the robot's xacro file located [here](../deploy/ros2_nodes/go2_description/xacro/robot.xacro) before installing this service. 
 - **go2py-hesai.service:** This service runs a cutomized Lidar driver for the robots that come with the hesai xt16 Lidars. This customized driver publishes laser_scan messages in addition to the pointcloud data. If your robot does not come with this LiDAR, you don't need to install this service.
 
 The installation for each services is comprised of two commands:
@@ -82,4 +82,4 @@ Finally, we need to install the Go2Py Python library on a computer located on th
 ```bash
 pip install -e .
 ```
-To check the installtion, run the interface example [here](examples/00-robot-interface.ipynb) to make sure you can read the state of the robot.
+To check the installtion, run the interface example [here](../examples/00-robot-interface.ipynb) to make sure you can read the state of the robot.
