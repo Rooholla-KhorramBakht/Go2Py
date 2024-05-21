@@ -53,7 +53,7 @@ while running:
 ## Installation
 Follow through the steps here to [setup](docs/setup.md) the robot and Go2Py. 
 
-## Further Examples 
+## Examples 
 A set of examples and tutorials are provided to get you up and running quickly:
 
 - [Communicating with the robot](examples/00-robot-interface.ipynb) 
