@@ -97,4 +97,4 @@ Note that our docker image may be extended in a similar way to the Isaac-ROS ima
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 ```
-In addition to this added docker image layer, you can add your own post execution commands that are excuted each time you start the docker container. These commands should be appended to the end of `workspace-entrypoint.sh` script [here](../docker/scripts/workspace-entrypoint.sh)
+In addition to this added docker image layer, you can add your own post execution commands that are excuted each time you start the docker container. These commands should be appended to the end of `workspace-entrypoint.sh` script [here](../docker/scripts/workspace-entrypoint.sh).
