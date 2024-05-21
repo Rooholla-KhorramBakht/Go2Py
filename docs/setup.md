@@ -12,7 +12,7 @@ The following steps configure the host computer to share its internet with the r
 ```bash
 sudo systemctl -w net.ipv4.ip_forward=1
 ```
-##### Configure the iptables:
+#### Configure the iptables:
 
 ```bash
 sudo iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
@@ -21,7 +21,7 @@ sudo iptables -A FORWARD -i eth0 -o wlan0 -j ACCEPT
 ```
 Note that `wlan0` should be replaced with the actual name of the network interface over which the internet is provided to the host computer, and eth0 should be replaced with the name of the Ethernet interface connected to the robot and has an IP address in range `192.168.123.x`. 
 
-##### Storing the Settings
+#### Storing the Settings
 Make the iptables rules persistent by installing the `iptables-persistent`:
 
 ```bash
