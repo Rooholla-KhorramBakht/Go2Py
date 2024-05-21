@@ -40,7 +40,7 @@ Finally, configure the DNS server by adding the following to the `/etc/resolv.co
 ```bash
 nameserver 8.8.8.8
 ```
-**Note:** Similarly to the host computer, you can make save this configuration using the `iptables-persistent` tool.
+**Note:** Similar to the host computer, you can save this configuration using the `iptables-persistent` tool.
 
 If everything has been successful, you should be able to access the internet on the robot. Run `ping 8.8.8.8` and `ping www.google.com` to verify this. 
 
