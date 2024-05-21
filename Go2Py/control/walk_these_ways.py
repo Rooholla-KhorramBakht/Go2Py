@@ -131,9 +131,7 @@ class CommandInterface:
         self.stance_width_cmd = 0.25
 
     def setGaitType(self, gait_type):
-        assert gait_type in [key for key in self.gaits.keys()], f'The gain type should be in {
-            [key for key in self.gaits.keys()]}'
-        self.gait = torch.tensor(self.gaits[gait_type])
+        assert gait_type in [key for key in self.gaits.keys()], f'The gain type should be in {self.gait = torch.tensor(self.gaits[gait_type])
 
     def get_command(self):
         command = np.zeros((19,))
