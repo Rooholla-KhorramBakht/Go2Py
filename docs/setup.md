@@ -82,4 +82,16 @@ Finally, we need to install the Go2Py Python library on a computer located on th
 ```bash
 pip install -e .
 ```
-To check the installation, run the interface example [here](../examples/00-robot-interface.ipynb) to make sure you can read the state of the robot. In addition to local installation, you can also the provided docker support. To do so, run `make docker_start` in the root directory of the repository. With this, a docker container with all the required dependencies runs and the Go2Py repository will be mounted into it. Then you can install the repository in editable mode inside this container. 
+To check the installation, run the interface example [here](../examples/00-robot-interface.ipynb) to make sure you can read the state of the robot. In addition to local installation, you can also the provided docker support. To do so, run `make docker_start` in the root directory of the repository:
+```bash
+cd ~/Go2Py
+make docker_start
+```
+
+With this, a docker container with all the required dependencies will be launched and the Go2Py repository will be mounted into `/workspaces/Go2Py` and installed in editable mode. Since our docker support is based on the Nvida Isaac-ROS images, you can also use the Iasaac-ROS nodes within this environment.  
+
+**Note:** Our base docker image can be extended in a similar way to the Isaac-ROS images (explained [here](https://nvidia-isaac-ros.github.io/repositories_and_packages/isaac_ros_common/index.html)). Simply append the `CONFIG_IMAGE_KEY="ros2_humble.go2py"` [here](../scripts/.isaac_ros_common-config) with the key to your custom Dockerfile name (e.g. `CONFIG_IMAGE_KEY="ros2_humble.go2py.custom"` for `Dockerfile.custom`) and place your docker file under `docker` directory [here](../docker) and append its name with the key you used (e.g. `Dockerfile.custom`). Your custom Dockerfile should start with:
+```docker
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+```
