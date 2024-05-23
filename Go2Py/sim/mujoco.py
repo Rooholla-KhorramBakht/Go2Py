@@ -6,9 +6,19 @@ from Go2Py import ASSETS_PATH
 import os
 from scipy.spatial.transform import Rotation
 
+pnt = np.array([-0.2, 0, 0.05])
+lidar_angles = np.linspace(0.0, 2 * np.pi, 1024).reshape(-1, 1)
+x_vec = np.cos(lidar_angles)
+y_vec = np.sin(lidar_angles)
+z_vec = np.zeros_like(x_vec)
+vec = np.concatenate([x_vec, y_vec, z_vec], axis=1)
+nray = vec.shape[0]
+geomid = np.zeros(nray, np.int32)
+dist = np.zeros(nray, np.float64)
+
 
 class Go2Sim:
-    def __init__(self, render=True, dt=0.002):
+    def __init__(self, mode='lowlevel', render=True, dt=0.002):
 
         self.model = mujoco.MjModel.from_xml_path(
             os.path.join(ASSETS_PATH, 'mujoco/go2.xml')
@@ -68,6 +78,22 @@ class Go2Sim:
         self.kv = np.zeros(12)
         self.latest_command_stamp = time.time()
         self.actuator_tau = np.zeros(12)
+        self.mode = mode
+        if self.mode == 'highlevel':
+            from Go2Py.control.walk_these_ways import CommandInterface, loadParameters, Policy, WalkTheseWaysAgent, HistoryWrapper
+            checkpoint_path = os.path.join(ASSETS_PATH,'checkpoints/walk_these_ways')
+            self.cfg = loadParameters(checkpoint_path)
+            self.policy = Policy(checkpoint_path)
+            self.command_profile = CommandInterface()
+            self.agent = WalkTheseWaysAgent(self.cfg, self.command_profile, robot=self)
+            self.agent = HistoryWrapper(self.agent)
+            self.control_dt = self.cfg["control"]["decimation"] * self.cfg["sim"]["dt"]
+            self.obs = self.agent.reset()
+            self.standUpReset()
+            self.step_counter = 0
+            self.step = self.stepHighlevel
+        else:
+            self.step = self.stepLowlevel
 
     def reset(self):
         self.q_nominal = np.hstack(
@@ -117,7 +143,7 @@ class Go2Sim:
         self.tau_ff = tau_ff
         self.latest_command_stamp = time.time()
 
-    def step(self):
+    def stepLowlevel(self):
         state = self.getJointStates()
         q, dq = state['q'], state['dq']
         tau = np.diag(self.kp) @ (self.q_des - q).reshape(12, 1) + \
@@ -130,6 +156,19 @@ class Go2Sim:
         # Render every render_ds_ratio steps (60Hz GUI update)
         if self.render and (self.step_counter % self.render_ds_ratio) == 0:
             self.viewer.sync()
+
+    def stepHighlevel(self, vx, vy, omega_z, body_z_offset=0):
+        policy_info = {}
+        if self.step_counter % (self.control_dt // self.dt) == 0:
+            action = self.policy(self.obs, policy_info)
+            self.obs, ret, done, info = self.agent.step(action)
+            
+        self.step_counter+=1
+        self.stepLowlevel()
+        self.command_profile.yaw_vel_cmd = omega_z
+        self.command_profile.x_vel_cmd = vx
+        self.command_profile.y_vel_cmd = vy  
+        self.command_profile.body_height_cmd = body_z_offset
 
     def getSiteJacobian(self, site_name):
         id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SITE, site_name)
@@ -150,6 +189,28 @@ class Go2Sim:
         R = Rotation.from_quat([q[1], q[2], q[3], q[0]]).as_matrix()
         g_in_body = R.T @ np.array([0.0, 0.0, -1.0]).reshape(3, 1)
         return g_in_body
+
+    def getLidarData(self):
+        t, q = self.getPose()
+        world_R_body = Rotation.from_quat([q[1], q[2], q[3], q[0]]).as_matrix()
+        pnt = t.copy()
+        pnt[2]+=0.25
+        vec_in_w = (world_R_body@vec.T).T
+        mujoco.mj_multiRay(
+            m=self.model,
+            d=self.data,
+            pnt=pnt,
+            vec=vec.flatten(),
+            geomgroup=None,
+            flg_static=1,
+            bodyexclude=-1,
+            geomid=geomid,
+            dist=dist,
+            nray=nray,
+            cutoff=mujoco.mjMAXVAL,
+        )
+        pcd = dist.reshape(-1, 1) * vec
+        return {"pcd": pcd, "geomid": geomid, "dist": dist}
 
     def overheat(self):
         return False
