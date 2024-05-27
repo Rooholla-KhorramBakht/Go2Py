@@ -95,6 +95,9 @@ class Go2Sim:
             self.standUpReset()
             self.step_counter = 0
             self.step = self.stepHighlevel
+            self.ex_sum=0
+            self.ey_sum=0
+            self.e_omega_sum=0
         else:
             self.step = self.stepLowlevel
 
@@ -104,6 +107,9 @@ class Go2Sim:
         )
         self.data.qpos = self.q_nominal
         self.data.qvel = np.zeros(18)
+        self.ex_sum=0
+        self.ey_sum=0
+        self.e_omega_sum=0
 
     def standUpReset(self):
         self.q0 = self.standing_q
@@ -160,18 +166,29 @@ class Go2Sim:
         if self.render and (self.step_counter % self.render_ds_ratio) == 0:
             self.viewer.sync()
 
-    def stepHighlevel(self, vx, vy, omega_z, body_z_offset=0):
+    def stepHighlevel(self, vx, vy, omega_z, body_z_offset=0, step_height = 0.08, kp=[2, 0.5, 0.5], ki=[0.02, 0.01, 0.01]):
         policy_info = {}
         if self.step_counter % (self.control_dt // self.dt) == 0:
             action = self.policy(self.obs, policy_info)
             self.obs, ret, done, info = self.agent.step(action)
-            
+        #Body velocity tracker PI controller
+        _, q = self.getPose()
+        world_R_body = Rotation.from_quat([q[1], q[2], q[3], q[0]]).as_matrix()
+        body_v = world_R_body.T@self.data.qvel[0:3].reshape(3,1)
+        ex = (vx-body_v[0])
+        ey = (vy-body_v[1])
+        e_omega = (omega_z-self.data.qvel[5])
+        self.ex_sum+=ex
+        self.ey_sum+=ey
+        self.e_omega_sum+=e_omega
+        self.command_profile.yaw_vel_cmd = np.clip(kp[2]*e_omega+ki[2]*self.e_omega_sum + omega_z, -2*np.pi, 2*np.pi)
+        self.command_profile.x_vel_cmd = np.clip(kp[0]*ex+ki[0]*self.ex_sum + vx, -2.5, 2.5)
+        self.command_profile.y_vel_cmd = np.clip(kp[1]*ey+ki[1]*self.ey_sum + vy,-1.5, 1.5)
+        self.command_profile.body_height_cmd = body_z_offset
+        self.command_profile.footswing_height_cmd = step_height
+
         self.step_counter+=1
         self.stepLowlevel()
-        self.command_profile.yaw_vel_cmd = omega_z
-        self.command_profile.x_vel_cmd = vx
-        self.command_profile.y_vel_cmd = vy  
-        self.command_profile.body_height_cmd = body_z_offset
 
     def getSiteJacobian(self, site_name):
         id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SITE, site_name)
@@ -203,7 +220,7 @@ class Go2Sim:
             m=self.model,
             d=self.data,
             pnt=pnt,
-            vec=vec.flatten(),
+            vec=vec_in_w.flatten(),
             geomgroup=None,
             flg_static=1,
             bodyexclude=-1,
