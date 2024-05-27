@@ -210,7 +210,7 @@ class Go2Sim:
         g_in_body = R.T @ np.array([0.0, 0.0, -1.0]).reshape(3, 1)
         return g_in_body
 
-    def getLidarData(self):
+    def getLaserScan(self, max_range=30):
         t, q = self.getPose()
         world_R_body = Rotation.from_quat([q[1], q[2], q[3], q[0]]).as_matrix()
         pnt = t.copy()
@@ -227,10 +227,11 @@ class Go2Sim:
             geomid=geomid,
             dist=dist,
             nray=nray,
-            cutoff=mujoco.mjMAXVAL,
+            cutoff=max_range#mujoco.mjMAXVAL,
         )
         pcd = dist.reshape(-1, 1) * vec
-        return {"pcd": pcd, "geomid": geomid, "dist": dist}
+        idx = np.where(np.logical_and(dist!=-1, dist<max_range))[0]
+        return {"pcd": pcd[idx,...], "geomid": geomid[idx,...], "dist": dist[idx,...]}
 
     def overheat(self):
         return False
