@@ -68,7 +68,7 @@
     <joint name="imu_joint" type="fixed">
         <parent link="trunk"/>
         <child link="imu_link"/>
-        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <origin rpy="0.001697 -0.020900 -0.000007" xyz="-0.027353 -0.005499 0.039913"/>
     </joint>
 
     <link name="imu_link">
@@ -90,6 +90,72 @@
                 <box size=".001 .001 .001"/>
             </geometry>
         </collision>
+    </link>
+
+    <joint name="vicon_joint" type="fixed">
+        <parent link="trunk"/>
+        <child link="vicon_link"/>
+        <origin rpy="-0.037935 -0.066371 -2.668897" xyz="0.022944 -0.000007 0.058458"/>
+    </joint>
+
+    <link name="vicon_link">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size="0.001 0.001 0.001"/>
+            </geometry>
+            <!-- <material name="red"/> -->
+        </visual>
+    </link>
+
+
+    <joint name="infra1_joint" type="fixed">
+        <parent link="trunk"/>
+        <child link="infra1_link"/>
+        <origin rpy="-1.641669 -0.014332 -1.617155" xyz="0.321618 0.033305 0.081622"/>
+    </joint>
+
+    <link name="infra1_link">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size="0.001 0.001 0.001"/>
+            </geometry>
+            <!-- <material name="red"/> -->
+        </visual>
+    </link>
+
+
+    <joint name="infra2_joint" type="fixed">
+        <parent link="trunk"/>
+        <child link="infra1_link"/>
+        <origin rpy="-1.640637 -0.014093 -1.611177" xyz="0.317969 -0.061919 0.082773"/>
+    </joint>
+
+    <link name="infra2_link">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size="0.001 0.001 0.001"/>
+            </geometry>
+            <!-- <material name="red"/> -->
+        </visual>
+    </link>
+
+    <joint name="color_joint" type="fixed">
+        <parent link="trunk"/>
+        <child link="color_link"/>
+        <origin rpy="-1.640491 -0.011125 -1.610364" xyz="0.319415 -0.025790 0.082311"/>
+    </joint>
+
+    <link name="color_link">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size="0.001 0.001 0.001"/>
+            </geometry>
+            <!-- <material name="red"/> -->
+        </visual>
     </link>
     
     <xacro:leg name="FR" mirror="-1" mirror_dae= "False" front_hind="1"  front_hind_dae="True"  />
