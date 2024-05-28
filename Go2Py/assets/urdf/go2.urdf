@@ -660,7 +660,7 @@ Stephen Brawner (brawner@gmail.com)
     </inertial>
   </link>
   <joint name="imu_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="-0.02557 0 0.04232"/>
+    <origin rpy="0.001697 -0.020900 -0.000007" xyz="-0.027353 -0.005499 0.039913"/>
     <parent link="base_link"/>
     <child link="imu_link"/>
     <axis xyz="0 0 0"/>
