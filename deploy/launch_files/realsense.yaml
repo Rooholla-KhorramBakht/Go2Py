@@ -1,0 +1,36 @@
+device_type: ''
+serial_no: ''
+usb_port_id: ''
+
+rgb_camera:
+  profile: '640x480x60'
+color_qos: "RELIABILITY_QOS_POLICY"
+
+depth_module:
+  profile: '640x480x15'
+  emitter_enabled: 1
+  emitter_on_off: false
+depth_qos: "SENSOR_DATA"
+depth_info_qos: "SYSTEM_DEFAULT"
+
+infra_qos: "SENSOR_DATA"
+
+enable_accel: true
+enable_color: true
+enable_depth: true
+enable_gyro: true
+enable_infra1: false
+enable_infra2: false
+
+pointcloud:
+  enable: true
+
+pointcloud_texture_index: 0
+pointcloud_texture_stream: RS2_STREAM_ANY
+
+enable_sync: true
+align_depth: false
+
+unite_imu_method: 2
+gyro_fps: 400
+accel_fps: 200

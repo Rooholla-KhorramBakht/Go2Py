@@ -255,12 +255,12 @@ class WalkTheseWaysAgent:
         for i, policy_joint_name in enumerate(policy_joint_names):
             id = np.where([name == policy_joint_name for name in unitree_joint_names])[0][0]
             policy_to_unitree_map.append((i, id))
-        self.policy_to_unitree_map = np.array(policy_to_unitree_map)
+        self.policy_to_unitree_map = np.array(policy_to_unitree_map).astype(np.uint32)
 
         for i, unitree_joint_name in enumerate(unitree_joint_names):
             id = np.where([name == unitree_joint_name for name in policy_joint_names])[0][0]
             unitree_to_policy_map.append((i, id))
-        self.unitree_to_policy_map = np.array(unitree_to_policy_map)
+        self.unitree_to_policy_map = np.array(unitree_to_policy_map).astype(np.uint32)
 
         self.default_dof_pos = np.array(
             [
@@ -343,8 +343,8 @@ class WalkTheseWaysAgent:
         joint_state = self.robot.getJointStates()
         if joint_state is not None:
             self.gravity_vector = self.robot.getGravityInBody()
-            self.dof_pos = joint_state['q'][self.unitree_to_policy_map[:, 1]]
-            self.dof_vel = joint_state['dq'][self.unitree_to_policy_map[:, 1]]
+            self.dof_pos = np.array(joint_state['q'])[self.unitree_to_policy_map[:, 1]]
+            self.dof_vel = np.array(joint_state['dq'])[self.unitree_to_policy_map[:, 1]]
 
         if reset_timer:
             self.reset_gait_indices()

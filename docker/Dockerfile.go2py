@@ -18,4 +18,6 @@ RUN --mount=type=cache,target=/var/cache/apt \
     --mount=type=bind,source=scripts/install-unitree-ros2.sh,target=/tmp/install-unitree-ros2.sh \
     bash /tmp/install-unitree-ros2.sh
 
+RUN apt install -y ros-humble-isaac-ros-h264-decoder ros-humble-isaac-ros-h264-encoder ros-humble-realsense2-camera
+
 USER $USERNAME
