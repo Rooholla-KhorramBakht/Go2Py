@@ -301,7 +301,7 @@ inline void SourceDriver::publishLaserScan(
   scan_msg->range_min = 0.2;
   scan_msg->range_max = 100;
   float max_height_ = 1.0;
-  float min_height_ = 0.;
+  float min_height_ = -0.33;
   
 
   // determine amount of rays to create

@@ -127,7 +127,7 @@
 
     <joint name="infra2_joint" type="fixed">
         <parent link="trunk"/>
-        <child link="infra1_link"/>
+        <child link="infra2_link"/>
         <origin rpy="-1.640637 -0.014093 -1.611177" xyz="0.317969 -0.061919 0.082773"/>
     </joint>
 

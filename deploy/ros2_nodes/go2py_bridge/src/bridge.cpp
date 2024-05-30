@@ -44,6 +44,8 @@ class Custom: public rclcpp::Node
             init_lowcmd();
             unitree_lowstate_suber = this->create_subscription<unitree_go::msg::LowState>(
             "lowstate", 1, std::bind(&Custom::unitree_lowstate_callback, this, std::placeholders::_1));
+            utlidar_odom_subr = this->create_subscription<nav_msgs::msg::Odometry>(
+            "/utlidar/robot_odom", 1, std::bind(&Custom::unitree_odom_callback, this, std::placeholders::_1));
 
             // the req_puber is set to subscribe "/api/sport/request" topic with dt
             unitree_highreq_puber = this->create_publisher<unitree_api::msg::Request>("/api/sport/request", 1);
@@ -70,6 +72,7 @@ class Custom: public rclcpp::Node
         geometry_msgs::msg::TwistStamped twist_cmd;
         void nav2TwistCmdCallback(const geometry_msgs::msg::Twist::SharedPtr msg);
         rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr nav2_twist_subr;        
+        rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr utlidar_odom_subr;        
         rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr pub_imu;
         rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr pub_joint;
         rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_odom;
@@ -79,6 +82,7 @@ class Custom: public rclcpp::Node
         unitree_go::msg::LowCmd lowcmd_msg;
         SportClient sport_req;
         void unitree_lowstate_callback(unitree_go::msg::LowState::SharedPtr data);
+        void unitree_odom_callback(nav_msgs::msg::Odometry::SharedPtr data);
         rclcpp::Subscription<unitree_go::msg::LowState>::SharedPtr unitree_lowstate_suber;
         rclcpp::Publisher<unitree_api::msg::Request>::SharedPtr unitree_highreq_puber;
         rclcpp::Publisher<unitree_go::msg::LowCmd>::SharedPtr lowcmd_puber;
@@ -106,6 +110,28 @@ void Custom::init_lowcmd()
         lowcmd_msg.motor_cmd[i].kd = 0;
         lowcmd_msg.motor_cmd[i].tau = 0;
     }
+}
+
+void Custom::unitree_odom_callback(nav_msgs::msg::Odometry::SharedPtr data)
+{
+    nav_msgs::msg::Odometry odom_state;
+    odom_state.header.stamp = rclcpp::Clock().now();
+    odom_state.header.frame_id = "odom";
+    odom_state.child_frame_id = "base_link";
+    odom_state.pose.pose.position.x = data->pose.pose.position.x;
+    odom_state.pose.pose.position.y = data->pose.pose.position.y;
+    odom_state.pose.pose.position.z = data->pose.pose.position.z;
+    odom_state.pose.pose.orientation.x = data->pose.pose.orientation.x;
+    odom_state.pose.pose.orientation.y = data->pose.pose.orientation.y;
+    odom_state.pose.pose.orientation.z = data->pose.pose.orientation.z;
+    odom_state.pose.pose.orientation.w = data->pose.pose.orientation.w;
+    odom_state.twist.twist.linear.x = data->twist.twist.linear.x;
+    odom_state.twist.twist.linear.y = data->twist.twist.linear.y;
+    odom_state.twist.twist.linear.z = data->twist.twist.linear.z;
+    odom_state.twist.twist.angular.x = data->twist.twist.angular.x;
+    odom_state.twist.twist.angular.y = data->twist.twist.angular.y;
+    odom_state.twist.twist.angular.z = data->twist.twist.angular.z;
+    pub_odom->publish(odom_state);
 }
 
 void Custom::unitree_lowstate_callback(unitree_go::msg::LowState::SharedPtr data)
