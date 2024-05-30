@@ -1,6 +1,9 @@
 docker_start:
 	@./scripts/run_dev.sh 
 
+nav2:
+	@cd deploy && docker build --no-cache --tag go2py_nav2:latest -f docker/Dockerfile.nav2 .
+
 messages:
 	@cd scripts && ./make_msgs.sh 
 

@@ -28,20 +28,4 @@ def generate_launch_description():
                     ("/robot_description", "/go2/robot_description"),
             ],
         ),
-        Node(
-            package="tf2_ros",
-            executable="static_transform_publisher",
-            arguments=[
-                    "0.15",
-                    "0",
-                    "0.15",
-                    "0",
-                    "0",
-                    "0.707107",
-                    "0.707107",
-                    "/trunk",
-                    "/go2/hesai_lidar",
-            ],
-            name="static_tf_pub_trunk_to_lidar",
-        ),
     ])
