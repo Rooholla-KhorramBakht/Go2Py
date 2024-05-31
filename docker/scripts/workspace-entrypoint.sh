@@ -20,5 +20,5 @@ sudo service udev restart
 export CMAKE_PREFIX_PATH=/workspace/unitree_ros2/cyclonedds_ws/install/cyclonedds/
 python3 -m pip install --upgrade pip
 cd /workspaces/Go2Py/ && python3 -m pip install -e .
-
+source /home/realsenes-ws/install/setup.bash
 $@

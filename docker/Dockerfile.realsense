@@ -23,3 +23,13 @@ COPY scripts/hotplug-realsense.sh /opt/realsense/hotplug-realsense.sh
 
 # Copy custom udev rules file
 COPY udev_rules/99-realsense-libusb-custom.rules /etc/udev/rules.d/99-realsense-libusb-custom.rules
+
+# Clone and compile the realsense ros
+RUN mkdir -p /home/realsenes-ws/src && cd /home/realsenes-ws/src && \
+    git clone https://github.com/IntelRealSense/realsense-ros.git && \  
+    cd .. && \ 
+    source /opt/ros/humble/setup.bash && \
+    colcon build --symlink-install
+
+# add the source to the bashrc
+RUN echo "source /home/realsenes-ws/install/setup.bash" >> /root/.bashrc
