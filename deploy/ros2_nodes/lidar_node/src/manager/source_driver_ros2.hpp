@@ -298,10 +298,10 @@ inline void SourceDriver::publishLaserScan(
   scan_msg->angle_increment = 0.0087/2.;
   scan_msg->time_increment = 0.0;
   scan_msg->scan_time = 0.3333;
-  scan_msg->range_min = 0.2;
+  scan_msg->range_min = 0.3;
   scan_msg->range_max = 100;
   float max_height_ = 1.0;
-  float min_height_ = -0.33;
+  float min_height_ = -0.1;
   
 
   // determine amount of rays to create

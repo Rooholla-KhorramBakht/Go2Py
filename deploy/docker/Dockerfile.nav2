@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
     ros-humble-nav2-* ros-humble-navigation2 \
     ros-humble-slam-toolbox \ 
     ros-humble-robot-localization\
+    ros-humble-image-geometry \
     && rm -rf /var/lib/apt/lists/*
 
 # Cheange the ROS2 RMW to CycloneDDS as instructed by Unitree
@@ -22,6 +23,7 @@ cd .. && colcon build --packages-select cyclonedds && source /opt/ros/humble/set
 
 # copy the go2py ros2 nodes
 COPY ros2_nodes/sportmode_nav2 /nav2_ws/src/sportmode_nav2
+COPY ros2_nodes/m-explore-ros2 /nav2_ws/src/m-explore-ros2
 COPY ros2_nodes/go2py_messages /nav2_ws/src/go2py_messages
 RUN cd /nav2_ws && source /opt/ros/humble/setup.bash && source /unitree_ros2/cyclonedds_ws/install/setup.bash && colcon build --symlink-install
 

@@ -157,7 +157,7 @@
         </visual>
     </link>
 
-    <link name="utlidar">
+    <!-- <link name="utlidar">
         <inertial>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <mass value="0"/>
@@ -169,7 +169,7 @@
         <parent link="base_link"/>
         <child link="utlidar"/>
         <axis xyz="0 0 0"/>
-    </joint>
+    </joint> -->
 
     <link name="hesai">
         <inertial>
