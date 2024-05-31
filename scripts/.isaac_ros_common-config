@@ -1,2 +1,2 @@
-CONFIG_IMAGE_KEY="ros2_humble.go2py"
+CONFIG_IMAGE_KEY="ros2_humble.go2py.realsense"
 CONFIG_DOCKER_SEARCH_DIRS=(../docker)

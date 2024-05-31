@@ -34,3 +34,5 @@ align_depth: false
 unite_imu_method: 2
 gyro_fps: 400
 accel_fps: 200
+camera_namespace: ""
+namespace: ""

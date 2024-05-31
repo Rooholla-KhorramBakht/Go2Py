@@ -22,10 +22,10 @@ git clone https://github.com/ros2/rmw_cyclonedds -b humble && git clone https://
 cd .. && colcon build --packages-select cyclonedds && source /opt/ros/humble/setup.bash && colcon build
 
 # copy the go2py ros2 nodes
-COPY ros2_nodes/sportmode_nav2 /nav2_ws/src/sportmode_nav2
-COPY ros2_nodes/m-explore-ros2 /nav2_ws/src/m-explore-ros2
-COPY ros2_nodes/go2py_messages /nav2_ws/src/go2py_messages
-RUN cd /nav2_ws && source /opt/ros/humble/setup.bash && source /unitree_ros2/cyclonedds_ws/install/setup.bash && colcon build --symlink-install
+COPY ros2_nodes/sportmode_nav2 /home/nav2_ws/src/sportmode_nav2
+COPY ros2_nodes/m-explore-ros2 /home/nav2_ws/src/m-explore-ros2
+COPY ros2_nodes/go2py_messages /home/nav2_ws/src/go2py_messages
+RUN cd /home/nav2_ws && source /opt/ros/humble/setup.bash && source /unitree_ros2/cyclonedds_ws/install/setup.bash && colcon build --symlink-install
 
 # set the entrypoint to bash
 ENTRYPOINT ["/bin/bash"]
