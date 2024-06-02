@@ -68,7 +68,8 @@ class Go2Sim:
         self.rot0 = np.array([1., 0., 0., 0.])
         self.reset()
         mujoco.mj_step(self.model, self.data)
-        self.viewer.sync()
+        if self.render:
+            self.viewer.sync()
         self.nv = self.model.nv
         self.jacp = np.zeros((3, self.nv))
         self.jacr = np.zeros((3, self.nv))
@@ -117,7 +118,8 @@ class Go2Sim:
         self.rot0 = np.array([1., 0., 0., 0.])
         self.reset()
         mujoco.mj_step(self.model, self.data)
-        self.viewer.sync()
+        if self.render:
+            self.viewer.sync()
 
     def sitDownReset(self):
         self.q0 = self.sitting_q
@@ -125,7 +127,8 @@ class Go2Sim:
         self.rot0 = np.array([1., 0., 0., 0.])
         self.reset()
         mujoco.mj_step(self.model, self.data)
-        self.viewer.sync()
+        if self.render:
+            self.viewer.sync()
 
     def getJointStates(self):
         return {"q": self.data.qpos[7:],
@@ -237,4 +240,5 @@ class Go2Sim:
         return False
 
     def close(self):
-        self.viewer.close()
+        if self.render:
+            self.viewer.close()
