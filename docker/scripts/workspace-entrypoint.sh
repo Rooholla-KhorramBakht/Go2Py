@@ -12,13 +12,14 @@
 echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
 source /opt/ros/${ROS_DISTRO}/setup.bash
 
-sudo apt-get update
-rosdep update
-
 # Restart udev daemon
 sudo service udev restart
-export CMAKE_PREFIX_PATH=/workspace/unitree_ros2/cyclonedds_ws/install/cyclonedds/
-python3 -m pip install --upgrade pip
-cd /workspaces/Go2Py/ && python3 -m pip install -e .
-source /home/realsenes-ws/install/setup.bash
+
+cd ~
+source /realsense-ws/install/setup.bash
+#source $HOME/unitree_ros2/cyclonedds_ws/install/setup.bash
+#export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+#export CYCLONEDDS_URI='<CycloneDDS><Domain><General><Interfaces>
+#                            <NetworkInterface name="enp3s0" priority="default" multicast="default" />
+#                        </Interfaces></General></Domain></CycloneDDS>'
 $@
