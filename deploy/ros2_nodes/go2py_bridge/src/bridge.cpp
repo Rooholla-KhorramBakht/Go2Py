@@ -39,7 +39,7 @@ class Custom: public rclcpp::Node
             pub_imu  = this->create_publisher<sensor_msgs::msg::Imu>("/go2/imu", 1);
             pub_joint  = this->create_publisher<sensor_msgs::msg::JointState>("/go2/joint_states", 1);
             nav2_twist_subr = this->create_subscription<geometry_msgs::msg::Twist>("/go2/cmd_vel", 1, std::bind(&Custom::nav2TwistCmdCallback, this, std::placeholders::_1));
-            
+            pub_foot_contact = this->create_publisher<sensor_msgs::msg::JointState>("/go2/foot_contact", 1);            
             //Unitree Topics
             init_lowcmd();
             unitree_lowstate_suber = this->create_subscription<unitree_go::msg::LowState>(
@@ -76,6 +76,7 @@ class Custom: public rclcpp::Node
         rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr pub_imu;
         rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr pub_joint;
         rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_odom;
+        rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr pub_foot_contact;
         
         // Unitree Interface
         unitree_api::msg::Request highreq;
@@ -138,6 +139,7 @@ void Custom::unitree_lowstate_callback(unitree_go::msg::LowState::SharedPtr data
 {
     sensor_msgs::msg::Imu imu;
     sensor_msgs::msg::JointState joint_state;
+    sensor_msgs::msg::JointState foot_contact_state;
     nav_msgs::msg::Odometry odom_state;
     go2py_messages::msg::Go2pyState go2py_state; 
 
@@ -197,13 +199,24 @@ void Custom::unitree_lowstate_callback(unitree_go::msg::LowState::SharedPtr data
         go2py_state.tau[i]=data->motor_state[i].tau_est;
         go2py_state.motor_temp[i] = data->motor_state[i].temperature;
     }
+    foot_contact_state.header.stamp = imu.header.stamp;
+    foot_contact_state.header.frame_id = "trunk";
+    foot_contact_state.name.push_back("FR_contact");
+    foot_contact_state.name.push_back("FL_contact");
+    foot_contact_state.name.push_back("RR_contact");
+    foot_contact_state.name.push_back("RL_contact");
+
     for(int i=0; i<4; i++)
+    {
         go2py_state.contact[i]=data->foot_force[i];
+        foot_contact_state.effort.push_back(data->foot_force[i]);
+    }
 
     for(int i=0; i<40; i++)
         go2py_state.wireless_remote[i]=data->wireless_remote[i];
     go2py_state.soc = data->bms_state.soc;
     pub_joint->publish(joint_state);
+    pub_foot_contact->publish(foot_contact_state);
     pub_imu->publish(imu);
     go2py_state_puber->publish(go2py_state);
     // Check for emergency stop
