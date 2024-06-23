@@ -7,5 +7,5 @@ RUN --mount=type=cache,target=/var/cache/apt \
 
 RUN apt install -y ros-humble-isaac-ros-h264-decoder ros-humble-isaac-ros-h264-encoder
 
-RUN mkdir -p /realsense-ws/src && cd /realsense-ws/src && git clone https://github.com/IntelRealSense/realsense-ros.git && cd .. && source /opt/ros/humble/setup.bash && colcon build
+#RUN mkdir -p /realsense-ws/src && cd /realsense-ws/src && git clone https://github.com/IntelRealSense/realsense-ros.git && cd .. && source /opt/ros/humble/setup.bash && colcon build
 USER $USERNAME

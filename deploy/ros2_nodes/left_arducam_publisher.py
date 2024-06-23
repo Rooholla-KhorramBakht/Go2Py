@@ -1,17 +1,21 @@
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image
-from std_msgs.msg import Header
 from cv_bridge import CvBridge
 import cv2
+from argparse import ArgumentParser
+
+argpars = ArgumentParser()
+argpars.add_argument('video_index', type=int,help="The video index of the camera", default=1)
+argpars.add_argument('topic_name', type=int,help="The topic name corresponding to the given camera.", default=1)
+args = argpars.parse_args()
 
 class ImagePublisher(Node):
     def __init__(self):
         super().__init__('image_publisher')
-        self.publisher_ = self.create_publisher(Image, '/go2/front/image_raw', 10)
+        self.publisher_ = self.create_publisher(Image, args.topic_name, 10)
         self.bridge = CvBridge()
-        self.gstreamer_str = "udpsrc address=230.1.1.1 port=1720 multicast-iface=eth0 ! application/x-rtp, media=video, encoding-name=H264 ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! video/x-raw,width=1280,height=720,format=BGR ! appsink drop=1"
-        self.cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(args.video_index)
 
     def publish_images(self):
         while rclpy.ok():
@@ -19,10 +23,6 @@ class ImagePublisher(Node):
             if ret:
                 print('new frame')
                 msg = self.bridge.cv2_to_imgmsg(frame, encoding="bgr8")
-                header = Header()
-                header.frame_id = 'go2_front_cam'
-                header.stamp = self.get_clock().now().to_msg()
-                msg.header = header
                 self.publisher_.publish(msg)
                 self.get_logger().info('Publishing image')
             else:

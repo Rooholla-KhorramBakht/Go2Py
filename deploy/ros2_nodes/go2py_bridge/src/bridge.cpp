@@ -20,6 +20,7 @@
 #include "geometry_msgs/msg/twist.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include <tf2/LinearMath/Quaternion.h>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 
 
 // headers needed for highlevel control
@@ -39,7 +40,9 @@ class Custom: public rclcpp::Node
             pub_imu  = this->create_publisher<sensor_msgs::msg::Imu>("/go2/imu", 1);
             pub_joint  = this->create_publisher<sensor_msgs::msg::JointState>("/go2/joint_states", 1);
             nav2_twist_subr = this->create_subscription<geometry_msgs::msg::Twist>("/go2/cmd_vel", 1, std::bind(&Custom::nav2TwistCmdCallback, this, std::placeholders::_1));
-            pub_foot_contact = this->create_publisher<sensor_msgs::msg::JointState>("/go2/foot_contact", 1);            
+            pub_foot_contact = this->create_publisher<sensor_msgs::msg::JointState>("/go2/foot_contact", 1);  
+            pub_utlidar = this->create_publisher<sensor_msgs::msg::PointCloud2>("/go2/utlidar", 1);
+            utlidar_subr = this->create_subscription<sensor_msgs::msg::PointCloud2>("/utlidar/cloud", 1, std::bind(&Custom::utlidar_callback, this, std::placeholders::_1));          
             //Unitree Topics
             init_lowcmd();
             unitree_lowstate_suber = this->create_subscription<unitree_go::msg::LowState>(
@@ -77,6 +80,8 @@ class Custom: public rclcpp::Node
         rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr pub_joint;
         rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_odom;
         rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr pub_foot_contact;
+        rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr utlidar_subr;
+        rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_utlidar;
         
         // Unitree Interface
         unitree_api::msg::Request highreq;
@@ -96,6 +101,13 @@ class Custom: public rclcpp::Node
         rclcpp::Subscription<go2py_messages::msg::Go2pyHighCmd>::SharedPtr go2py_high_cmd_suber;
         rclcpp::Publisher<go2py_messages::msg::Go2pyState>::SharedPtr go2py_state_puber;
         rclcpp::Publisher<go2py_messages::msg::Go2pyStatus>::SharedPtr status_publisher;  
+        // PointCloud2
+        void utlidar_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg)
+        {
+            auto restamped_msg = sensor_msgs::msg::PointCloud2(*msg);
+            restamped_msg.header.stamp = this->now();
+            pub_utlidar->publish(restamped_msg);
+        }
 
 };
 
