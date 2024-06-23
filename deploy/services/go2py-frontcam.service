@@ -1,0 +1,13 @@
+[Unit]
+Description=ROS2 device driver container
+Requires=multi-user.target
+After=multi-user.target
+
+[Service]
+Restart=always
+ExecStartPre=/usr/bin/docker rm -f go2py_frontcam || true
+ExecStart=/bin/bash -c '/usr/bin/frontcam-v4l-loopback.sh' 
+ExecStop=/usr/bin/docker stop -t 2 go2py_frontcam
+
+[Install]
+WantedBy=default.target

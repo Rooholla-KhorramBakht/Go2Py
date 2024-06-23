@@ -4,4 +4,4 @@ export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 export CYCLONEDDS_URI='<CycloneDDS><Domain><General><Interfaces>
                             <NetworkInterface name="eth0" priority="default" multicast="default" />
                         </Interfaces></General></Domain></CycloneDDS>'
-source /bridge_ws/install/setup.bash && python3 /home/front-camera-publisher.py
+python3 /home/front-camera-publisher.py

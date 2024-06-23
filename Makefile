@@ -1,3 +1,6 @@
+frontcam:
+	@cd deploy && docker build --no-cache --tag go2py_frontcam_publisher:latest -f docker/Dockerfile.frontcam .
+
 docker_start:
 	@./scripts/run_dev.sh 
 
@@ -22,6 +25,12 @@ bridge:
 robot_description:
 	@cd deploy && docker build --no-cache --tag go2py_description:latest -f docker/Dockerfile.robot_description .
 
+frontcam_install:
+	@cp deploy/services/go2py-frontcam.service /etc/systemd/system/
+	@cp deploy/services/frontcam-v4l-loopback.sh /usr/bin
+	@systemctl enable go2py-frontcam.service
+	@systemctl start go2py-frontcam.service
+
 hesai_install:
 	@cp deploy/services/go2py-hesai.service /etc/systemd/system/
 	@systemctl enable go2py-hesai.service
@@ -36,7 +45,12 @@ robot_description_install:
 	@cp deploy/services/go2py-robot-description.service /etc/systemd/system/
 	@systemctl enable go2py-robot-description.service
 	@systemctl start go2py-robot-description.service
-	
+
+frontcam_uninstall:
+	@systemctl disable go2py-frontcam.service
+	@systemctl stop go2py-frontcam.service
+	@rm /etc/systemd/system/go2py-frontcam.service
+
 hesai_uninstall:
 	@systemctl disable go2py-hesai.service
 	@systemctl stop go2py-hesai.service
