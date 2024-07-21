@@ -11,7 +11,7 @@ class ImagePublisher(Node):
         self.publisher_ = self.create_publisher(Image, '/go2/front/image_raw', 10)
         self.bridge = CvBridge()
         self.gstreamer_str = "udpsrc address=230.1.1.1 port=1720 multicast-iface=eth0 ! application/x-rtp, media=video, encoding-name=H264 ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! video/x-raw,width=1280,height=720,format=BGR ! appsink drop=1"
-        self.cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(6)
 
     def publish_images(self):
         while rclpy.ok():

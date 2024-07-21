@@ -293,16 +293,27 @@ inline void SourceDriver::publishLaserScan(
   auto scan_msg = std::make_unique<sensor_msgs::msg::LaserScan>();
   scan_msg->header = cloud_msg->header;
 
-  scan_msg->angle_min = -3.1415;
-  scan_msg->angle_max =  3.1415;
-  scan_msg->angle_increment = 0.0087/2.;
-  scan_msg->time_increment = 0.0;
-  scan_msg->scan_time = 0.3333;
-  scan_msg->range_min = 0.3;
-  scan_msg->range_max = 100;
-  float max_height_ = 1.0;
-  float min_height_ = -0.1;
+   scan_msg->angle_min = -3.1415;
+   scan_msg->angle_max =  3.1415;
+   scan_msg->angle_increment = 0.0087/2.;
+   scan_msg->time_increment = 0.0;
+   scan_msg->scan_time = 0.3333;
+   scan_msg->range_min = 0.1;
+   scan_msg->range_max = 15;
+   float max_height_ = 1.0;
+   float min_height_ = -0.1;
   
+  // scan_msg->angle_min = -(3*3.1415)/4;
+  // scan_msg->angle_max =  -3.1415/4;
+  // scan_msg->angle_min = -3.1415;
+  //scan_msg->angle_max =  3.1415;
+  //scan_msg->angle_increment = 0.0087/2.;
+  //scan_msg->time_increment = 0.0;
+  //scan_msg->scan_time = 0.3333;
+  //scan_msg->range_min = 0.3;
+  //scan_msg->range_max = 5;
+  //float max_height_ = 1.0;
+  //float min_height_ = -0.1;
 
   // determine amount of rays to create
   uint32_t ranges_size = std::ceil(

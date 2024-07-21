@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
     git \
+    python3-pip \
     ros-humble-nav2-* ros-humble-navigation2 \
     ros-humble-slam-toolbox \ 
     ros-humble-robot-localization\
@@ -27,5 +28,9 @@ COPY ros2_nodes/m-explore-ros2 /home/nav2_ws/src/m-explore-ros2
 COPY ros2_nodes/go2py_messages /home/nav2_ws/src/go2py_messages
 RUN cd /home/nav2_ws && source /opt/ros/humble/setup.bash && source /unitree_ros2/cyclonedds_ws/install/setup.bash && colcon build --symlink-install
 
+RUN cd / && \
+    python3 -m pip install --upgrade pip && \
+    python3 -m pip install numpy scipy paramiko openai
+    
 # set the entrypoint to bash
 ENTRYPOINT ["/bin/bash"]
