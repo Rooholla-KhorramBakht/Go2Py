@@ -299,9 +299,9 @@ inline void SourceDriver::publishLaserScan(
    scan_msg->time_increment = 0.0;
    scan_msg->scan_time = 0.3333;
    scan_msg->range_min = 0.1;
-   scan_msg->range_max = 15;
+   scan_msg->range_max = 50;
    float max_height_ = 1.0;
-   float min_height_ = -0.1;
+   float min_height_ = -0.05;
   
   // scan_msg->angle_min = -(3*3.1415)/4;
   // scan_msg->angle_max =  -3.1415/4;

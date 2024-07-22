@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y \
     ros-humble-slam-toolbox \ 
     ros-humble-robot-localization\
     ros-humble-image-geometry \
+    ros-humble-test-msgs \
     && rm -rf /var/lib/apt/lists/*
 
 # Cheange the ROS2 RMW to CycloneDDS as instructed by Unitree
