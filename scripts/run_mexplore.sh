@@ -41,6 +41,6 @@ if [ "$(docker ps -q -f name=$CONTAINER_NAME)" ]; then
     check_docker
 else
     echo "Starting new container: $CONTAINER_NAME"
-    sudo docker run -it --rm --name $CONTAINER_NAME --privileged --network host --ipc=host -v $(pwd)/deploy/ros2_nodes/m-explore-ros2:/home/explore_ws/src/m-explore-ros2 -v /dev/*:/dev/* -v /etc/localtime:/etc/localtime:ro --workdir /home/explore_ws go2py_mexplore:latest  
+    sudo docker run -it --rm --name $CONTAINER_NAME --privileged --network host -v $(pwd)/deploy/ros2_nodes/m-explore-ros2:/home/explore_ws/src/m-explore-ros2 -v /dev/*:/dev/* -v /etc/localtime:/etc/localtime:ro --workdir /home/explore_ws go2py_mexplore:latest  
     check_docker
 fi

@@ -106,10 +106,10 @@ controller_server:
       vx_std: 0.5
       vy_std: 0.2
       wz_std: 0.4
-      vx_max: 1.0
-      vx_min: -0.8
-      vy_max: 1.0
-      wz_max: 2.0
+      vx_max: 0.5
+      vx_min: -0.4
+      vy_max: 0.5
+      wz_max: 1.0
       ax_max: 1004.0
       ax_min: -1004.0
       ay_max: 1004.0

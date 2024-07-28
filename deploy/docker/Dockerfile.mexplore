@@ -12,17 +12,21 @@ RUN apt-get update && apt-get install -y \
     cmake \
     git \
     ros-humble-cv-bridge \
+    ros-humble-image-geometry \ 
+    ros-humble-map-msgs \
+    ros-humble-nav2-costmap-2d \
+    ros-humble-nav2-msgs \
     && rm -rf /var/lib/apt/lists/*
 
 # Cheange the ROS2 RMW to CycloneDDS as instructed by Unitree
-RUN cd / && git clone https://github.com/unitreerobotics/unitree_ros2 && cd /unitree_ros2/cyclonedds_ws/src && \
-git clone https://github.com/ros2/rmw_cyclonedds -b humble && git clone https://github.com/eclipse-cyclonedds/cyclonedds -b releases/0.10.x &&\
-cd .. && colcon build --packages-select cyclonedds && source /opt/ros/humble/setup.bash && colcon build
+# RUN cd / && git clone https://github.com/unitreerobotics/unitree_ros2 && cd /unitree_ros2/cyclonedds_ws/src && \
+# git clone https://github.com/ros2/rmw_cyclonedds -b humble && git clone https://github.com/eclipse-cyclonedds/cyclonedds -b releases/0.10.x &&\
+# cd .. && colcon build --packages-select cyclonedds && source /opt/ros/humble/setup.bash && colcon build
 
 # copy the required scripts and source files
 COPY ros2_nodes/m-explore-ros2 /explore_ws/src/m-explore-ros2
 # RUN cd /explore_ws && source /opt/ros/humble/setup.bash && colcon build --symlink-install
-
+COPY docker/scripts /root/scripts
 # set the entrypoint to bash
 #ENTRYPOINT ["/bin/bash"]
-ENTRYPOINT ["/bin/bash", "/root/scripts/front_cam_publisher.sh"]
+ENTRYPOINT ["/bin/bash", "/root/scripts/mexplore_start.sh"]

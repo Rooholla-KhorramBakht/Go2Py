@@ -12,9 +12,9 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Cheange the ROS2 RMW to CycloneDDS as instructed by Unitree
-RUN cd / && git clone https://github.com/unitreerobotics/unitree_ros2 && cd /unitree_ros2/cyclonedds_ws/src && \
-git clone https://github.com/ros2/rmw_cyclonedds -b rolling && git clone https://github.com/eclipse-cyclonedds/cyclonedds -b releases/0.10.x &&\
-cd .. && colcon build --packages-select cyclonedds && source /opt/ros/rolling/setup.bash && colcon build
+# RUN cd / && git clone https://github.com/unitreerobotics/unitree_ros2 && cd /unitree_ros2/cyclonedds_ws/src && \
+# git clone https://github.com/ros2/rmw_cyclonedds -b rolling && git clone https://github.com/eclipse-cyclonedds/cyclonedds -b releases/0.10.x &&\
+# cd .. && colcon build --packages-select cyclonedds && source /opt/ros/rolling/setup.bash && colcon build
 
 # copy the go2py ros2 nodes
 # COPY ros2_nodes/go2py_messages /bridge_ws/src/go2py_messages
