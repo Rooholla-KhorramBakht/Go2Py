@@ -50,6 +50,8 @@ bt_navigator:
     wait_for_service_timeout: 1000
     action_server_result_timeout: 900.0
     navigators: ["navigate_to_pose", "navigate_through_poses"]
+    default_nav_to_pose_bt_xml: "/home/nav2_ws/src/sportmode_nav2/params/navigate_to_pose_w_replanning_and_recovery.xml"
+    default_nav_through_poses_bt_xml: "/home/nav2_ws/src/sportmode_nav2/params/navigate_through_poses_w_replanning_and_recovery.xml"
     navigate_to_pose:
       plugin: "nav2_bt_navigator::NavigateToPoseNavigator"
     navigate_through_poses:
@@ -104,10 +106,10 @@ controller_server:
       vx_std: 0.5
       vy_std: 0.2
       wz_std: 0.4
-      vx_max: 1.5
+      vx_max: 1.0
       vx_min: -0.8
-      vy_max: 1.5
-      wz_max: 3.9
+      vy_max: 1.0
+      wz_max: 2.0
       ax_max: 1004.0
       ax_min: -1004.0
       ay_max: 1004.0
@@ -118,7 +120,7 @@ controller_server:
       temperature: 0.3
       gamma: 0.015
       motion_model: "DiffDrive"
-      visualize: true
+      visualize: false
       # reset_period: 1.0 # (only in Humble)
       regenerate_noises: false
       TrajectoryVisualizer:
@@ -298,7 +300,7 @@ planner_server:
   ros__parameters:
     use_sim_time: False
     planner_plugins: ["GridBased"]
-
+    expected_planner_frequency: 1.0
     GridBased:
       plugin: "nav2_smac_planner::SmacPlannerHybrid"
       tolerance: 0.5                      # tolerance for planning if unable to reach exact pose, in meters
