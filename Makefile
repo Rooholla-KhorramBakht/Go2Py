@@ -5,7 +5,7 @@ docker_start:
 	@./scripts/run_dev.sh 
 
 nav2:
-	@cd deploy && docker build --no-cache --tag go2py_nav2:latest -f docker/Dockerfile.nav2 .
+	@cd deploy && docker build --tag go2py_nav2:latest -f docker/Dockerfile.nav2 .
 
 nav2_start:
 	@ ./scripts/run_nav2.sh

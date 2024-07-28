@@ -144,7 +144,7 @@ inline void SourceDriver::Init(const YAML::Node& config)
     YamlRead<std::string>(config["ros"], "ros_send_packet_topic", ros_send_packet_topic, "hesai_packets");
     pkt_pub_ = node_ptr_->create_publisher<hesai_ros_driver::msg::UdpFrame>(ros_send_packet_topic, 1);
   }
-  laserscan_pub_ = node_ptr_->create_publisher<sensor_msgs::msg::LaserScan>("/go2/scan", rclcpp::SensorDataQoS());
+  laserscan_pub_ = node_ptr_->create_publisher<sensor_msgs::msg::LaserScan>("/go2/scan", 1);
   if (driver_param.input_param.source_type == DATA_FROM_ROS_PACKET) {
     std::string ros_recv_packet_topic;
     YamlRead<std::string>(config["ros"], "ros_recv_packet_topic", ros_recv_packet_topic, "hesai_packets");
