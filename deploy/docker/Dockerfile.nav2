@@ -32,7 +32,7 @@ RUN cd /home && mkdir nav2_ws && cd nav2_ws && mkdir src && cd src && \
 # copy overlay source
 ARG OVERLAY_WS
 WORKDIR $OVERLAY_WS/src
-RUN git clone https://github.com/ros-navigation/navigation2.git
+RUN git clone https://github.com/ros-navigation/navigation2.git && git clone https://github.com/SteveMacenski/slam_toolbox.git -b ros2 
 
 # copy manifests for caching
 WORKDIR /opt
@@ -142,7 +142,6 @@ RUN sed --in-place \
 # copy the go2py ros2 nodes
 COPY ros2_nodes/m-explore-ros2 /home/nav2_ws/src/m-explore-ros2
 # COPY ros2_nodes/sportmode_nav2 /home/nav2_ws/src/sportmode_nav2
-
 # RUN cd /home/nav2_ws && source /opt/ros/rolling/setup.bash && \
 # colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --symlink-install
 
