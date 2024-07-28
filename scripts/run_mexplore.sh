@@ -1,10 +1,10 @@
 #!/bin/bash
 
-CONTAINER_NAME="go2py_nav2"
+CONTAINER_NAME="go2py_mexplore"
 
 # Function to print usage
 function usage() {
-    echo "Usage: run_go2py_nav2.sh"
+    echo "Usage: run_mexplore.sh"
 }
 
 # Function to check if docker command succeeded
@@ -41,6 +41,6 @@ if [ "$(docker ps -q -f name=$CONTAINER_NAME)" ]; then
     check_docker
 else
     echo "Starting new container: $CONTAINER_NAME"
-    sudo docker run -it --rm --name $CONTAINER_NAME --privileged --network host --ipc=host -v $(pwd)/deploy/ros2_nodes/sportmode_nav2:/home/nav2_ws/src/sportmode_nav2 -v /dev/*:/dev/* -v /etc/localtime:/etc/localtime:ro -v /home/unitree/Go2Py/deploy/SGNav/llm_planner:/home/llm_planner --workdir /home/nav2_ws go2py_nav2:latest  
+    sudo docker run -it --rm --name $CONTAINER_NAME --privileged --network host --ipc=host -v $(pwd)/deploy/ros2_nodes/m-explore-ros2:/home/explore_ws/src/m-explore-ros2 -v /dev/*:/dev/* -v /etc/localtime:/etc/localtime:ro --workdir /home/explore_ws go2py_mexplore:latest  
     check_docker
 fi

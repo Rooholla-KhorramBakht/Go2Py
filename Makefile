@@ -5,10 +5,19 @@ docker_start:
 	@./scripts/run_dev.sh 
 
 nav2:
-	@cd deploy && docker build --tag go2py_nav2:latest -f docker/Dockerfile.nav2 .
+	@cd deploy && docker build --no-cache --tag go2py_nav2:latest -f docker/Dockerfile.nav2 .
+
+nav2_source:
+	@cd deploy && docker build --tag robocaster/navigation2:aarch64 -f docker/Dockerfile.nav2_source .
 
 nav2_start:
 	@ ./scripts/run_nav2.sh
+
+mexplore:
+	@cd deploy && docker build --no-cache --tag go2py_mexplore:latest -f docker/Dockerfile.mexplore .
+
+mexplore_start:
+	@ ./scripts/run_mexplore.sh
 
 messages:
 	@cd scripts && ./make_msgs.sh 
