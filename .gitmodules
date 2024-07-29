@@ -1,3 +1,0 @@
-[submodule "deploy/ros2_nodes/m-explore-ros2"]
-	path = deploy/ros2_nodes/m-explore-ros2
-	url = https://github.com/robo-friends/m-explore-ros2.git
