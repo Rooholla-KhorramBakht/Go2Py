@@ -47,6 +47,8 @@ If everything has been successful, you should be able to access the internet on 
 ## Installing the Docker
 All the deployed services in Go2Py are based on docker so make sure that docker and Nvidia runtime is installed. For this, you can follow through the Isaac-ROS installation instructions [here](https://nvidia-isaac-ros.github.io/getting_started/hardware_setup/compute/jetson_storage.html).  
 
+**Note:** For the LiDAR node, the `nvidia contaner toolkit` should also be installed on the robot.
+
 ## Installing the Go2Py
 
 Go2Py has two main components. A set of services running on the robot and a Python package that can run anywhere and is used to communicate with the robot in Python. 
@@ -70,11 +72,15 @@ sudo make bridge_install
 # For the robot description service
 make robot_description
 sudo make robot_description_install
+```
+The first command for each service makes the corresponding docker image and the second command, copies the service file that runs those images into the appropriate locations of the system and enables them as autorun services. You can check for the success of this installation by checking the output of the `systemctl status service_name.service` command where the `service_name` is replaced with the name of the service you want to check. 
+
+**Note**: At the moment, the implemented LiDAR driver service only supports the XT16 sensor. If you have this sensor on your robot run:
+```bash
 # For the LiDAR driver
 make hesai
 sudo make hesai_install
 ```
-The first command for each service makes the corresponding docker image and the second command, copies the service file that runs those images into the appropriate locations of the system and enables them as autorun services. You can check for the success of this installation by checking the output of the `systemctl status service_name.service` command where the `service_name` is replaced with the name of the service you want to check. 
 
 ### Installing the GoPy 
 #### Local Installation
@@ -82,15 +88,20 @@ Finally, we need to install the Go2Py Python library on a computer located on th
 ```bash
 pip install -e .
 ```
+
+After successful installation, open the `Makefile` in the root directory and set the `INTERFACE` variable at the top of the file to the network interface name connected to the robot's network. Then, simply run `make ddscfg` to configure CycloneDDS for proper communication with the robot.
+
 To check the installation, run the interface example [here](../examples/00-robot-interface.ipynb) to make sure you can read the state of the robot. 
 #### Using Docker
-In addition to local installation, you can use the provided docker support. To do so, run `make docker_start` in the root directory of the repository:
-```bash
-cd ~/Go2Py
-make docker_start
-```
+In addition to local installation, you can use the provided docker support:
+##### VSCode Devcontainers
+Simply install the devcontainer extension in your VSCode and press `SHIFT+Ctrl+P` and run `Rebuild and Reopen in Container` while you're in the root directory of the project. 
+#### Direct
 
-With this, a docker container with all the required dependencies will be launched and the Go2Py repository will be mounted into `/workspaces/Go2Py` and installed in editable mode. Since our docker support is based on the Nvida Isaac-ROS images, you should be able to use the Iasaac-ROS packages within this environment.  
+Runing `make docker_start` launces a container with all the requirements installed. Attach to this container and follow the local installation instructions inside the docker.
+
+#### Installation With Isaac-ROS Docker
+Running `make isaac_ros_start` starts a docker container with all the required dependencies. The Go2Py repository will be mounted into `/workspaces/Go2Py` and installed in editable mode. Inside this docker environment, you can use the Iasaac-ROS packages.  
 
 Note that our docker image may be extended in a similar way to the Isaac-ROS images (as explained [here](https://nvidia-isaac-ros.github.io/repositories_and_packages/isaac_ros_common/index.html)). Simply append the `CONFIG_IMAGE_KEY="ros2_humble.go2py"` [here](../scripts/.isaac_ros_common-config) with the key to your custom Dockerfile name (e.g. `CONFIG_IMAGE_KEY="ros2_humble.go2py.custom"` for `Dockerfile.custom`) and place your docker file under `docker` directory [here](../docker) and append its name with the key you used (e.g. `Dockerfile.custom`). Your custom Dockerfile should start with:
 ```docker
@@ -98,3 +109,6 @@ ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 ```
 In addition to this added docker image layer, you can add your own post execution commands that are excuted each time you start the docker container. These commands should be appended to the end of `workspace-entrypoint.sh` script [here](../docker/scripts/workspace-entrypoint.sh).
+
+#### Enabling GUI Access
+In case you're interested in running the simulations inside the docker with GUI support, you need to run `xhost +` on your host terminal to allow X11 requests from the applications inside the Docker.

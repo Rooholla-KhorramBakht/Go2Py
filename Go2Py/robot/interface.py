@@ -18,17 +18,22 @@ from cyclonedds.util import duration
 from threading import Thread
 from scipy.spatial.transform import Rotation
 from Go2Py.joy import xKeySwitch, xRockerBtn
+from Go2Py.utils import set_cyclonedds_config
 
 
 class GO2Real():
     def __init__(
         self,
+        interface_name=None,
         mode='lowlevel',  # 'highlevel' or 'lowlevel'
         vx_max=0.5,
         vy_max=0.4,
         ωz_max=0.5,
     ):
         assert mode in ['highlevel', 'lowlevel'], "mode should be either 'highlevel' or 'lowlevel'"
+        if interface_name is not None:
+            set_cyclonedds_config(interface_name)
+            
         self.mode = mode
         self.simulated = False
         self.prestanding_q = np.array([0.0, 1.26186061, -2.5,
@@ -50,8 +55,11 @@ class GO2Real():
         self.lowcmd_topic_name = "rt/go2py/low_cmd"
         self.highcmd_topic_name = "rt/go2py/high_cmd"
         self.lowstate_topic_name = "rt/go2py/state"
-
-        self.participant = DomainParticipant()
+        try:
+            self.participant = DomainParticipant()
+        except:
+            raise Exception('Could not initialize the DDS communication. Is the interface name provided correctly?')
+        
         self.lowstate_topic = Topic(self.participant, self.lowstate_topic_name, Go2pyState_)
         self.state_reader = DataReader(self.participant, self.lowstate_topic)
 
@@ -69,6 +77,7 @@ class GO2Real():
         self.state = None
         self.setCommands = {'lowlevel': self.setCommandsLow,
                             'highlevel': self.setCommandsHigh}[self.mode]
+        self.state = Go2pyState_
         self.state_thread = Thread(target=self.state_update)
         self.running = True
         self.state_thread.start()

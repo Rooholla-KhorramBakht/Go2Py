@@ -1,0 +1,8 @@
+include Go2Py/assets/*.xml
+include Go2Py/assets/urdf/*.urdf
+include Go2Py/assets/mujoco/*.xml
+include Go2Py/mujoco/assets/*.obj
+include Go2Py/mujoco/dae/*.dae
+include Go2Py/assets/checkpoints/walk_these_ways/checkpoints/*.jit
+include Go2Py/assets/checkpoints/walk_these_ways/checkpoints/*.pt
+include Go2Py/assets/checkpoints/walk_these_ways/*.pkl

@@ -1,7 +1,16 @@
+INTERFACE = enx00e04c006390  # interface name used to talk with the robot
+
+# Target to run the script with the specified interface
+ddscfg:
+	python3 scripts/set_cyclonedds_config.py $(INTERFACE) && /bin/bash scripts/ros_env_setup.bash
+
 frontcam:
 	@cd deploy && docker build --no-cache --tag go2py_frontcam_publisher:latest -f docker/Dockerfile.frontcam .
 
 docker_start:
+	@cd .devcontainer && docker compose up go2py
+
+isaac_ros_start:
 	@./scripts/run_dev.sh 
 
 nav2:
