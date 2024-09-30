@@ -1,0 +1,18 @@
+// https://containers.dev/implementors/json_reference/
+{
+    "name": "go2py", 
+    "dockerComposeFile": "docker-compose.yaml",
+    "workspaceFolder": "/home/Go2py",
+    "service": "go2py",
+    "remoteUser": "root", 
+    "postCreateCommand": "cd /home/Go2py && pip install -e . && make ddscfg",
+    "customizations": {
+      "vscode": {
+        "extensions": [
+          "dbaeumer.vscode-eslint", // Existing ESLint extension
+          "ms-python.python", // Python extension by Microsoft
+          "ms-toolsai.jupyter" // Jupyter extension by Microsoft
+        ]
+      }
+    }
+  }
