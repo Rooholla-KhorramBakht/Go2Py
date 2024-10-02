@@ -294,6 +294,7 @@ class CaTAgent:
             "contact_state": self.contact_state[np.newaxis, :],
             "body_linear_vel_cmd": self.commands[np.newaxis, 0:2],
             "body_angular_vel_cmd": self.commands[np.newaxis, 2:],
+            "torques": self.torques
         }
 
         self.timestep += 1
