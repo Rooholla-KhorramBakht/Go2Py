@@ -5,6 +5,7 @@ import numpy as np
 from Go2Py import ASSETS_PATH
 import os
 from scipy.spatial.transform import Rotation
+import cv2
 
 pnt = np.array([-0.2, 0, 0.05])
 lidar_angles = np.linspace(0.0, 2 * np.pi, 1024).reshape(-1, 1)
@@ -18,7 +19,7 @@ dist = np.zeros(nray, np.float64)
 
 
 class Go2Sim:
-    def __init__(self, mode='lowlevel', render=True, dt=0.002, xml_path=None):
+    def __init__(self, mode='lowlevel', render=True, dt=0.002, height_map = None, xml_path=None):
 
         if xml_path is None:
             self.model = mujoco.MjModel.from_xml_path(
@@ -26,6 +27,13 @@ class Go2Sim:
             )
         else:
             self.model = mujoco.MjModel.from_xml_path(xml_path)
+
+        if height_map is not None:
+            try:
+                self.updateHeightMap(height_map)
+            except:
+                raise Exception('Could not set height map. Are you sure the XML contains the required asset?')
+        
         self.simulated = True
         self.data = mujoco.MjData(self.model)
         self.dt = dt
@@ -101,6 +109,16 @@ class Go2Sim:
             self.e_omega_sum=0
         else:
             self.step = self.stepLowlevel
+
+    def updateHeightMap(self, height_map, hfield_size = (300,300), raw_deoth_to_height_ratio = 255.):
+        try:
+            map = cv2.resize(height_map, hfield_size)/raw_deoth_to_height_ratio
+            self.height_map = np.flip(map, axis=0).reshape(-1)
+            self.model.hfield_data = self.height_map
+            if self.render:
+                self.viewer.update_hfield(0)
+        except:
+            raise Exception(f'Could not load heightmap. Make sure the heigh_map is a 2D numpy array')
 
     def reset(self):
         self.q_nominal = np.hstack(
