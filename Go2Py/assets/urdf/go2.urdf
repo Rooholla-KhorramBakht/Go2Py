@@ -667,7 +667,7 @@ Stephen Brawner (brawner@gmail.com)
   </joint>
 
   <joint name="vicon_joint" type="fixed">
-        <parent link="trunk"/>
+        <parent link="base_link"/>
         <child link="vicon_link"/>
         <origin rpy="-0.037935 -0.066371 -2.668897" xyz="0.022944 -0.000007 0.058458"/>
     </joint>
@@ -684,7 +684,7 @@ Stephen Brawner (brawner@gmail.com)
 
 
     <joint name="infra1_joint" type="fixed">
-        <parent link="trunk"/>
+        <parent link="base_link"/>
         <child link="infra1_link"/>
         <origin rpy="-1.641669 -0.014332 -1.617155" xyz="0.321618 0.033305 0.081622"/>
     </joint>
@@ -700,7 +700,7 @@ Stephen Brawner (brawner@gmail.com)
     </link>
 
     <joint name="infra2_joint" type="fixed">
-        <parent link="trunk"/>
+        <parent link="base_link"/>
         <child link="infra1_link"/>
         <origin rpy="-1.640637 -0.014093 -1.611177" xyz="0.317969 -0.061919 0.082773"/>
     </joint>
@@ -716,7 +716,7 @@ Stephen Brawner (brawner@gmail.com)
     </link>
 
     <joint name="color_joint" type="fixed">
-        <parent link="trunk"/>
+        <parent link="base_link"/>
         <child link="color_link"/>
         <origin rpy="-1.640491 -0.011125 -1.610364" xyz="0.319415 -0.025790 0.082311"/>
     </joint>
