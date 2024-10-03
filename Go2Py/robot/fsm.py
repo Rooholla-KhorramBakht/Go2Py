@@ -5,7 +5,7 @@ from enum import Enum
 
 
 class FSM:
-    def __init__(self, robot, remote, safety_hypervisor, user_controller_callback=None):
+    def __init__(self, robot, remote, safety_hypervisor, control_dT=1/50, user_controller_callback=None):
         self.robot = robot
         self.remote = remote
         self.remote.flushStates()
@@ -25,7 +25,8 @@ class FSM:
             self.damping_kv,
             np.zeros(12))
         self.fsm_dT = 1. / 50.
-        self.control_dT = 1. / 50.
+        
+        self.control_dT = control_dT
         self.dT = self.fsm_dT
 
         self.modes = {"tracking": self.trackingControlUpdate,

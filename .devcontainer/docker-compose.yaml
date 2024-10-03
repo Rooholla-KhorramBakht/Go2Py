@@ -9,6 +9,7 @@ services:
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ../:/home/Go2py
+      - /dev/input:/dev/input
     environment:
       - DISPLAY=${DISPLAY}
       - QT_X11_NO_MITSHM=1

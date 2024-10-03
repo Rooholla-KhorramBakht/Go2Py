@@ -91,7 +91,7 @@ class Agent(nn.Module):
 class Policy:
     def __init__(self, checkpoint_path):
         self.agent = Agent()
-        actor_sd = torch.load(checkpoint_path)
+        actor_sd = torch.load(checkpoint_path, map_location="cpu")
         self.agent.load_state_dict(actor_sd)
 
     def __call__(self, obs, info):
