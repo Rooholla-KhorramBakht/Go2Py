@@ -17,9 +17,232 @@ nray = vec.shape[0]
 geomid = np.zeros(nray, np.int32)
 dist = np.zeros(nray, np.float64)
 
+# Credit to: https://github.com/google-deepmind/mujoco/issues/1672
+class Camera:
+    def __init__(self, resolution, model, data, cam_name: str = "", min_depth=0.35, max_depth=3.):
+        """Initialize Camera instance.
+
+        Args:
+        - args: Arguments containing camera width and height.
+        - model: Mujoco model.
+        - data: Mujoco data.
+        - cam_name: Name of the camera.
+        - save_dir: Directory to save captured images.
+        """
+        self._min_depth = min_depth
+        self._max_depth = max_depth
+        self._cam_name = cam_name
+        self._model = model
+        self._data = data
+        self._width = resolution[0]
+        self._height = resolution[1]
+        self._cam_id = self._data.cam(self._cam_name).id
+
+        self._renderer = mujoco.Renderer(self._model, self._height, self._width)
+        self._camera = mujoco.MjvCamera()
+        self._scene = mujoco.MjvScene(self._model, maxgeom=10_000)
+
+        self._image = np.zeros((self._height, self._width, 3), dtype=np.uint8)
+        self._depth_image = np.zeros((self._height, self._width, 1), dtype=np.float32)
+        self._seg_id_image = np.zeros((self._height, self._width, 3), dtype=np.float32)
+        self._point_cloud = np.zeros((self._height, self._width, 1), dtype=np.float32)
+
+    @property
+    def height(self) -> int:
+        """
+        Get the height of the camera.
+
+        Returns:
+                int: The height of the camera.
+        """
+        return self._height
+
+    @property
+    def width(self) -> int:
+        """
+        Get the width of the camera.
+
+        Returns:
+                int: The width of the camera.
+        """
+        return self._width
+
+    @property
+    def name(self) -> str:
+        """
+        Get the name of the camera.
+
+        Returns:
+                str: The name of the camera.s
+        """
+        return self._cam_name
+
+    @property
+    def K(self) -> np.ndarray:
+        """
+        Compute the intrinsic camera matrix (K) based on the camera's field of view (fov),
+        width (_width), and height (_height) parameters, following the pinhole camera model.
+
+        Returns:
+        np.ndarray: The intrinsic camera matrix (K), a 3x3 array representing the camera's intrinsic parameters.
+        """
+        # Convert the field of view from degrees to radians
+        theta = np.deg2rad(self.fov)
+
+        # Focal length calculation (f in terms of sensor width and height)
+        f_x = (self._width / 2) / np.tan(theta / 2)
+        f_y = (self._height / 2) / np.tan(theta / 2)
+
+        # Pixel resolution (assumed to be focal length per pixel unit)
+        alpha_u = f_x  # focal length in terms of pixel width
+        alpha_v = f_y  # focal length in terms of pixel height
+
+        # Optical center offsets (assuming they are at the center of the sensor)
+        u_0 = (self._width - 1) / 2.0
+        v_0 = (self._height - 1) / 2.0
+
+        # Intrinsic camera matrix K
+        K = np.array([[alpha_u, 0, u_0], [0, alpha_v, v_0], [0, 0, 1]])
+
+        return K
+
+    @property
+    def T_world_cam(self) -> np.ndarray:
+        """
+        Compute the homogeneous transformation matrix for the camera.
+
+        The transformation matrix is computed from the camera's position and orientation.
+        The position and orientation are retrieved from the camera data.
+
+        Returns:
+        np.ndarray: The 4x4 homogeneous transformation matrix representing the camera's pose.
+        """
+        pos = self._data.cam(self._cam_id).xpos
+        rot = self._data.cam(self._cam_id).xmat.reshape(3, 3).T
+        T = np.hstack([rot, pos.reshape(3,1)])
+        T = np.vstack([T, np.array([0., 0., 0., 1.])])
+        return T
+
+    @property
+    def P(self) -> np.ndarray:
+        """
+        Compute the projection matrix for the camera.
+
+        The projection matrix is computed as the product of the camera's intrinsic matrix (K)
+        and the homogeneous transformation matrix (T_world_cam).
+
+        Returns:
+        np.ndarray: The 3x4 projection matrix.
+        """
+        return self.K @ self.T_world_cam
+
+    @property
+    def image(self) -> np.ndarray:
+        """Return the captured RGB image."""
+        self._renderer.update_scene(self._data, camera=self.name)
+        self._image = self._renderer.render()
+        return self._image
+
+    @property
+    def depth_image(self) -> np.ndarray:
+        """Return the captured depth image."""
+        self._renderer.update_scene(self._data, camera=self.name)
+        self._renderer.enable_depth_rendering()
+        self._depth_image = self._renderer.render()
+        self._renderer.disable_depth_rendering()
+        return np.clip(self._depth_image, self._min_depth, self._max_depth)
+
+    @property
+    def seg_image(self) -> np.ndarray:
+        """Return the captured segmentation image based on object's id."""
+        self._renderer.update_scene(self._data, camera=self.name)
+        self._renderer.enable_segmentation_rendering()
+
+        self._seg_id_image = self._renderer.render()[:, :, 0].reshape(
+            (self.height, self.width)
+        )
+        self._renderer.disable_segmentation_rendering()
+        return self._seg_id_image
+
+    @property
+    def point_cloud(self) -> np.ndarray:
+        """Return the captured point cloud."""
+        self._point_cloud = self._depth_to_point_cloud(self.depth_image)
+        return self._point_cloud
+
+    @property
+    def fov(self) -> float:
+        """Get the field of view (FOV) of the camera.
+
+        Returns:
+        - float: The field of view angle in degrees.
+        """
+        return self._model.cam(self._cam_id).fovy[0]
+
+    @property
+    def id(self) -> int:
+        """Get the identifier of the camera.
+
+        Returns:
+        - int: The identifier of the camera.
+        """
+        return self._cam_id
+
+    def _depth_to_point_cloud(self, depth_image: np.ndarray) -> np.ndarray:
+        """
+        Method to convert depth image to a point cloud in camera coordinates.
+
+        Args:
+        - depth_image: The depth image we want to convert to a point cloud.
+
+        Returns:
+        - np.ndarray: 3D points in camera coordinates.
+        """
+        # Get image dimensions
+        dimg_shape = depth_image.shape
+        height = dimg_shape[0]
+        width = dimg_shape[1]
+
+        # Create pixel grid
+        y, x = np.meshgrid(np.arange(height), np.arange(width), indexing="ij")
+
+        # Flatten arrays for vectorized computation
+        x_flat = x.flatten()
+        y_flat = y.flatten()
+        depth_flat = depth_image.flatten()
+
+        # Negate depth values because z-axis goes into the camera
+        depth_flat = -depth_flat
+
+        # Stack flattened arrays to form homogeneous coordinates
+        homogeneous_coords = np.vstack((x_flat, y_flat, np.ones_like(x_flat)))
+
+        # Compute inverse of the intrinsic matrix K
+        K_inv = np.linalg.inv(self.K)
+
+        # Calculate 3D points in camera coordinates
+        points_camera = np.dot(K_inv, homogeneous_coords) * depth_flat
+
+        # Homogeneous coordinates to 3D points
+        points_camera = np.vstack((points_camera, np.ones_like(x_flat)))
+
+        points_camera = points_camera.T
+
+        # dehomogenize
+        points_camera = points_camera[:, :3] / points_camera[:, 3][:, np.newaxis]
+
+        return points_camera
 
 class Go2Sim:
-    def __init__(self, mode='lowlevel', render=True, dt=0.002, height_map = None, xml_path=None):
+    def __init__(self, 
+                 mode='lowlevel', 
+                 render=True, 
+                 dt=0.002, 
+                 height_map = None, 
+                 xml_path=None,
+                 camera_name = "front_camera", 
+                 camera_resolution = (640, 480),
+                 camera_depth_range = (0.35, 3.0)):
 
         if xml_path is None:
             self.model = mujoco.MjModel.from_xml_path(
@@ -109,6 +332,10 @@ class Go2Sim:
             self.e_omega_sum=0
         else:
             self.step = self.stepLowlevel
+        self.camera_name = camera_name
+        self.camera_resolution = camera_resolution
+        self.camera_depth_range = camera_depth_range
+        self.camera = Camera(self.camera_resolution, self.model, self.data, self.camera_name, min_depth=self.camera_depth_range[0] ,max_depth=self.camera_depth_range[1])
 
     def updateHeightMap(self, height_map, hfield_size = (300,300), raw_deoth_to_height_ratio = 255.):
         try:
@@ -254,6 +481,26 @@ class Go2Sim:
         idx = np.where(np.logical_and(dist!=-1, dist<max_range))[0]
         return {"pcd": pcd[idx,...], "geomid": geomid[idx,...], "dist": dist[idx,...]}
 
+    def getCameraState(self, get_pointcloud=False):
+        depth = self.camera.depth_image
+        img = self.camera.image
+        K = self.camera.K
+        world_T_camera = self.camera.depth_image
+        fov = self.camera.fov
+        if get_pointcloud:
+            pointcloud = self.camera.point_cloud
+        else:
+            pointcloud = None
+
+        return {
+            'depth':depth, 
+            'rgb':img, 
+            'K': K, 
+            'world_T_camera': world_T_camera,
+            'fovy': fov,
+            'pointcloud':pointcloud
+        }
+        
     def overheat(self):
         return False
 

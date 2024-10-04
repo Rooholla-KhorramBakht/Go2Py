@@ -69,6 +69,7 @@
     <geom name="floor" size="0 0 0.05" type="plane" material="groundplane"/>
     <body name="base" pos="0 0 0.445" childclass="go2">
       <light pos="0.0 0.0 2.5" />
+      <camera name="front_camera" mode="fixed" pos="0.321618 0.033305 0.081622" euler="1.57079632679 0. 0." resolution="640 480" fovy="45."/>
       <inertial pos="0.021112 0 -0.005366" quat="-0.000543471 0.713435 -0.00173769 0.700719" mass="6.921"
         diaginertia="0.107027 0.0980771 0.0244531"/>
       <freejoint/>
