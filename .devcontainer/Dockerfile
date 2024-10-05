@@ -43,6 +43,7 @@ RUN pip3 install warp-lang scikit-learn casadi mujoco pin
 RUN pip install jupyter ipykernel
 RUN pip install cyclonedds pygame 
 RUN pip install pynput pygame 
+RUN pip install onnx onnxruntime
 
 # Set environmental variables required for using ROS 
 RUN echo 'source /opt/ros/humble/setup.bash' >> ~/.bashrc
