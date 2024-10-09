@@ -275,6 +275,7 @@ class CaTAgent:
                 self.commands * np.array([2.0, 2.0, 0.25]),
                 self.gravity_vector[:, 0],
                 self.dof_pos * 1.0,
+                #((self.dof_pos - self.prev_dof_pos) / self.dt) * 0.05,
                 self.dof_vel * 0.05,
                 self.last_actions[0]
             ),
