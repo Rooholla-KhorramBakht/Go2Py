@@ -95,7 +95,7 @@ class GO2Real():
         gyro = self.state.gyro
         quat = self.state.quat
         temp = self.state.imu_temp
-        return {'accel': accel, 'gyro': gyro, 'quat': quat, 'temp': temp}
+        return {'accel': np.array(accel), 'gyro': np.array(gyro), 'quat': np.array(quat), 'temp': temp}
 
     def getFootContacts(self):
         """Returns the raw foot contact forces"""

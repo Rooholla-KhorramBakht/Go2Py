@@ -414,6 +414,12 @@ class Go2Sim:
         if self.render and (self.step_counter % self.render_ds_ratio) == 0:
             self.viewer.sync()
 
+    def getLinVel(self):
+        _, q = self.getPose()
+        world_R_body = Rotation.from_quat([q[1], q[2], q[3], q[0]]).as_matrix()
+        body_v = world_R_body.T@self.data.qvel[0:3].reshape(3,1)
+        return body_v
+
     def stepHighlevel(self, vx, vy, omega_z, body_z_offset=0, step_height = 0.08, kp=[2, 0.5, 0.5], ki=[0.02, 0.01, 0.01]):
         policy_info = {}
         if self.step_counter % (self.control_dt // self.dt) == 0:

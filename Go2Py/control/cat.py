@@ -230,8 +230,8 @@ class CaTAgent:
         print(f"p_gains: {self.p_gains}")
 
         self.commands = np.zeros(3)
-        self.actions = torch.zeros((1, 12))
-        self.last_actions = torch.zeros(12)
+        self.actions = np.zeros((1, 12))
+        self.last_actions = np.zeros((1,12))
         self.gravity_vector = np.zeros(3)
         self.dof_pos = np.zeros(12)
         self.dof_vel = np.zeros(12)
@@ -239,9 +239,11 @@ class CaTAgent:
         self.body_angular_vel = np.zeros(3)
         self.joint_pos_target = np.zeros(12)
         self.joint_vel_target = np.zeros(12)
+        self.prev_joint_acc = None
         self.torques = np.zeros(12)
         self.contact_state = np.ones(4)
         self.foot_contact_forces_mag = np.zeros(4)
+        self.prev_foot_contact_forces_mag = np.zeros(4)
         self.test = 0
 
     def wait_for_state(self):
@@ -256,10 +258,16 @@ class CaTAgent:
         joint_state = self.robot.getJointStates()
         if joint_state is not None:
             self.gravity_vector = self.robot.getGravityInBody()
+            self.prev_dof_pos = self.dof_pos.copy()
             self.dof_pos = np.array(joint_state['q'])[self.unitree_to_policy_map[:, 1]]
+            self.prev_dof_vel = self.dof_vel.copy()
             self.dof_vel = np.array(joint_state['dq'])[self.unitree_to_policy_map[:, 1]]
             self.body_angular_vel = self.robot.getIMU()["gyro"]
-            self.foot_contact_forces_mag = self.robot.getFootContact()
+            self.body_linear_vel = self.robot.getLinVel()
+            try:
+                self.foot_contact_forces_mag = self.robot.getFootContact()
+            except:
+                pass
 
         ob = np.concatenate(
             (
@@ -268,7 +276,7 @@ class CaTAgent:
                 self.gravity_vector[:, 0],
                 self.dof_pos * 1.0,
                 self.dof_vel * 0.05,
-                self.actions[0]
+                self.last_actions[0]
             ),
             axis=0,
         )
@@ -320,6 +328,15 @@ class CaTAgent:
         self.time = time.time()
         obs = self.get_obs()
 
+        joint_acc = np.abs(self.prev_dof_vel - self.dof_vel) / self.dt
+        if self.prev_joint_acc is None:
+            self.prev_joint_acc = np.zeros_like(joint_acc)
+        joint_jerk = np.abs(self.prev_joint_acc - joint_acc) / self.dt
+        self.prev_joint_acc = joint_acc.copy()
+
+        foot_contact_rate = np.abs(self.foot_contact_forces_mag - self.prev_foot_contact_forces_mag)
+        self.prev_foot_contact_forces_mag = self.foot_contact_forces_mag.copy()
+
         infos = {
             "joint_pos": self.dof_pos[np.newaxis, :],
             "joint_vel": self.dof_vel[np.newaxis, :],
@@ -331,7 +348,10 @@ class CaTAgent:
             "body_linear_vel_cmd": self.commands[np.newaxis, 0:2],
             "body_angular_vel_cmd": self.commands[np.newaxis, 2:],
             "torques": self.torques,
-            "foot_contact_forces_mag": self.foot_contact_forces_mag.copy()
+            "foot_contact_forces_mag": self.foot_contact_forces_mag.copy(),
+            "joint_acc": joint_acc[np.newaxis, :],
+            "joint_jerk": joint_jerk[np.newaxis, :],
+            "foot_contact_rate": foot_contact_rate[np.newaxis, :],
         }
 
         self.timestep += 1

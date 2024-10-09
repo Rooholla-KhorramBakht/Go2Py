@@ -321,6 +321,8 @@ class WalkTheseWaysAgent:
         self.joint_vel_target = np.zeros(12)
         self.torques = np.zeros(12)
         self.contact_state = np.ones(4)
+        self.foot_contact_forces_mag = np.zeros(4)
+        self.prev_foot_contact_forces_mag = np.zeros(4)
         self.test = 0
 
         self.gait_indices = torch.zeros(self.num_envs, dtype=torch.float)
@@ -345,6 +347,10 @@ class WalkTheseWaysAgent:
             self.gravity_vector = self.robot.getGravityInBody()
             self.dof_pos = np.array(joint_state['q'])[self.unitree_to_policy_map[:, 1]]
             self.dof_vel = np.array(joint_state['dq'])[self.unitree_to_policy_map[:, 1]]
+            try:
+                self.foot_contact_forces_mag = self.robot.getFootContact()
+            except:
+                pass
 
         if reset_timer:
             self.reset_gait_indices()
@@ -464,6 +470,9 @@ class WalkTheseWaysAgent:
         self.clock_inputs[:, 2] = torch.sin(2 * np.pi * self.foot_indices[2])
         self.clock_inputs[:, 3] = torch.sin(2 * np.pi * self.foot_indices[3])
 
+        foot_contact_rate = np.abs(self.foot_contact_forces_mag - self.prev_foot_contact_forces_mag)
+        self.prev_foot_contact_forces_mag = self.foot_contact_forces_mag.copy()
+
         infos = {
             "joint_pos": self.dof_pos[np.newaxis, :],
             "joint_vel": self.dof_vel[np.newaxis, :],
@@ -476,6 +485,8 @@ class WalkTheseWaysAgent:
             "body_linear_vel_cmd": self.commands[:, 0:2],
             "body_angular_vel_cmd": self.commands[:, 2:],
             "privileged_obs": None,
+            "foot_contact_rate": foot_contact_rate[np.newaxis, :],
+            "foot_contact_forces_mag": self.foot_contact_forces_mag.copy(),
         }
 
         self.timestep += 1
