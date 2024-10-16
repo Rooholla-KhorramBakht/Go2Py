@@ -242,7 +242,9 @@ class Go2Sim:
                  xml_path=None,
                  camera_name = "front_camera", 
                  camera_resolution = (640, 480),
-                 camera_depth_range = (0.35, 3.0)):
+                 camera_depth_range = (0.35, 3.0), 
+                 friction_model = None,
+                 ):
 
         if xml_path is None:
             self.model = mujoco.MjModel.from_xml_path(
@@ -256,7 +258,7 @@ class Go2Sim:
                 self.updateHeightMap(height_map)
             except:
                 raise Exception('Could not set height map. Are you sure the XML contains the required asset?')
-        
+        self.friction_model = friction_model
         self.simulated = True
         self.data = mujoco.MjData(self.model)
         self.dt = dt
@@ -405,6 +407,9 @@ class Go2Sim:
         q, dq = state['q'], state['dq']
         tau = np.diag(self.kp) @ (self.q_des - q).reshape(12, 1) + \
             np.diag(self.kv) @ (self.dq_des - dq).reshape(12, 1) + self.tau_ff.reshape(12, 1)
+        # Apply the friction model if it is provided to the simulator
+        if self.friction_model is not None:
+            tau = tau.squeeze()-self.friction_model(dq)
         self.actuator_tau = tau
         self.data.ctrl[:] = tau.squeeze()
 

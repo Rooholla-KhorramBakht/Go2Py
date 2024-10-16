@@ -5,6 +5,22 @@ import numpy as np
 urdf_path = os.path.join(ASSETS_PATH, 'urdf/go2.urdf')
 urdf_root_path = os.path.join(ASSETS_PATH, 'urdf')
 
+class FrictionModel:
+    def __init__(self, mu_v=0.1, Fs=0.3, Vs=0.5, temperature=0.1):
+        self.mu_v = mu_v
+        self.Fs = Fs
+        self.Vs = Vs 
+        self.temperature = temperature
+
+    def __call__(self, dq):
+        # tau_sticktion = self.Fs*np.exp(-(np.abs(dq)/self.Vs)**2)*self.softSign(dq, temperature=self.temperature)
+        tau_sticktion = self.Fs*self.softSign(dq, temperature=self.temperature)
+        tau_viscose = self.mu_v*dq
+        return tau_sticktion+tau_viscose
+
+    def softSign(self, u, temperature=0.1):
+        return np.tanh(u/temperature)
+    
 
 class Go2Model:
     """
