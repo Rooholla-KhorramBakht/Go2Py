@@ -158,13 +158,24 @@ class Policy:
         self.adaptation_module = torch.jit.load(
             os.path.join(checkpoint_path, "checkpoints/adaptation_module_latest.jit")
         )
+        self.step_counter = 0
+        self.perturbation = None
 
     def __call__(self, obs, info):
-        latent = self.adaptation_module.forward(obs["obs_history"].to("cpu"))
-        action = self.body.forward(
-            torch.cat((obs["obs_history"].to("cpu"), latent), dim=-1)
-        )
-        info["latent"] = latent
+        with torch.no_grad():
+            if self.perturbation is None:
+                latent = self.adaptation_module.forward(obs["obs_history"].to("cpu"))
+                self.perturbation = torch.rand_like(latent)*0.9
+            else:
+                latent = self.adaptation_module.forward(obs["obs_history"].to("cpu"))+self.perturbation
+            if self.step_counter%50==0:
+                self.perturbation = torch.rand_like(latent)*0.9
+            self.step_counter +=1
+            print(latent, self.perturbation)
+            info["latent"] = latent
+            action = self.body.forward(
+                torch.cat((obs["obs_history"].to("cpu"), latent), dim=-1)
+            )
         return action
 
 

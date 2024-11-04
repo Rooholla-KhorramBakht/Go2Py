@@ -425,6 +425,11 @@ class Go2Sim:
         body_v = world_R_body.T@self.data.qvel[0:3].reshape(3,1)
         return body_v
 
+    def getFootVelInWorld(self, site_name):
+        Jp, Jr = self.getSiteJacobian(site_name)
+        foot_vel = Jp@self.data.qvel.reshape(-1,1)
+        return foot_vel
+
     def stepHighlevel(self, vx, vy, omega_z, body_z_offset=0, step_height = 0.08, kp=[2, 0.5, 0.5], ki=[0.02, 0.01, 0.01]):
         policy_info = {}
         if self.step_counter % (self.control_dt // self.dt) == 0:

@@ -235,6 +235,7 @@ class CaTAgent:
         self.gravity_vector = np.zeros(3)
         self.dof_pos = np.zeros(12)
         self.dof_vel = np.zeros(12)
+        self.pos = np.zeros(3)
         self.body_linear_vel = np.zeros(3)
         self.body_angular_vel = np.zeros(3)
         self.joint_pos_target = np.zeros(12)
@@ -263,9 +264,11 @@ class CaTAgent:
             self.prev_dof_vel = self.dof_vel.copy()
             self.dof_vel = np.array(joint_state['dq'])[self.unitree_to_policy_map[:, 1]]
             self.body_angular_vel = self.robot.getIMU()["gyro"]
-            self.body_linear_vel = self.robot.getLinVel()
+            
             try:
                 self.foot_contact_forces_mag = self.robot.getFootContact()
+                self.body_linear_vel = self.robot.getLinVel()
+                self.pos, _ = self.robot.getPose()
             except:
                 pass
 
@@ -327,7 +330,7 @@ class CaTAgent:
         # if self.timestep % 100 == 0:
         #     print(f"frq: {1 / (time.time() - self.time)} Hz")
         self.time = time.time()
-        obs = self.get_obs()
+        #obs = self.get_obs()
 
         joint_acc = np.abs(self.prev_dof_vel - self.dof_vel) / self.dt
         if self.prev_joint_acc is None:
@@ -345,6 +348,7 @@ class CaTAgent:
             "joint_vel_target": self.joint_vel_target[np.newaxis, :],
             "body_linear_vel": self.body_linear_vel[np.newaxis, :],
             "body_angular_vel": self.body_angular_vel[np.newaxis, :],
+            "body_pos": self.pos[np.newaxis, :].copy(),
             "contact_state": self.contact_state[np.newaxis, :],
             "body_linear_vel_cmd": self.commands[np.newaxis, 0:2],
             "body_angular_vel_cmd": self.commands[np.newaxis, 2:],
@@ -356,4 +360,4 @@ class CaTAgent:
         }
 
         self.timestep += 1
-        return obs, None, None, infos
+        return None, None, None, infos

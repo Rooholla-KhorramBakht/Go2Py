@@ -20,7 +20,6 @@ class FrictionModel:
 
     def softSign(self, u, temperature=0.1):
         return np.tanh(u/temperature)
-    
 
 class Go2Model:
     """
