@@ -69,7 +69,7 @@ Stephen Brawner (brawner@gmail.com)
     <child link="Head_lower"/>
     <axis xyz="0 0 0"/>
   </joint>
-  <link name="FL_hip">
+  <link name="FL_HAA">
     <inertial>
       <origin rpy="0 0 0" xyz="-0.0054 0.00194 -0.000105"/>
       <mass value="0.678"/>
@@ -91,15 +91,15 @@ Stephen Brawner (brawner@gmail.com)
       </geometry>
     </collision> -->
   </link>
-  <joint name="FL_hip_joint" type="revolute">
+  <joint name="FL_HAA_joint" type="revolute">
     <origin rpy="0 0 0" xyz="0.1934 0.0465 0"/>
     <parent link="base_link"/>
-    <child link="FL_hip"/>
+    <child link="FL_HAA"/>
     <axis xyz="1 0 0"/>
     <dynamics damping="0" friction="0"/>
     <limit effort="23.7" lower="-1.0472" upper="1.0472" velocity="30.1"/>
   </joint>
-  <link name="FL_thigh">
+  <link name="FL_HFE">
     <inertial>
       <origin rpy="0 0 0" xyz="-0.00374 -0.0223 -0.0327"/>
       <mass value="1.152"/>
@@ -121,15 +121,15 @@ Stephen Brawner (brawner@gmail.com)
       </geometry>
     </collision>
   </link>
-  <joint name="FL_thigh_joint" type="revolute">
+  <joint name="FL_HFE_joint" type="revolute">
     <origin rpy="0 0 0" xyz="0 0.0955 0"/>
-    <parent link="FL_hip"/>
-    <child link="FL_thigh"/>
+    <parent link="FL_HAA"/>
+    <child link="FL_HFE"/>
     <axis xyz="0 1 0"/>
     <dynamics damping="0" friction="0"/>
     <limit effort="23.7" lower="-1.5708" upper="3.4907" velocity="30.1"/>
   </joint>
-  <link name="FL_calf">
+  <link name="FL_KFE">
     <inertial>
       <origin rpy="0 0 0" xyz="0.00548 -0.000975 -0.115"/>
       <mass value="0.154"/>
@@ -151,15 +151,15 @@ Stephen Brawner (brawner@gmail.com)
       </geometry>
     </collision>
   </link>
-  <joint name="FL_calf_joint" type="revolute">
+  <joint name="FL_KFE_joint" type="revolute">
     <origin rpy="0 0 0" xyz="0 0 -0.213"/>
-    <parent link="FL_thigh"/>
-    <child link="FL_calf"/>
+    <parent link="FL_HFE"/>
+    <child link="FL_KFE"/>
     <axis xyz="0 1 0"/>
     <dynamics damping="0" friction="0"/>
     <limit effort="45.43" lower="-2.7227" upper="-0.83776" velocity="15.70"/>
   </joint>
-  <link name="FL_calflower">
+  <link name="FL_KFElower">
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
@@ -167,13 +167,13 @@ Stephen Brawner (brawner@gmail.com)
       </geometry>
     </collision>
   </link>
-  <joint name="FL_calflower_joint" type="fixed">
+  <joint name="FL_KFElower_joint" type="fixed">
     <origin rpy="0 0.05 0" xyz="0.020 0 -0.148"/>
-    <parent link="FL_calf"/>
-    <child link="FL_calflower"/>
+    <parent link="FL_KFE"/>
+    <child link="FL_KFElower"/>
     <axis xyz="0 0 0"/>
   </joint>
-  <link name="FL_calflower1">
+  <link name="FL_KFElower1">
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
@@ -181,13 +181,13 @@ Stephen Brawner (brawner@gmail.com)
       </geometry>
     </collision>
   </link>
-  <joint name="FL_calflower1_joint" type="fixed">
+  <joint name="FL_KFElower1_joint" type="fixed">
     <origin rpy="0 0.48 0" xyz="-0.01 0 -0.04"/>
-    <parent link="FL_calflower"/>
-    <child link="FL_calflower1"/>
+    <parent link="FL_KFElower"/>
+    <child link="FL_KFElower1"/>
     <axis xyz="0 0 0"/>
   </joint>
-  <link name="FL_foot">
+  <link name="FL_FOOT">
     <inertial>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <mass value="0.04"/>
@@ -209,13 +209,13 @@ Stephen Brawner (brawner@gmail.com)
       </geometry>
     </collision>
   </link>
-  <joint dont_collapse="true" name="FL_foot_joint" type="fixed">
+  <joint dont_collapse="true" name="FL_FOOT_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 -0.213"/>
-    <parent link="FL_calf"/>
-    <child link="FL_foot"/>
+    <parent link="FL_KFE"/>
+    <child link="FL_FOOT"/>
     <axis xyz="0 0 0"/>
   </joint>
-  <link name="FR_hip">
+  <link name="FR_HAA">
     <inertial>
       <origin rpy="0 0 0" xyz="-0.0054 -0.00194 -0.000105"/>
       <mass value="0.678"/>
@@ -237,15 +237,15 @@ Stephen Brawner (brawner@gmail.com)
       </geometry>
     </collision> -->
   </link>
-  <joint name="FR_hip_joint" type="revolute">
+  <joint name="FR_HAA_joint" type="revolute">
     <origin rpy="0 0 0" xyz="0.1934 -0.0465 0"/>
     <parent link="base_link"/>
-    <child link="FR_hip"/>
+    <child link="FR_HAA"/>
     <axis xyz="1 0 0"/>
     <dynamics damping="0" friction="0"/>
     <limit effort="23.7" lower="-1.0472" upper="1.0472" velocity="30.1"/>
   </joint>
-  <link name="FR_thigh">
+  <link name="FR_HFE">
     <inertial>
       <origin rpy="0 0 0" xyz="-0.00374 0.0223 -0.0327"/>
       <mass value="1.152"/>
@@ -267,15 +267,15 @@ Stephen Brawner (brawner@gmail.com)
       </geometry>
     </collision>
   </link>
-  <joint name="FR_thigh_joint" type="revolute">
+  <joint name="FR_HFE_joint" type="revolute">
     <origin rpy="0 0 0" xyz="0 -0.0955 0"/>
-    <parent link="FR_hip"/>
-    <child link="FR_thigh"/>
+    <parent link="FR_HAA"/>
+    <child link="FR_HFE"/>
     <axis xyz="0 1 0"/>
     <dynamics damping="0" friction="0"/>
     <limit effort="23.7" lower="-1.5708" upper="3.4907" velocity="30.1"/>
   </joint>
-  <link name="FR_calf">
+  <link name="FR_KFE">
     <inertial>
       <origin rpy="0 0 0" xyz="0.00548 0.000975 -0.115"/>
       <mass value="0.154"/>
@@ -297,15 +297,15 @@ Stephen Brawner (brawner@gmail.com)
       </geometry>
     </collision>
   </link>
-  <joint name="FR_calf_joint" type="revolute">
+  <joint name="FR_KFE_joint" type="revolute">
     <origin rpy="0 0 0" xyz="0 0 -0.213"/>
-    <parent link="FR_thigh"/>
-    <child link="FR_calf"/>
+    <parent link="FR_HFE"/>
+    <child link="FR_KFE"/>
     <axis xyz="0 1 0"/>
     <dynamics damping="0" friction="0"/>
     <limit effort="45.43" lower="-2.7227" upper="-0.83776" velocity="15.70"/>
   </joint>
-  <link name="FR_calflower">
+  <link name="FR_KFElower">
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
@@ -313,13 +313,13 @@ Stephen Brawner (brawner@gmail.com)
       </geometry>
     </collision>
   </link>
-  <joint name="FR_calflower_joint" type="fixed">
+  <joint name="FR_KFElower_joint" type="fixed">
     <origin rpy="0 0.05 0" xyz="0.020 0 -0.148"/>
-    <parent link="FR_calf"/>
-    <child link="FR_calflower"/>
+    <parent link="FR_KFE"/>
+    <child link="FR_KFElower"/>
     <axis xyz="0 0 0"/>
   </joint>
-  <link name="FR_calflower1">
+  <link name="FR_KFElower1">
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
@@ -327,13 +327,13 @@ Stephen Brawner (brawner@gmail.com)
       </geometry>
     </collision>
   </link>
-  <joint name="FR_calflower1_joint" type="fixed">
+  <joint name="FR_KFElower1_joint" type="fixed">
     <origin rpy="0 0.48 0" xyz="-0.01 0 -0.04"/>
-    <parent link="FR_calflower"/>
-    <child link="FR_calflower1"/>
+    <parent link="FR_KFElower"/>
+    <child link="FR_KFElower1"/>
     <axis xyz="0 0 0"/>
   </joint>
-  <link name="FR_foot">
+  <link name="FR_FOOT">
     <inertial>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <mass value="0.04"/>
@@ -355,13 +355,13 @@ Stephen Brawner (brawner@gmail.com)
       </geometry>
     </collision>
   </link>
-  <joint dont_collapse="true" name="FR_foot_joint" type="fixed">
+  <joint dont_collapse="true" name="FR_FOOT_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 -0.213"/>
-    <parent link="FR_calf"/>
-    <child link="FR_foot"/>
+    <parent link="FR_KFE"/>
+    <child link="FR_FOOT"/>
     <axis xyz="0 0 0"/>
   </joint>
-  <link name="RL_hip">
+  <link name="HL_HAA">
     <inertial>
       <origin rpy="0 0 0" xyz="0.0054 0.00194 -0.000105"/>
       <mass value="0.678"/>
@@ -383,15 +383,15 @@ Stephen Brawner (brawner@gmail.com)
       </geometry>
     </collision> -->
   </link>
-  <joint name="RL_hip_joint" type="revolute">
+  <joint name="HL_HAA_joint" type="revolute">
     <origin rpy="0 0 0" xyz="-0.1934 0.0465 0"/>
     <parent link="base_link"/>
-    <child link="RL_hip"/>
+    <child link="HL_HAA"/>
     <axis xyz="1 0 0"/>
     <dynamics damping="0" friction="0"/>
     <limit effort="23.7" lower="-1.0472" upper="1.0472" velocity="30.1"/>
   </joint>
-  <link name="RL_thigh">
+  <link name="HL_HFE">
     <inertial>
       <origin rpy="0 0 0" xyz="-0.00374 -0.0223 -0.0327"/>
       <mass value="1.152"/>
@@ -413,15 +413,15 @@ Stephen Brawner (brawner@gmail.com)
       </geometry>
     </collision>
   </link>
-  <joint name="RL_thigh_joint" type="revolute">
+  <joint name="HL_HFE_joint" type="revolute">
     <origin rpy="0 0 0" xyz="0 0.0955 0"/>
-    <parent link="RL_hip"/>
-    <child link="RL_thigh"/>
+    <parent link="HL_HAA"/>
+    <child link="HL_HFE"/>
     <axis xyz="0 1 0"/>
     <dynamics damping="0" friction="0"/>
     <limit effort="23.7" lower="-0.5236" upper="4.5379" velocity="30.1"/>
   </joint>
-  <link name="RL_calf">
+  <link name="HL_KFE">
     <inertial>
       <origin rpy="0 0 0" xyz="0.00548 -0.000975 -0.115"/>
       <mass value="0.154"/>
@@ -443,15 +443,15 @@ Stephen Brawner (brawner@gmail.com)
       </geometry>
     </collision>
   </link>
-  <joint name="RL_calf_joint" type="revolute">
+  <joint name="HL_KFE_joint" type="revolute">
     <origin rpy="0 0 0" xyz="0 0 -0.213"/>
-    <parent link="RL_thigh"/>
-    <child link="RL_calf"/>
+    <parent link="HL_HFE"/>
+    <child link="HL_KFE"/>
     <axis xyz="0 1 0"/>
     <dynamics damping="0" friction="0"/>
     <limit effort="45.43" lower="-2.7227" upper="-0.83776" velocity="15.70"/>
   </joint>
-  <link name="RL_calflower">
+  <link name="HL_KFElower">
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
@@ -459,13 +459,13 @@ Stephen Brawner (brawner@gmail.com)
       </geometry>
     </collision>
   </link>
-  <joint name="RL_calflower_joint" type="fixed">
+  <joint name="HL_KFElower_joint" type="fixed">
     <origin rpy="0 0.05 0" xyz="0.020 0 -0.148"/>
-    <parent link="RL_calf"/>
-    <child link="RL_calflower"/>
+    <parent link="HL_KFE"/>
+    <child link="HL_KFElower"/>
     <axis xyz="0 0 0"/>
   </joint>
-  <link name="RL_calflower1">
+  <link name="HL_KFElower1">
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
@@ -473,13 +473,13 @@ Stephen Brawner (brawner@gmail.com)
       </geometry>
     </collision>
   </link>
-  <joint name="RL_calflower1_joint" type="fixed">
+  <joint name="HL_KFElower1_joint" type="fixed">
     <origin rpy="0 0.48 0" xyz="-0.01 0 -0.04"/>
-    <parent link="RL_calflower"/>
-    <child link="RL_calflower1"/>
+    <parent link="HL_KFElower"/>
+    <child link="HL_KFElower1"/>
     <axis xyz="0 0 0"/>
   </joint>
-  <link name="RL_foot">
+  <link name="HL_FOOT">
     <inertial>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <mass value="0.04"/>
@@ -501,13 +501,13 @@ Stephen Brawner (brawner@gmail.com)
       </geometry>
     </collision>
   </link>
-  <joint dont_collapse="true" name="RL_foot_joint" type="fixed">
+  <joint dont_collapse="true" name="HL_FOOT_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 -0.213"/>
-    <parent link="RL_calf"/>
-    <child link="RL_foot"/>
+    <parent link="HL_KFE"/>
+    <child link="HL_FOOT"/>
     <axis xyz="0 0 0"/>
   </joint>
-  <link name="RR_hip">
+  <link name="HR_HAA">
     <inertial>
       <origin rpy="0 0 0" xyz="0.0054 -0.00194 -0.000105"/>
       <mass value="0.678"/>
@@ -529,15 +529,15 @@ Stephen Brawner (brawner@gmail.com)
       </geometry>
     </collision> -->
   </link>
-  <joint name="RR_hip_joint" type="revolute">
+  <joint name="HR_HAA_joint" type="revolute">
     <origin rpy="0 0 0" xyz="-0.1934 -0.0465 0"/>
     <parent link="base_link"/>
-    <child link="RR_hip"/>
+    <child link="HR_HAA"/>
     <axis xyz="1 0 0"/>
     <dynamics damping="0" friction="0"/>
     <limit effort="23.7" lower="-1.0472" upper="1.0472" velocity="30.1"/>
   </joint>
-  <link name="RR_thigh">
+  <link name="HR_HFE">
     <inertial>
       <origin rpy="0 0 0" xyz="-0.00374 0.0223 -0.0327"/>
       <mass value="1.152"/>
@@ -559,15 +559,15 @@ Stephen Brawner (brawner@gmail.com)
       </geometry>
     </collision>
   </link>
-  <joint name="RR_thigh_joint" type="revolute">
+  <joint name="HR_HFE_joint" type="revolute">
     <origin rpy="0 0 0" xyz="0 -0.0955 0"/>
-    <parent link="RR_hip"/>
-    <child link="RR_thigh"/>
+    <parent link="HR_HAA"/>
+    <child link="HR_HFE"/>
     <axis xyz="0 1 0"/>
     <dynamics damping="0" friction="0"/>
     <limit effort="23.7" lower="-0.5236" upper="4.5379" velocity="30.1"/>
   </joint>
-  <link name="RR_calf">
+  <link name="HR_KFE">
     <inertial>
       <origin rpy="0 0 0" xyz="0.00548 0.000975 -0.115"/>
       <mass value="0.154"/>
@@ -589,15 +589,15 @@ Stephen Brawner (brawner@gmail.com)
       </geometry>
     </collision>
   </link>
-  <joint name="RR_calf_joint" type="revolute">
+  <joint name="HR_KFE_joint" type="revolute">
     <origin rpy="0 0 0" xyz="0 0 -0.213"/>
-    <parent link="RR_thigh"/>
-    <child link="RR_calf"/>
+    <parent link="HR_HFE"/>
+    <child link="HR_KFE"/>
     <axis xyz="0 1 0"/>
     <dynamics damping="0" friction="0"/>
     <limit effort="45.43" lower="-2.7227" upper="-0.83776" velocity="15.70"/>
   </joint>
-  <link name="RR_calflower">
+  <link name="HR_KFElower">
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
@@ -605,13 +605,13 @@ Stephen Brawner (brawner@gmail.com)
       </geometry>
     </collision>
   </link>
-  <joint name="RR_calflower_joint" type="fixed">
+  <joint name="HR_KFElower_joint" type="fixed">
     <origin rpy="0 0.05 0" xyz="0.020 0 -0.148"/>
-    <parent link="RR_calf"/>
-    <child link="RR_calflower"/>
+    <parent link="HR_KFE"/>
+    <child link="HR_KFElower"/>
     <axis xyz="0 0 0"/>
   </joint>
-  <link name="RR_calflower1">
+  <link name="HR_KFElower1">
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
@@ -619,13 +619,13 @@ Stephen Brawner (brawner@gmail.com)
       </geometry>
     </collision>
   </link>
-  <joint name="RR_calflower1_joint" type="fixed">
+  <joint name="HR_KFElower1_joint" type="fixed">
     <origin rpy="0 0.48 0" xyz="-0.01 0 -0.04"/>
-    <parent link="RR_calflower"/>
-    <child link="RR_calflower1"/>
+    <parent link="HR_KFElower"/>
+    <child link="HR_KFElower1"/>
     <axis xyz="0 0 0"/>
   </joint>
-  <link name="RR_foot">
+  <link name="HR_FOOT">
     <inertial>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <mass value="0.04"/>
@@ -647,10 +647,10 @@ Stephen Brawner (brawner@gmail.com)
       </geometry>
     </collision>
   </link>
-  <joint dont_collapse="true" name="RR_foot_joint" type="fixed">
+  <joint dont_collapse="true" name="HR_FOOT_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 -0.213"/>
-    <parent link="RR_calf"/>
-    <child link="RR_foot"/>
+    <parent link="HR_KFE"/>
+    <child link="HR_FOOT"/>
     <axis xyz="0 0 0"/>
   </joint>
   <link name="imu_link">

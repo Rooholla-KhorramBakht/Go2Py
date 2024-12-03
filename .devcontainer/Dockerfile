@@ -43,16 +43,17 @@ SHELL ["conda", "run", "-n", "base", "/bin/bash", "-c"]
 ENV CONDA_PREFIX /opt/conda
 
 # Cheange the ROS2 RMW to CycloneDDS as instructed by Unitree
-RUN cd / && git clone https://github.com/unitreerobotics/unitree_ros2 && cd /unitree_ros2/cyclonedds_ws/src && \
-git clone https://github.com/ros2/rmw_cyclonedds -b humble && git clone https://github.com/eclipse-cyclonedds/cyclonedds -b releases/0.10.x &&\
-cd .. && colcon build --packages-select cyclonedds && source /opt/ros/humble/setup.bash && colcon build
+# RUN cd / && git clone https://github.com/unitreerobotics/unitree_ros2 && cd /unitree_ros2/cyclonedds_ws/src && \
+# git clone https://github.com/ros2/rmw_cyclonedds -b humble && git clone https://github.com/eclipse-cyclonedds/cyclonedds -b releases/0.10.x &&\
+# cd .. && colcon build --packages-select cyclonedds && source /opt/ros/humble/setup.bash && colcon build
 
 # Install Python dependencies
 RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 RUN pip install matplotlib opencv-python proxsuite scipy isort black
 RUN pip install warp-lang scikit-learn casadi
-
-RUN pip install cyclonedds pygame pynput onnx onnxruntime jupyter ipykernel meshcat mujoco
+RUN pip install onnx onnxruntime
+# RUN pip install cyclonedds pygame pynput jupyter ipykernel
+RUN pip install meshcat mujoco
 RUN conda install -y -c conda-forge \
                         pinocchio \
                         crocoddyl \
