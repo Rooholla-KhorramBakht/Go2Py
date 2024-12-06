@@ -1,9 +1,9 @@
 // https://containers.dev/implementors/json_reference/
 {
-    "name": "go2py", 
+    "name": "go2py-mpc", 
     "dockerComposeFile": "docker-compose.yaml",
     "workspaceFolder": "/home/Go2py",
-    "service": "go2py",
+    "service": "go2py-mpc",
     "remoteUser": "root", 
     "postCreateCommand": "cd /home/Go2py && pip install -e . && make ddscfg",
     "customizations": {

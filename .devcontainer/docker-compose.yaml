@@ -1,6 +1,6 @@
 version: "3.9"
 services:
-  go2py:
+  go2py-mpc:
     build: .
     # container_name: go2py
     network_mode: host

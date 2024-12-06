@@ -48,10 +48,10 @@ ENV CONDA_PREFIX /opt/conda
 # cd .. && colcon build --packages-select cyclonedds && source /opt/ros/humble/setup.bash && colcon build
 
 # Install Python dependencies
-RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-RUN pip install matplotlib opencv-python proxsuite scipy isort black
-RUN pip install warp-lang scikit-learn casadi
-RUN pip install onnx onnxruntime
+# RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+# RUN pip install matplotlib opencv-python proxsuite scipy isort black
+# RUN pip install warp-lang scikit-learn casadi
+# RUN pip install onnx onnxruntime
 # RUN pip install cyclonedds pygame pynput jupyter ipykernel
 RUN pip install meshcat mujoco
 RUN conda install -y -c conda-forge \

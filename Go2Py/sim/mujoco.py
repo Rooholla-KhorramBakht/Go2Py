@@ -5,7 +5,7 @@ import numpy as np
 from Go2Py import ASSETS_PATH
 import os
 from scipy.spatial.transform import Rotation
-import cv2
+# import cv2
 
 pnt = np.array([-0.2, 0, 0.05])
 lidar_angles = np.linspace(0.0, 2 * np.pi, 1024).reshape(-1, 1)
@@ -244,15 +244,20 @@ class Go2Sim:
                  camera_resolution = (640, 480),
                  camera_depth_range = (0.35, 3.0), 
                  friction_model = None,
+                 with_arm = False,
                  ):
-
+        self.with_arm = with_arm
+        
         if xml_path is None:
+            xml = 'mujoco/go2.xml' if not with_arm else 'mujoco/go2_with_arm.xml'
             self.model = mujoco.MjModel.from_xml_path(
-                os.path.join(ASSETS_PATH, 'mujoco/go2.xml')
+                os.path.join(ASSETS_PATH, xml)
             )
         else:
             self.model = mujoco.MjModel.from_xml_path(xml_path)
-
+        self.nv = self.model.nv
+        self.nq = self.model.nq
+        self.data = mujoco.MjData(self.model)
         if height_map is not None:
             try:
                 self.updateHeightMap(height_map)
@@ -260,7 +265,6 @@ class Go2Sim:
                 raise Exception('Could not set height map. Are you sure the XML contains the required asset?')
         self.friction_model = friction_model
         self.simulated = True
-        self.data = mujoco.MjData(self.model)
         self.dt = dt
         _render_dt = 1 / 60
         self.render_ds_ratio = max(1, _render_dt // dt)
@@ -281,20 +285,29 @@ class Go2Sim:
         self.render = render
         self.step_counter = 0
 
-        self.prestanding_q = np.array([0.0, 1.26186061, -2.5,
+        self.prestanding_q = [0.0, 1.26186061, -2.5,
                                        0.0, 1.25883281, -2.5,
                                        0.0, 1.27193761, -2.6,
-                                       0.0, 1.27148342, -2.6])
+                                       0.0, 1.27148342, -2.6]
 
-        self.sitting_q = np.array([-0.02495611, 1.26249647, -2.82826662,
+        self.sitting_q = [-0.02495611, 1.26249647, -2.82826662,
                                    0.04563564, 1.2505368, -2.7933557,
                                    -0.30623949, 1.28283751, -2.82314873,
-                                   0.26400229, 1.29355574, -2.84276843])
+                                   0.26400229, 1.29355574, -2.84276843]
 
-        self.standing_q = np.array([0.0, 0.77832842, -1.56065452,
+        self.standing_q = [0.0, 0.77832842, -1.56065452,
                                     0.0, 0.76754963, -1.56634164,
                                     0.0, 0.76681757, -1.53601146,
-                                    0.0, 0.75422204, -1.53229916])
+                                    0.0, 0.75422204, -1.53229916]
+        
+        if self.with_arm:
+            self.prestanding_q = np.array(self.prestanding_q+8*[0])
+            self.sitting_q = np.array(self.sitting_q+8*[0])
+            self.standing_q = np.array(self.standing_q+8*[0])
+        else:
+            self.prestanding_q = np.array(self.prestanding_q)
+            self.sitting_q = np.array(self.sitting_q)
+            self.standing_q = np.array(self.standing_q)
 
         self.q0 = self.sitting_q
         self.pos0 = np.array([0., 0., 0.1])
@@ -303,18 +316,17 @@ class Go2Sim:
         mujoco.mj_step(self.model, self.data)
         if self.render:
             self.viewer.sync()
-        self.nv = self.model.nv
         self.jacp = np.zeros((3, self.nv))
         self.jacr = np.zeros((3, self.nv))
         self.M = np.zeros((self.nv, self.nv))
 
-        self.q_des = np.zeros(12)
-        self.dq_des = np.zeros(12)
-        self.tau_ff = np.zeros(12)
-        self.kp = np.zeros(12)
-        self.kv = np.zeros(12)
+        self.q_des = np.zeros(self.nv)
+        self.dq_des = np.zeros(self.nv)
+        self.tau_ff = np.zeros(self.nv)
+        self.kp = np.zeros(self.nv)
+        self.kv = np.zeros(self.nv)
         self.latest_command_stamp = time.time()
-        self.actuator_tau = np.zeros(12)
+        self.actuator_tau = np.zeros(self.nv)
         self.mode = mode
         if self.mode == 'highlevel':
             from Go2Py.control.walk_these_ways import CommandInterface, loadParameters, Policy, WalkTheseWaysAgent, HistoryWrapper
@@ -355,10 +367,10 @@ class Go2Sim:
                 [self.pos0.squeeze(), self.rot0.squeeze(), self.q0.squeeze()]
             )
         else:
-            assert q0.shape == (19,), 'Invalid q0 shape. The shape should be (19,)'
+            assert q0.shape == (self.nq,), f'Invalid q0 shape. The shape should be ({self.nq},)'
             self.q_nominal = q0
         self.data.qpos = self.q_nominal
-        self.data.qvel = np.zeros(18)
+        self.data.qvel = np.zeros(self.nv)
         self.ex_sum=0
         self.ey_sum=0
         self.e_omega_sum=0
@@ -402,18 +414,26 @@ class Go2Sim:
         return self.data.sensordata[6:10]
 
     def setCommands(self, q_des, dq_des, kp, kv, tau_ff):
-        self.q_des = q_des
-        self.dq_des = dq_des
-        self.kp = kp
-        self.kv = kv
-        self.tau_ff = tau_ff
-        self.latest_command_stamp = time.time()
+        if q_des.shape == 12 and self.with_arm: # If the robot is with arm but the policy is just for the robot
+            self.q_des[:12] = q_des
+            self.dq_des[:12] = dq_des
+            self.kp[:12] = kp
+            self.kv[:12] = kv
+            self.tau_ff [:12]= tau_ff
+            self.latest_command_stamp = time.time()
+        else:
+            self.q_des = q_des
+            self.dq_des = dq_des
+            self.kp = kp
+            self.kv = kv
+            self.tau_ff = tau_ff
+            self.latest_command_stamp = time.time()
 
     def stepLowlevel(self):
         state = self.getJointStates()
         q, dq = state['q'], state['dq']
-        tau = np.diag(self.kp) @ (self.q_des - q).reshape(12, 1) + \
-            np.diag(self.kv) @ (self.dq_des - dq).reshape(12, 1) + self.tau_ff.reshape(12, 1)
+        tau = np.diag(self.kp) @ (self.q_des - q).reshape(self.nv-6, 1) + \
+            np.diag(self.kv) @ (self.dq_des - dq).reshape(self.nv-6, 1) + self.tau_ff.reshape(self.nv-6, 1)
         # Apply the friction model if it is provided to the simulator
         if self.friction_model is not None:
             tau = tau.squeeze()-self.friction_model(dq)
