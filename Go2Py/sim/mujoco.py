@@ -5,7 +5,7 @@ import numpy as np
 from Go2Py import ASSETS_PATH
 import os
 from scipy.spatial.transform import Rotation
-# import cv2
+import cv2
 
 pnt = np.array([-0.2, 0, 0.05])
 lidar_angles = np.linspace(0.0, 2 * np.pi, 1024).reshape(-1, 1)
